@@ -28,8 +28,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install --upgrade build
     - name: Build
+      if: ${{ matrix.os == 'windows-latest' }}
       run: |
-        if: ${{ matrix.os == 'windows-latest' }}
-          py -m build
-        if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
-          python3 -m build
+        py -m build
+    - name: Build
+      if: ${{ matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest' }}
+      run: |
+        python3 -m build
