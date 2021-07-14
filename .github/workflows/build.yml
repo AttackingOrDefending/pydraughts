@@ -29,9 +29,9 @@ jobs:
         pip install --upgrade build
     - name: Build
       run: |
-        if: matrix.os == 'windows-latest'
+        if: ${{ matrix.os }} == 'windows-latest'
           py -m build
-        if: matrix.os == 'ubuntu-latest'
+        if: ${{ matrix.os }} == 'ubuntu-latest'
           python3 -m build
-        if: matrix.os == 'macos-latest'
+        if: ${{ matrix.os }} == 'macos-latest'
           python3 -m build
