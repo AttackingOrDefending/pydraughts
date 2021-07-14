@@ -19,7 +19,7 @@ setuptools.setup(
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "src"},
-    packages=setuptools.find_packages(where="src"),
+    package_dir={"": "draughts"},
+    packages=setuptools.find_packages(where="draughts"),
     python_requires=">=3",
 )
