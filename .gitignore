@@ -1,0 +1,17 @@
+.venv/
+.idea/
+__pycache__
+.gitattributes
+
+*.swp
+*.py[cod]
+*~
+.coverage
+.coveralls.yml
+nosetests.xml
+.tox
+
+dist/
+build/
+draughts/pydraughts.egg-info/
+docs/_build/
