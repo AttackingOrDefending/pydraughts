@@ -1,4 +1,4 @@
-from piece import Piece
+from draughts.piece import Piece
 
 WHITE = 2
 BLACK = 1

@@ -1,5 +1,5 @@
-from board_searcher import BoardSearcher
-from board_initializer import BoardInitializer
+from draughts.board_searcher import BoardSearcher
+from draughts.board_initializer import BoardInitializer
 from functools import reduce
 import pickle
 

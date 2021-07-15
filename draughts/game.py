@@ -1,4 +1,4 @@
-from board import Board
+from draughts.board import Board
 import pickle
 
 WHITE = 2

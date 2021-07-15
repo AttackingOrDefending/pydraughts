@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pydraughts",
-    version="0.0.2",
+    version="0.0.3",
     author="AttackingOrDefending",
     description="A draughts library for Python",
     long_description=long_description,
@@ -19,7 +19,6 @@ setuptools.setup(
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
     ],
-    package_dir={"": "draughts"},
-    packages=setuptools.find_packages(where="draughts"),
+    packages=["draughts"],
     python_requires=">=3",
 )
