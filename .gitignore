@@ -1,6 +1,7 @@
 .venv/
 .idea/
 __pycache__
+draughts/__pycache__
 .gitattributes
 
 *.swp
@@ -13,5 +14,6 @@ nosetests.xml
 
 dist/
 build/
+pydraughts.egg-info/
 draughts/pydraughts.egg-info/
 docs/_build/
