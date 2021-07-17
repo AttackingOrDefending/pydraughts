@@ -1,8 +1,5 @@
 import pytest
 from draughts import Game
-import logging
-
-logger = logging.getLogger(__name__)
 
 variants = ['standard', 'frisian', 'frysk', 'antidraughts', 'breakthrough', 'russian', 'brazilian']
 
@@ -49,16 +46,16 @@ def test_push_move():
     antidraughts_2 = ['3530', '1924', '3019', '1423', '3329', '1319', '3126', '0813', '3833', '1722', '2924',
                       '20293827', '293827', '3827']
 
-    logger.info('Testing push_move')
+    print('Testing push_move')
     for variant in variants:
-        logger.info(f'Testing {variant}')
+        print(f'Testing {variant}')
         sample = 1
         while True:
             try:
                 moves = eval(f'{variant}_{sample}')
             except:
                 break
-            logger.info(f'Now testing {variant}_{sample}')
+            print(f'Now testing {variant}_{sample}')
             game = Game(variant)
             for move in moves:
                 game.push_move(move)
@@ -106,16 +103,16 @@ def test_hub_to_board():
                '2228', '3731', '1014', '3126', '2832', '2621', '3237', '4338', '373938', '2117', '3943', '1712', '4348',
                '1208', '4831', '0802', '1419', '0207', '3122', '0740', '2206', '4035', '2430', '35021930']
 
-    logger.info('Testing hub_to_board')
+    print('Testing hub_to_board')
     for variant in variants:
-        logger.info(f'Testing {variant}')
+        print(f'Testing {variant}')
         sample = 1
         while True:
             try:
                 moves = eval(f'{variant}_{sample}')
             except:
                 break
-            logger.info(f'Now testing {variant}_{sample}')
+            print(f'Now testing {variant}_{sample}')
             game = Game(variant)
             for move in moves:
                 _, board_move = game.hub_to_li_board(move)
