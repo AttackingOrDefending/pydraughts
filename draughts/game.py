@@ -8,6 +8,8 @@ BLACK = 1
 class Game:
 
     def __init__(self, variant='standard', fen='startpos'):
+        if variant == 'frysk':
+            variant = 'frysk!'
         self.variant = variant
         self.initial_fen = fen
         self.initial_hub_fen = self.li_fen_to_hub_fen(self.initial_fen)
