@@ -71,18 +71,14 @@ class Game:
             return WHITE
         elif self.whose_turn() == WHITE and not self.board.count_movable_player_pieces(WHITE, self.not_added_capture):
             return BLACK
-        else:
-            if self.variant == 'breakthrough':
-                for loc in range(1, self.board.position_count + 1):
-                    piece = self.board.searcher.get_piece_by_position(loc)
-                    if piece is not None:
-                        if piece.player == WHITE and piece.king:
-                            return WHITE
-                        elif piece.player == BLACK and piece.king:
-                            return BLACK
-                return None
-            else:
-                return None
+        elif self.variant == 'breakthrough':
+            for loc in range(1, self.board.position_count + 1):
+                piece = self.board.searcher.get_piece_by_position(loc)
+                if piece is not None:
+                    if piece.player == WHITE and piece.king:
+                        return WHITE
+                    elif piece.player == BLACK and piece.king:
+                        return BLACK
 
     def get_possible_moves(self):
         return self.board.get_possible_moves(self.not_added_capture)
