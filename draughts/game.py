@@ -63,8 +63,8 @@ class Game:
                 if piece is not None:
                     if piece.king:
                         has_king = True
-            return self.move_limit_reached() or not self.legal_moves() or has_king
-        return self.move_limit_reached() or not self.legal_moves()
+            return self.move_limit_reached() or not self.legal_moves()[0] or has_king
+        return self.move_limit_reached() or not self.legal_moves()[0]
 
     def get_winner(self):
         if self.whose_turn() == BLACK and not self.board.count_movable_player_pieces(BLACK, self.not_added_capture):
