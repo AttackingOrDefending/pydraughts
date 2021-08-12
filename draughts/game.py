@@ -8,12 +8,15 @@ BLACK = 1
 class Game:
 
     def __init__(self, variant='standard', fen='startpos'):
-        if variant == 'frysk':
-            variant = 'frysk!'
         self.variant = variant
-        self.initial_fen = fen
+        if self.variant == 'from position':
+            self.variant = 'standard'
+        elif self.variant == 'frysk':
+            self.variant = 'frysk!'
+        self.initial_fen = self.startpos_to_fen(fen)
         self.initial_hub_fen = self.li_fen_to_hub_fen(self.initial_fen)
         self.board = Board(self.variant, self.initial_hub_fen)
+        self.initial_dxp_fen = self.get_dxp_fen()
         self.moves = []
         self.move_stack = []
         self.capture_stack = []
@@ -104,6 +107,42 @@ class Game:
 
         final_fen = playing + fen
         return final_fen
+
+    def get_li_fen(self):
+        playing = 'W' if self.board.player_turn == WHITE else 'B'
+        white_pieces = []
+        black_pieces = []
+
+        for loc in range(1, self.board.position_count + 1):
+            piece = self.board.searcher.get_piece_by_position(loc)
+            if piece is not None:
+                letter = str(loc)
+                if piece.king:
+                    letter = 'K' + letter
+                if piece.player == WHITE:
+                    white_pieces.append(letter)
+                else:
+                    black_pieces.append(letter)
+
+        final_fen = f"{playing}:W{','.join(white_pieces)}:B{','.join(black_pieces)}"
+        return final_fen
+
+    def get_dxp_fen(self):
+        fen = ''
+
+        for loc in range(1, self.board.position_count + 1):
+            piece = self.board.searcher.get_piece_by_position(loc)
+            letter = 'e'
+            if piece is not None:
+                if piece.player == WHITE:
+                    letter = 'w'
+                else:
+                    letter = 'z'
+                if piece.king:
+                    letter = letter.capitalize()
+            fen += letter
+
+        return fen
 
     def get_moves(self):
         """
@@ -297,12 +336,6 @@ class Game:
         return self.li_to_hub(li_move, captures)
 
     def li_fen_to_hub_fen(self, li_fen):
-        if li_fen == 'startpos' and self.variant == 'frysk!':
-            return 'Wbbbbbeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeewwwww'
-        elif li_fen == 'startpos' and (self.variant == 'brazilian' or self.variant == 'russian'):
-            return 'Wbbbbbbbbbbbbeeeeeeeewwwwwwwwwwww'
-        elif li_fen == 'startpos':
-            return 'Wbbbbbbbbbbbbbbbbbbbbeeeeeeeeeewwwwwwwwwwwwwwwwwwww'
         fen = ''
         li_fen = li_fen.split(':')
         fen += li_fen[0]
@@ -327,3 +360,13 @@ class Game:
             else:
                 fen += 'e'
         return fen
+
+    def startpos_to_fen(self, fen):
+        if fen != 'startpos':
+            return fen
+        if self.variant == 'frysk!':
+            return 'W:W46,47,48,49,50:B1,2,3,4,5'
+        elif self.variant == 'russian' or self.variant == 'brazilian':
+            return 'W:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12'
+        else:
+            return 'W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20'
