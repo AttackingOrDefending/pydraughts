@@ -251,6 +251,9 @@ class Game:
     def make_len_4(self, move1, move2):
         return self.make_len_2(move1) + self.make_len_2(move2)
 
+    def push_move(self, move):
+        self.move([int(move[:2]), int(move[2:4])])
+
     def board_to_li_old(self, move):
         return self.make_len_4(move[0][0], move[-1][1])
 
@@ -259,9 +262,6 @@ class Game:
         for semi_move in move:
             final_move += self.make_len_2(semi_move[1])
         return final_move
-
-    def push_move(self, move):
-        self.move([int(move[:2]), int(move[2:4])])
 
     def sort_captures(self, captures):
         """
@@ -273,20 +273,6 @@ class Game:
         captures = ''.join(captures)
         return captures
 
-    def hub_to_li_board(self, move):
-        possible_moves, possible_captures = self.legal_moves()
-        moves_li_board = {}
-        for possible_move, possible_capture in zip(possible_moves, possible_captures):
-            if possible_capture[0] is None:
-                possible_capture = []
-            li_move = self.board_to_li_old(possible_move) + self.sort_captures(possible_capture)
-            moves_li_board[li_move] = possible_move
-        board_move = moves_li_board[move]
-        api_move = []
-        for semi_move in board_move:
-            api_move.append(self.board_to_li([semi_move]))
-        return api_move, board_move
-
     def li_to_hub(self, move, captures):
         if captures[0] is None:
             captures = []
@@ -297,43 +283,11 @@ class Game:
             hub_move = hub_move[:2] + '-' + hub_move[2:]
         return hub_move
 
-    def board_to_li_api(self, move):
-        moves = []
-        for semi_move in move:
-            moves.append(self.make_len_4(semi_move[0], semi_move[1]))
-        return moves
-
     def li_api_to_li_one(self, move):
         new_move = move[0][:2]
         for semi_move in move:
             new_move += semi_move[2:]
         return new_move
-
-    def board_to_pdn(self, move):
-        possible_moves, possible_captures = self.legal_moves()
-        starts_endings = []
-        for possible_move in possible_moves:
-            starts_endings.append(self.make_len_4(possible_move[0][0], possible_move[-1][1]))
-        if starts_endings.count(self.make_len_4(move[0][0], move[-1][1])) == 1:
-            index = possible_moves.index(move)
-            captures = possible_captures[index]
-            if captures[0] is not None:
-                return self.make_len_2(str(move[0][0])) + 'x' + self.make_len_2(str(move[-1][1]))
-            else:
-                return self.make_len_2(str(move[0][0])) + '-' + self.make_len_2(str(move[-1][1]))
-        else:
-            li_move = self.board_to_li(move)
-            li_move = [li_move[i:i + 2] for i in range(0, len(li_move), 2)]
-            return 'x'.join(li_move)
-
-    def board_to_hub(self, move):
-        possible_moves, possible_captures = self.legal_moves()
-        li_move = self.board_to_li(move)
-        moves_to_captures = {}
-        for possible_move, possible_capture in zip(possible_moves, possible_captures):
-            moves_to_captures[self.board_to_li(possible_move)] = possible_capture
-        captures = moves_to_captures[li_move]
-        return self.li_to_hub(li_move, captures)
 
     def li_fen_to_hub_fen(self, li_fen):
         fen = ''
