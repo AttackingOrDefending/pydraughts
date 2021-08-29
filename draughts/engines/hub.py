@@ -366,7 +366,9 @@ class HubEngine:
         depth = time_limit.depth
         nodes = time_limit.nodes
         movetime = time_limit.movetime
-        bestmove, pondermove, taken, pondertaken = self.go(board.initial_hub_fen, moves=' '.join(board.hub_move_stack), my_time=time, inc=inc, depth=depth, analysisnodes=nodes, movetime=movetime, ponder=ponder)
+        hub_moves = board.move_stack
+        hub_moves = list(map(lambda move: move.hub_move, hub_moves))
+        bestmove, pondermove, taken, pondertaken = self.go(board.initial_hub_fen, moves=' '.join(hub_moves), my_time=time, inc=inc, depth=depth, analysisnodes=nodes, movetime=movetime, ponder=ponder)
 
         ponder_move = None
         if bestmove is None:

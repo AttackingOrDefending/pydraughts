@@ -1,4 +1,5 @@
 from draughts.board import Board
+from draughts.move import Move
 import pickle
 
 WHITE = 2
@@ -22,7 +23,6 @@ class Game:
         self.capture_stack = []
         self.not_added_move = []
         self.not_added_capture = []
-        self.hub_move_stack = []
         self.consecutive_noncapture_move_limit = 1000  # The original was 40
         self.moves_since_last_capture = 0
 
@@ -43,10 +43,14 @@ class Game:
             self.not_added_move.append(move)
             self.not_added_capture.append(enemy_position)
         else:
-            li_move = self.board_to_li(self.not_added_move + [move])
-            self.move_stack.append(li_move)
-            self.capture_stack.append(self.not_added_capture + [enemy_position])
-            self.hub_move_stack.append(self.li_to_hub(li_move, self.not_added_capture + [enemy_position]))
+            captures = self.not_added_capture + [enemy_position]
+            if captures[0] is None:
+                captures = []
+            move_to_add_board = self.not_added_move + [move]
+            move_to_add_hub = self.make_len_2(move_to_add_board[0][0]) + self.make_len_2(move_to_add_board[-1][1]) + self.sort_captures(captures)
+            move_to_add = Move(board_move=move_to_add_board, hub_position_move=move_to_add_hub, has_captures=bool(captures))
+            self.move_stack.append(move_to_add)
+            self.capture_stack.append(captures)
             self.not_added_move = []
             self.not_added_capture = []
 
@@ -207,6 +211,7 @@ class Game:
 
             if has_man and len(self.move_stack) >= 6:
                 last_3_moves = [self.move_stack[-6], self.move_stack[-4], self.move_stack[-2]]
+                last_3_moves = list(map(lambda move: move.li_one_move, last_3_moves))
                 last_3_moves_same_piece = last_3_moves[0][-2:] == last_3_moves[1][:2] and last_3_moves[1][-2:] == last_3_moves[2][:2]
                 was_a_capture = bool(list(filter(lambda captures: captures[0] is not None, [self.capture_stack[-6], self.capture_stack[-4], self.capture_stack[-2]])))
                 piece = self.board.searcher.get_piece_by_position(int(last_3_moves[-1][-2:]))
@@ -248,20 +253,8 @@ class Game:
     def make_len_2(self, move):
         return f'0{move}' if len(str(move)) == 1 else str(move)
 
-    def make_len_4(self, move1, move2):
-        return self.make_len_2(move1) + self.make_len_2(move2)
-
     def push_move(self, move):
         self.move([int(move[:2]), int(move[2:4])])
-
-    def board_to_li_old(self, move):
-        return self.make_len_4(move[0][0], move[-1][1])
-
-    def board_to_li(self, move):
-        final_move = self.make_len_2(move[0][0])
-        for semi_move in move:
-            final_move += self.make_len_2(semi_move[1])
-        return final_move
 
     def sort_captures(self, captures):
         """
@@ -272,22 +265,6 @@ class Game:
         captures.sort()
         captures = ''.join(captures)
         return captures
-
-    def li_to_hub(self, move, captures):
-        if captures[0] is None:
-            captures = []
-        hub_move = move[:2] + move[-2:] + self.sort_captures(captures)
-        if captures:
-            hub_move = 'x'.join([hub_move[i:i + 2] for i in range(0, len(hub_move), 2)])
-        else:
-            hub_move = hub_move[:2] + '-' + hub_move[2:]
-        return hub_move
-
-    def li_api_to_li_one(self, move):
-        new_move = move[0][:2]
-        for semi_move in move:
-            new_move += semi_move[2:]
-        return new_move
 
     def li_fen_to_hub_fen(self, li_fen):
         fen = ''
