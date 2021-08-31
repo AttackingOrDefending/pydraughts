@@ -138,7 +138,7 @@ class DXPEngine:
             self.start(board, self.initial_time)
             self.game_started = True
         if board.move_stack:
-            move = board.move_stack[-1]
+            move = board.move_stack[-1].li_one_move
             move = [move[i:i+2] for i in range(0, len(move), 2)]
             move = '-'.join(move)
             self.console.run_command(f'sm {move}')
