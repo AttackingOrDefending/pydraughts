@@ -206,6 +206,7 @@ class HubEngine:
 
         if depth is None and movetime is None and clock is None and searchnodes is None:
             if inc:
+                my_time -= inc  # Hub engines first add the increment
                 self.send("level time={} inc={}".format(my_time, inc))
             else:
                 self.send("level time={}".format(my_time))

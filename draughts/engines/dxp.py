@@ -6,26 +6,23 @@ import signal
 import threading
 import time
 import logging
+from importlib import reload
 
 logger = logging.getLogger(__name__)
 
 
 class DXPEngine:
     def __init__(self, command, options=None, initial_time=0, ENGINE=5):
+        global dxp
+        dxp = reload(dxp)
         if options is None:
             options = {}
-        if "initial-time" not in options:
-            options["initial-time"] = initial_time
-        if "max-moves" not in options:
-            options["max-moves"] = 0
-        if "ip" not in options:
-            options["ip"] = '127.0.0.1'
-        if "port" not in options:
-            options["port"] = '27531'
-        if "engine-opened" not in options:
-            options["engine-opened"] = True  # Whether the engine is already open or pydraughts should open it
-        if "wait-to-open-time" not in options:
-            options["wait-to-open-time"] = 10
+        self.initial_time = initial_time
+        self.max_moves = 0
+        self.ip = '127.0.0.1'
+        self.port = '27531'
+        self.engine_opened = True  # Whether the engine is already open or pydraughts should open it
+        self.wait_to_open_time = 10
         if type(command) == str:
             command = [command]
         self.command = command
@@ -35,15 +32,7 @@ class DXPEngine:
         self.console = dxp.tConsoleHandler
         self.receiver = dxp.tReceiveHandler
         self.game_started = False
-        self.old_moves = []
         self.last_move = None
-
-        self.initial_time = options.pop("initial-time")
-        self.max_moves = options.pop("max-moves")
-        self.engine_opened = options.pop("engine-opened")
-        self.ip = options.pop("ip")
-        self.port = options.pop("port")
-        self.wait_to_open_time = options.pop("wait-to-open-time")
 
         for name, value in options.items():
             self.setoption(name, value)
@@ -53,18 +42,24 @@ class DXPEngine:
             command = list(filter(bool, self.command))
             command = " ".join(command)
             self.p = self.open_process(command, cwd)
+            self.thr = threading.Thread(target=self.recv)
+            self.thr.start()
 
         self.start_time = time.perf_counter_ns()
 
     def setoption(self, name, value):
-        if name == 'engine_opened':
+        if name == 'engine-opened':
             self.engine_opened = value
         elif name == 'ip':
             self.ip = str(value)
         elif name == 'port':
             self.port = str(value)
-        elif name == 'wait_time':
+        elif name == 'wait-to-open-time':
             self.wait_to_open_time = int(value)
+        elif name == 'max-moves':
+            self.max_moves = 0
+        elif name == 'initial-time':
+            self.initial_time = 0
 
     def open_process(self, command, cwd=None, shell=True, _popen_lock=threading.Lock()):
         kwargs = {
@@ -121,6 +116,15 @@ class DXPEngine:
         logger.debug(f'Aceepted: {accepted}')
         self.id["name"] = dxp.current.engineName
 
+    def recv(self):
+        while True:
+            line = self.p.stdout.readline()
+
+            line = line.rstrip()
+
+            if line:
+                logging.debug(f"{self.ENGINE} %s >> %s {self.p.pid} {line}")
+
     def recv_accept(self):
         while True:
             if dxp.accepted is not None:
@@ -128,6 +132,8 @@ class DXPEngine:
 
     def recv_move(self):
         while True:
+            if not dxp.tReceiveHandler.isListening:
+                break
             if self.last_move != dxp.last_move:
                 self.last_move = dxp.last_move
                 logger.debug(f'new last move: {self.last_move}')
@@ -143,7 +149,8 @@ class DXPEngine:
             move = '-'.join(move)
             self.console.run_command(f'sm {move}')
         best_move = self.recv_move()
-        best_move = draughts.Move(board, best_move)
+        if best_move:
+            best_move = draughts.Move(board, best_move)
         return best_move, None
 
     def quit(self):

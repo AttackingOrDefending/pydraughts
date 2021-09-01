@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pydraughts",
-    version="0.1.2",
+    version="0.1.3",
     author="AttackingOrDefending",
     description="A draughts library for Python",
     long_description=long_description,
@@ -20,5 +20,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     packages=["draughts", "draughts.engines", "draughts.engines.dxp_communication"],
-    python_requires=">=3",
+    python_requires=">=3.6",
 )

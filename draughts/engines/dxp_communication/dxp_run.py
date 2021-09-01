@@ -17,6 +17,7 @@ class ConsoleHandler:
     def run_command(self, comm):
 
         global current, mySock, lock
+        global accepted, last_move
         logger.debug(f'comm {comm}')
 
         if comm.startswith('q') or comm.startswith('ex'):  # quit/exit
@@ -127,6 +128,8 @@ class ConsoleHandler:
                 logger.debug("Game already started; gamereq not allowed")
                 return
             logger.debug(f"Command request new game: {comm.strip()}")
+            last_move = None
+            accepted = None
             myColor = "W"  # default
             gameTime = "120"  # default
             numMoves = "50"  # default

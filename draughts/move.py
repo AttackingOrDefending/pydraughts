@@ -1,7 +1,5 @@
 class Move:
     def __init__(self, board=None, board_move=None, hub_move=None, hub_position_move=None, pdn_move=None, pdn_position_move=None, steps_move=None, li_api_move=None, li_one_move=None, has_captures=None):
-        assert board_move or hub_move or hub_position_move or pdn_move or pdn_position_move or steps_move or li_api_move or li_one_move
-
         self.board_move = board_move
         self.hub_move = hub_move
         self.hub_position_move = hub_position_move
@@ -14,15 +12,16 @@ class Move:
         self.captures = None
         self.has_captures = has_captures
 
-        if board:
-            self.possible_moves, self.possible_captures = board.legal_moves()
-            self.to_board()
-            self.captures = self.possible_captures[self.possible_moves.index(self.board_move)]
-            self.captures = [] if self.captures[0] is None else self.captures
-            self.has_captures = bool(self.captures)
-            self.from_board()
-        else:
-            self.no_board()
+        if board_move or hub_move or hub_position_move or pdn_move or pdn_position_move or steps_move or li_api_move or li_one_move:
+            if board:
+                self.possible_moves, self.possible_captures = board.legal_moves()
+                self.to_board()
+                self.captures = self.possible_captures[self.possible_moves.index(self.board_move)]
+                self.captures = [] if self.captures[0] is None else self.captures
+                self.has_captures = bool(self.captures)
+                self.from_board()
+            else:
+                self.no_board()
 
     def make_len_2(self, move):
         return f'0{move}' if len(str(move)) == 1 else str(move)
