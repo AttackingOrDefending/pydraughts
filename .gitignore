@@ -14,8 +14,8 @@ draughts/engines/dxp_communication/__pycache__
 nosetests.xml
 .tox
 
-dist/
-build/
-pydraughts.egg-info/
-draughts/pydraughts.egg-info/
-docs/_build/
+dist
+build
+pydraughts.egg-info
+draughts/pydraughts.egg-info
+docs/_build
