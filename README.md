@@ -17,6 +17,7 @@ Variants:
 Engine protocols:
 * Hub
 * DXP
+* CheckerBoard
 <br/></br>
 * Import library
 ```python

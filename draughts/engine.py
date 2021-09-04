@@ -1,5 +1,6 @@
 from draughts.engines.dxp import DXPEngine
 from draughts.engines.hub import HubEngine
+from draughts.engines.checkerboard import CheckerBoardEngine
 
 
 class Limit:
