@@ -5,6 +5,8 @@ pydraughts is a draughts library for Python with move generation and engine comm
 
 ## Features
 
+Note: White always starts. Black always has the squares starting from 1 (e.g. 1-20 in international draughts).
+
 Variants:
 * Standard (International)
 * Frisian
