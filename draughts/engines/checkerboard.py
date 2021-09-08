@@ -64,8 +64,9 @@ class CheckerBoardEngine:
         steps = []
         positions = [cbmove['from']]
         jumps = max(cbmove['jumps'], 1)
-        for pos in cbmove['path'][1:jumps + 1]:
+        for pos in cbmove['path'][1:jumps]:
             positions.append(pos)
+        positions.append(cbmove['to'])
         for pos in positions:
             steps.append(self.row_col_to_num(board, pos[1], pos[0]))  # Checkerboard returns first the column, then the row
 
