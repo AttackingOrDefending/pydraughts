@@ -48,6 +48,9 @@ class Piece:
 
         for enemy_position in adjacent_enemy_positions:
             enemy_piece = self.board.searcher.get_piece_by_position(enemy_position)
+            if self.variant == 'italian' and not self.king and enemy_piece.king:
+                # Men can't capture kings in italian draughts
+                continue
             positions_behind_enemy = self.get_position_behind_enemy(enemy_piece, captures)
             for position_behind_enemy in positions_behind_enemy:
 
@@ -196,6 +199,13 @@ class Piece:
                     positions = new_positions
 
                     return positions
+            elif self.variant == 'english' or self.variant == 'italian':
+                # Same as if it is not a king
+                column_adjustment = -1 if current_row % 2 == 0 else 1
+                column_behind_enemy = current_column + column_adjustment if current_column == enemy_column else enemy_column
+                row_behind_enemy = enemy_row + (enemy_row - current_row)
+
+                return [self.board.position_layout.get(row_behind_enemy, {}).get(column_behind_enemy)]
             adjacent_positions = self.get_adjacent_positions(capture=True)
             down_direction = enemy_row > current_row
             left_direction = enemy_column < current_column if current_row % 2 == 1 else enemy_column <= current_column
@@ -280,7 +290,8 @@ class Piece:
         return [[self.position, new_position] for new_position in new_positions]
 
     def get_adjacent_positions(self, capture=False):
-        return self.get_directional_adjacent_positions(forward=True, capture=capture) + (self.get_directional_adjacent_positions(forward=False, capture=capture) if capture or self.king else [])
+        criteria = bool(self.king) if self.variant == 'english' or self.variant == 'italian' else bool(capture or self.king)
+        return self.get_directional_adjacent_positions(forward=True, capture=capture) + (self.get_directional_adjacent_positions(forward=False, capture=capture) if criteria else [])
 
     def get_column(self):
         return (self.position - 1) % self.board.width
@@ -349,6 +360,16 @@ class Piece:
                         positions += []
                         continue
                     positions += [self.board.position_layout[next_row][current_column]]
+            elif self.variant == 'english' or self.variant == 'italian':
+                # Same as if it is not a king
+                next_row = current_row + ((1 if self.player == BLACK else -1) * (1 if forward else -1))
+
+                if next_row not in self.board.position_layout:
+                    return []
+
+                next_column_indexes = self.get_next_column_indexes(current_row, self.get_column())
+
+                return [self.board.position_layout[next_row][column_index] for column_index in next_column_indexes]
 
             positions_diagonal_1 = []
             positions_diagonal_2 = []

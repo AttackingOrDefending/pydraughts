@@ -1,6 +1,6 @@
 import ctypes
 import draughts
-from draughts.engines.checkerboard_extra.get_checker_board import get_board
+from draughts.engines.checkerboard_extra.get_checker_board import get_board, from_board
 
 from msl.loadlib import Server32
 
@@ -54,7 +54,25 @@ class Engine32Server(Server32):
         self.lib.getmove.argtypes = [((ctypes.c_int * 8) * 8), ctypes.c_int, ctypes.c_double, (ctypes.c_char * 1024), ctypes.POINTER(ctypes.c_int), ctypes.c_int, ctypes.c_int, ctypes.POINTER(CBmove)]
 
         cbmove = CBmove()
+
         result = self.lib.getmove(board, color, maxtime, output, ctypes.byref(playnow), info, moreinfo, ctypes.byref(cbmove))
+
+        old_fen = game.get_fen()
+        new_fen = from_board(board, game)
+        our_pieces, opponents_pieces = (['w', 'W'], ['b', 'B']) if old_fen[0] == 'W' else (['b', 'B'], ['w', 'W'])
+        captures = []
+        start_pos, end_pos = None, None
+        for index in range(1, len(old_fen)):
+            if old_fen[index] in our_pieces and new_fen[index] == 'e':
+                start_pos = index
+            elif new_fen[index] in our_pieces and old_fen[index] == 'e':
+                end_pos = index
+            elif old_fen[index] in opponents_pieces and new_fen[index] == 'e':
+                captures.append(index)
+        if start_pos and end_pos:
+            hub_pos_move = game.make_len_2(start_pos) + game.make_len_2(end_pos) + game.sort_captures(captures)
+        else:
+            hub_pos_move = None
 
         cbmove_output_2 = {}
         cbmove_output_2['jumps'] = cbmove.jumps
@@ -67,4 +85,4 @@ class Engine32Server(Server32):
         cbmove.path = getattr(cbmove, 'del')
         cbmove_output_2['del'] = [(cbmove.path[i].x, cbmove.path[i].y) for i in range(12)]
         cbmove_output_2['delpiece'] = [cbmove.delpiece[i] for i in range(12)]
-        return output.value, cbmove_output_2, result
+        return hub_pos_move, output.value, cbmove_output_2, result

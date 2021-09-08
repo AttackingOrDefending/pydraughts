@@ -1,7 +1,8 @@
 import ctypes
+from ctypes import wintypes
 import os
 import draughts
-from draughts.engines.checkerboard_extra.get_checker_board import get_board
+from draughts.engines.checkerboard_extra.get_checker_board import get_board, from_board
 
 
 class Engine64:
@@ -14,6 +15,7 @@ class Engine64:
     def kill_process(self):
         handle = self.engine._handle
         try:
+            ctypes.windll.kernel32.FreeLibrary.argtypes = [wintypes.HMODULE]
             ctypes.windll.kernel32.FreeLibrary(handle)
         except:
             self.engine.dlcose(handle)
@@ -63,6 +65,23 @@ class Engine64:
 
         result = self.engine.getmove(board, color, maxtime, output, ctypes.byref(playnow), info, moreinfo,  ctypes.byref(cbmove))
 
+        old_fen = game.get_fen()
+        new_fen = from_board(board, game)
+        our_pieces, opponents_pieces = (['w', 'W'], ['b', 'B']) if old_fen[0] == 'W' else (['b', 'B'], ['w', 'W'])
+        captures = []
+        start_pos, end_pos = None, None
+        for index in range(1, len(old_fen)):
+            if old_fen[index] in our_pieces and new_fen[index] == 'e':
+                start_pos = index
+            elif new_fen[index] in our_pieces and old_fen[index] == 'e':
+                end_pos = index
+            elif old_fen[index] in opponents_pieces and new_fen[index] == 'e':
+                captures.append(index)
+        if start_pos and end_pos:
+            hub_pos_move = game.make_len_2(start_pos) + game.make_len_2(end_pos) + game.sort_captures(captures)
+        else:
+            hub_pos_move = None
+
         cbmove_output_2 = {}
         cbmove_output_2['jumps'] = cbmove.jumps
         cbmove_output_2['oldpiece'] = cbmove.oldpiece
@@ -74,4 +93,4 @@ class Engine64:
         cbmove.path = getattr(cbmove, 'del')
         cbmove_output_2['del'] = [(cbmove.path[i].x, cbmove.path[i].y) for i in range(12)]
         cbmove_output_2['delpiece'] = [cbmove.delpiece[i] for i in range(12)]
-        return output.value, cbmove_output_2, result
+        return hub_pos_move, output.value, cbmove_output_2, result

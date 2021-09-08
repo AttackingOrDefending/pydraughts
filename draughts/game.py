@@ -12,11 +12,18 @@ class Game:
         self.variant = variant
         if self.variant == 'from position':
             self.variant = 'standard'
+        if self.variant == 'american':
+            self.variant = 'english'
         elif self.variant == 'frysk':
             self.variant = 'frysk!'
-        self.initial_fen = self.startpos_to_fen(fen)
-        self.initial_hub_fen = self.li_fen_to_hub_fen(self.initial_fen)
-        self.board = Board(self.variant, self.initial_hub_fen)
+        if fen == 'startpos' or ':' in fen:  # Li fen
+            self.initial_fen = self.startpos_to_fen(fen)
+            self.initial_hub_fen = self.li_fen_to_hub_fen(self.initial_fen)
+            self.board = Board(self.variant, self.initial_hub_fen)
+        else:  # Hub fen
+            self.initial_hub_fen = fen
+            self.board = Board(self.variant, self.initial_hub_fen)
+            self.initial_fen = self.get_li_fen()
         self.initial_dxp_fen = self.get_dxp_fen()
         self.moves = []
         self.move_stack = []
@@ -235,7 +242,74 @@ class Game:
             else:
                 moves_legal = moves_pseudo_legal_2
                 captures_legal = captures_pseudo_legal_2
-        elif self.variant == 'russian':
+        elif self.variant == 'italian':
+            moves, captures = self.get_moves()
+            if not moves:
+                return moves, captures
+            max_len_key = max(list(map(len, moves)))
+            moves_pseudo_legal = []
+            captures_pseudo_legal = []
+            for move, capture in zip(moves, captures):
+                if len(move) == max_len_key:
+                    moves_pseudo_legal.append(move)
+                    captures_pseudo_legal.append(capture)
+
+            move_with_king = bool(list(filter(lambda move: self.board.searcher.get_piece_by_position(move[0][0]).king, moves_pseudo_legal)))
+            if move_with_king:
+                moves_pseudo_legal_2 = []
+                captures_pseudo_legal_2 = []
+                for move, capture in zip(moves_pseudo_legal, captures_pseudo_legal):
+                    if self.board.searcher.get_piece_by_position(move[0][0]).king and capture[0] is not None or capture[0] is None:
+                        moves_pseudo_legal_2.append(move)
+                        captures_pseudo_legal_2.append(capture)
+            else:
+                moves_pseudo_legal_2 = moves_pseudo_legal
+                captures_pseudo_legal_2 = captures_pseudo_legal
+
+            max_kings = 0
+            for move, capture in zip(moves_pseudo_legal_2, captures_pseudo_legal_2):
+                kings = 0
+                for piece_loc in capture:
+                    if piece_loc is not None and self.board.searcher.get_piece_by_position(piece_loc).king:
+                        kings += 1
+                max_kings = max(max_kings, kings)
+            moves_pseudo_legal_3 = []
+            captures_pseudo_legal_3 = []
+            for move, capture in zip(moves_pseudo_legal_2, captures_pseudo_legal_2):
+                kings = 0
+                for piece_loc in capture:
+                    if piece_loc is not None and self.board.searcher.get_piece_by_position(piece_loc).king:
+                        kings += 1
+                if kings == max_kings:
+                    moves_pseudo_legal_3.append(move)
+                    captures_pseudo_legal_3.append(capture)
+
+            earliest_king = 100
+            for move, capture in zip(moves_pseudo_legal_3, captures_pseudo_legal_3):
+                if capture[0] is not None:
+                    for index, piece_loc in enumerate(capture):
+                        if self.board.searcher.get_piece_by_position(piece_loc).king:
+                            earliest_king = min(earliest_king, index)
+                            break
+            moves_pseudo_legal_4 = []
+            captures_pseudo_legal_4 = []
+            for move, capture in zip(moves_pseudo_legal_3, captures_pseudo_legal_3):
+                if capture[0] is not None:
+                    for index, piece_loc in enumerate(capture):
+                        if index > earliest_king:
+                            break
+                        elif self.board.searcher.get_piece_by_position(piece_loc).king:
+                            if index == earliest_king:
+                                moves_pseudo_legal_4.append(move)
+                                captures_pseudo_legal_4.append(capture)
+                            break
+                else:
+                    moves_pseudo_legal_4.append(move)
+                    captures_pseudo_legal_4.append(capture)
+            moves_legal = moves_pseudo_legal_4
+            captures_legal = captures_pseudo_legal_4
+
+        elif self.variant in ['russian', 'english']:
             return self.get_moves()
         else:
             moves, captures = self.get_moves()
@@ -273,7 +347,7 @@ class Game:
         white_pieces = li_fen[1][1:].split(',')
         black_pieces = li_fen[2][1:].split(',')
 
-        if self.variant == 'brazilian' or self.variant == 'russian':
+        if self.variant in ['brazilian', 'russian', 'english', 'italian']:
             position_count = 32
         else:
             position_count = 50
@@ -297,7 +371,7 @@ class Game:
             return fen
         if self.variant == 'frysk!':
             return 'W:W46,47,48,49,50:B1,2,3,4,5'
-        elif self.variant == 'russian' or self.variant == 'brazilian':
+        elif self.variant in ['brazilian', 'russian', 'english', 'italian']:
             return 'W:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12'
         else:
             return 'W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20'

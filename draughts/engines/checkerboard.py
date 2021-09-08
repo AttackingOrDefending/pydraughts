@@ -54,23 +54,32 @@ class CheckerBoardEngine:
                 self.engine.enginecommand('set gametype 25')
             elif board.variant == 'brazilian':
                 self.engine.enginecommand('set gametype 26')
+            elif board.variant == 'italian':
+                self.engine.enginecommand('set gametype 22')
+            elif board.variant == 'english':
+                self.engine.enginecommand('set gametype 21')
             self.sent_variant = True
         
         if time:
             time /= self.divide_time_by
 
-        info, cbmove, result = self.engine.getmove(board, time, inc, movetime, depth)
+        hub_pos_move, info, cbmove, result = self.engine.getmove(board, time, inc, movetime, depth)
 
-        steps = []
-        positions = [cbmove['from']]
-        jumps = max(cbmove['jumps'], 1)
-        for pos in cbmove['path'][1:jumps]:
-            positions.append(pos)
-        positions.append(cbmove['to'])
-        for pos in positions:
-            steps.append(self.row_col_to_num(board, pos[1], pos[0]))  # Checkerboard returns first the column, then the row
+        if hub_pos_move:
+            bestmove = draughts.Move(board, hub_position_move=hub_pos_move)
+        else:
+            steps = []
+            positions = [cbmove['from']]
+            jumps = max(cbmove['jumps'], 1)
+            for pos in cbmove['path'][1:jumps]:
+                positions.append(pos)
+            positions.append(cbmove['to'])
+            for pos in positions:
+                steps.append(
+                    self.row_col_to_num(board, pos[1], pos[0]))  # Checkerboard returns first the column, then the row
 
-        bestmove = draughts.Move(board, steps_move=steps)
+            bestmove = draughts.Move(board, steps_move=steps)
+
         self.info = info.decode()
         self.result = result
         return bestmove, None

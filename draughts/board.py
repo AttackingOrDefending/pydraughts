@@ -11,10 +11,10 @@ class Board:
 
     def __init__(self, variant='standard', fen='startpos'):
         if fen != 'startpos':
-            self.player_turn = 2 if fen[0].lower() == 'w' else 1
+            self.player_turn = WHITE if fen[0].lower() == 'w' else BLACK
         else:
-            self.player_turn = 2
-        if variant == 'brazilian' or variant == 'russian':
+            self.player_turn = WHITE
+        if variant in ['brazilian', 'russian', 'english', 'italian']:
             self.width = 4
             self.height = 8
         else:
@@ -23,7 +23,7 @@ class Board:
         self.position_count = self.width * self.height
         if variant == 'frysk!':
             self.rows_per_user_with_pieces = 1
-        elif variant == 'brazilian' or variant == 'russian':
+        elif variant in ['brazilian', 'russian', 'english', 'italian']:
             self.rows_per_user_with_pieces = 3
         else:
             self.rows_per_user_with_pieces = 4
@@ -79,7 +79,9 @@ class Board:
         enemy_position = enemy_piece.position
         enemy_piece.capture()
         self.move_piece(move, move_number)
-        if not originally_was_king and self.variant != 'russian':
+        if not originally_was_king and piece.king and (self.variant == 'english' or self.variant == 'italian'):
+            further_capture_moves_for_piece = []
+        elif not originally_was_king and self.variant != 'russian':
             was_king = piece.king
             piece.king = False
             further_capture_moves_for_piece = [capture_move for capture_move in self.get_possible_capture_moves(captures + [enemy_position]) if move[1] == capture_move[0]]

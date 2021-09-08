@@ -15,6 +15,8 @@ Variants:
 * Breakthrough
 * Russian
 * Brazilian
+* English/American
+* Italian
 
 Engine protocols:
 * Hub
