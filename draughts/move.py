@@ -1,5 +1,5 @@
 class Move:
-    def __init__(self, board=None, board_move=None, hub_move=None, hub_position_move=None, pdn_move=None, pdn_position_move=None, steps_move=None, li_api_move=None, li_one_move=None, has_captures=None):
+    def __init__(self, board=None, board_move=None, hub_move=None, hub_position_move=None, pdn_move=None, pdn_position_move=None, steps_move=None, li_api_move=None, li_one_move=None, has_captures=None, possible_moves=None, possible_captures=None):
         self.board_move = board_move
         self.hub_move = hub_move
         self.hub_position_move = hub_position_move
@@ -11,10 +11,13 @@ class Move:
         self.ambiguous = None
         self.captures = None
         self.has_captures = has_captures
+        self.possible_moves = possible_moves
+        self.possible_captures = possible_captures
 
         if board_move or hub_move or hub_position_move or pdn_move or pdn_position_move or steps_move or li_api_move or li_one_move:
-            if board:
-                self.possible_moves, self.possible_captures = board.legal_moves()
+            if board or possible_moves and possible_captures:
+                if not possible_moves or not possible_captures:
+                    self.possible_moves, self.possible_captures = board.legal_moves()
                 self.to_board()
                 self.captures = self.possible_captures[self.possible_moves.index(self.board_move)]
                 self.captures = [] if self.captures[0] is None else self.captures
