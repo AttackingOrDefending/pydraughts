@@ -2,8 +2,10 @@
 .idea/
 __pycache__
 draughts/__pycache__
+draughts/core/__pycache__
 draughts/engines/__pycache__
 draughts/engines/dxp_communication/__pycache__
+draughts/engines/checkerboard_extra/__pycache__
 .gitattributes
 
 *.swp
