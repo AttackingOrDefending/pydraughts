@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pydraughts",
-    version="0.2.0",
+    version="0.2.2",
     author="AttackingOrDefending",
     description="A draughts library for Python with move generation and engine communication",
     long_description=long_description,
@@ -19,7 +19,7 @@ setuptools.setup(
         "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: OS Independent",
     ],
-    packages=["draughts", "draughts.engines", "draughts.engines.dxp_communication", "draughts.engines.checkerboard_extra"],
+    packages=["draughts", "draughts.core", "draughts.engines", "draughts.engines.dxp_communication", "draughts.engines.checkerboard_extra"],
     python_requires=">=3.6",
     install_requires=["msl-loadlib==0.9.0"],
 )
