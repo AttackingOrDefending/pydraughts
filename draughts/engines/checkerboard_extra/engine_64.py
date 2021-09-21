@@ -25,8 +25,8 @@ class Engine64:
         result = self.engine.enginecommand(ctypes.create_string_buffer(bytes(command.encode('ascii')), 256), output)
         return output.value, result
 
-    def getmove(self, game, maxtime=None, increment=None, movetime=None, depth=None):
-        assert maxtime is not None or movetime is not None or depth is not None
+    def getmove(self, game, maxtime=None, time=None, increment=None, movetime=None):
+        assert maxtime is not None or time is not None or movetime is not None
 
         # From CheckerBoard API:
         WHITE = 1
@@ -34,24 +34,41 @@ class Engine64:
 
         board = get_board(game)
 
+        # Reversed color because red (black) starts first in Checkerboard and not white
         color = BLACK if game.whose_turn() == draughts.WHITE else WHITE
-        if movetime:
-            maxtime = ctypes.c_double(float(movetime))
-        elif depth:
-            maxtime = ctypes.c_double(float(depth))
-        else:
-            maxtime = ctypes.c_double(float(maxtime))
-        output = ctypes.create_string_buffer(b'', 1024)
-        playnow = ctypes.c_int(0)
+
         info = 0
         moreinfo = 0
         if movetime:
             info = info | (1 << 1)  # 2nd bit means the engine has to think for exactly maxtime seconds
-        elif depth:
-            info = info | (1 << 3)  # 4th bit means the engine has to search for exactly maxtime depth
-        elif int(increment):
-            info = info | (1 << 2)  # 3rd bit means the game has increment
-            moreinfo = int(increment)
+        elif time:
+            if time / .01 > 2 ** 15 - 1 or increment / .01 > 2 ** 15 - 1:
+                info = info | (1 << 3)  # 0.1 seconds
+                info = info | (1 << 4)  # 0.1 seconds
+                time = int(time / .1)
+                increment = int(increment / .1)
+            elif time / .001 > 2 ** 15 - 1 or increment / .001 > 2 ** 15 - 1:
+                info = info | (1 << 3)  # 0.01 seconds
+                time = int(time / .01)
+                increment = int(increment / .01)
+            else:
+                info = info | (1 << 4)  # 0.001 seconds
+                time = int(time / .001)
+                increment = int(increment / .001)
+            bin_time = bin(time)[2:].zfill(16)
+            if len(bin_time) > 16:
+                bin_time = '1' * 16
+            bin_inc = bin(increment)[2:].zfill(16)
+            if len(bin_inc) > 16:
+                bin_inc = '1' * 16
+            moreinfo = eval('0b' + bin_time + bin_inc)
+
+        if movetime:
+            maxtime = ctypes.c_double(float(movetime))
+        else:
+            maxtime = ctypes.c_double(float(maxtime))
+        output = ctypes.create_string_buffer(b'', 1024)
+        playnow = ctypes.c_int(0)
 
         class coor(ctypes.Structure):
             _fields_ = [("x", ctypes.c_int), ("y", ctypes.c_int)]

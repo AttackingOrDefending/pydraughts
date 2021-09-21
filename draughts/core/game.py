@@ -25,11 +25,13 @@ class Game:
             self.board = Board(self.variant, self.initial_hub_fen)
             self.initial_fen = self.get_li_fen()
         self.initial_dxp_fen = self.get_dxp_fen()
+        self.last_non_reversible_fen = self.initial_fen
         self.moves = []
         self.move_stack = []
         self.capture_stack = []
         self.not_added_move = []
         self.not_added_capture = []
+        self.non_reversible_moves = []
         self.consecutive_noncapture_move_limit = 1000  # The original was 40
         self.moves_since_last_capture = 0
 
@@ -55,11 +57,18 @@ class Game:
                 captures = []
             move_to_add_board = self.not_added_move + [move]
             move_to_add_hub = self.make_len_2(move_to_add_board[0][0]) + self.make_len_2(move_to_add_board[-1][1]) + self.sort_captures(captures)
-            move_to_add = Move(board_move=move_to_add_board, hub_position_move=move_to_add_hub, has_captures=bool(captures))
+            move_to_add = Move(board_move=move_to_add_board, hub_position_move=move_to_add_hub, has_captures=bool(captures), hub_to_pdn_pseudolegal=True)
             self.move_stack.append(move_to_add)
             self.capture_stack.append(captures)
             self.not_added_move = []
             self.not_added_capture = []
+
+            piece = self.board.searcher.get_piece_by_position(move[1])
+            if piece.king and not captures:
+                self.non_reversible_moves.append(move_to_add)
+            else:
+                self.last_non_reversible_fen = self.get_li_fen()
+                self.non_reversible_moves = []
 
         if return_captured:
             return self, enemy_position

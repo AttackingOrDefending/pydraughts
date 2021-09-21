@@ -1,5 +1,5 @@
 class Move:
-    def __init__(self, board=None, board_move=None, hub_move=None, hub_position_move=None, pdn_move=None, pdn_position_move=None, steps_move=None, li_api_move=None, li_one_move=None, has_captures=None, possible_moves=None, possible_captures=None):
+    def __init__(self, board=None, board_move=None, hub_move=None, hub_position_move=None, pdn_move=None, pdn_position_move=None, steps_move=None, li_api_move=None, li_one_move=None, has_captures=None, possible_moves=None, possible_captures=None, hub_to_pdn_pseudolegal=False):
         self.board_move = board_move
         self.hub_move = hub_move
         self.hub_position_move = hub_position_move
@@ -13,6 +13,7 @@ class Move:
         self.has_captures = has_captures
         self.possible_moves = possible_moves
         self.possible_captures = possible_captures
+        self.hub_to_pdn_pseudolegal = hub_to_pdn_pseudolegal
 
         if board_move or hub_move or hub_position_move or pdn_move or pdn_position_move or steps_move or li_api_move or li_one_move:
             if board or possible_moves and possible_captures:
@@ -200,6 +201,11 @@ class Move:
             positions = [self.hub_position_move[i:i + 2] for i in range(0, len(self.hub_position_move), 2)]
             separator = "x" if self.has_captures else "-"
             self.hub_move = separator.join(list(map(lambda position: str(int(position)), positions)))
+
+        if self.hub_to_pdn_pseudolegal:
+            self.pdn_position_move = self.hub_position_move[:4]
+            separator = "x" if self.has_captures else "-"
+            self.pdn_move = self.pdn_position_move[:2] + separator + self.pdn_position_move[2:]
 
         # PDN related moves
 

@@ -5,7 +5,7 @@ import draughts
 
 
 class CheckerBoardEngine:
-    def __init__(self, command, divide_time_by=40, ENGINE=5):
+    def __init__(self, command, divide_time_by=40, checkerboard_timing=False, ENGINE=5):
         self.cwd = os.path.realpath(os.path.expanduser("."))
         if type(command) == str:
             command = [command]
@@ -18,6 +18,7 @@ class CheckerBoardEngine:
         self.id = {}
         self.result = None
         self.divide_time_by = divide_time_by
+        self.checkerboard_timing = checkerboard_timing
         self.sent_variant = False
         self.bits = self.open_engine()
         self.id["name"] = self.engine.enginecommand('name')[0].decode()
@@ -49,6 +50,9 @@ class CheckerBoardEngine:
         nodes = time_limit.nodes
         movetime = time_limit.movetime
 
+        if not inc:
+            inc = 0
+
         if not self.sent_variant:
             if board.variant == 'russian':
                 self.engine.enginecommand('set gametype 25')
@@ -59,11 +63,37 @@ class CheckerBoardEngine:
             elif board.variant == 'english':
                 self.engine.enginecommand('set gametype 21')
             self.sent_variant = True
-        
-        if time:
-            time /= self.divide_time_by
 
-        hub_pos_move, info, cbmove, result = self.engine.getmove(board, time, inc, movetime, depth)
+        if board.move_stack:
+            gamehist = f'set gamehist {board.last_non_reversible_fen} {" ".join(list(map(lambda move: move.pdn_move, board.non_reversible_moves)))}'
+            if len(gamehist) > 256:
+                gamehist = " ".join(gamehist[:256].split()[:-1])
+            self.engine.enginecommand(gamehist)
+
+        time_to_use = None
+        if time:
+
+            if time < 0 and inc < 0:
+                time = 0
+                inc = 0
+            elif time < 0:
+                inc = max(inc + time, 0)
+                time = 0
+            elif inc < 0:
+                time = max(time + inc, 0)
+                inc = 0
+
+            if self.checkerboard_timing:
+                if time < inc * .4:
+                    time_to_use = inc * .4
+                elif time < inc:
+                    time_to_use = time
+                else:
+                    time_to_use = inc + (time - inc) / 2.5
+            else:
+                time_to_use = time / self.divide_time_by
+
+        hub_pos_move, info, cbmove, result = self.engine.getmove(board, time_to_use, time, inc, movetime)
 
         if hub_pos_move:
             bestmove = draughts.Move(board, hub_position_move=hub_pos_move)
