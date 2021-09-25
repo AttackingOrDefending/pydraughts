@@ -20,6 +20,7 @@ import logging
 import threading
 import time
 import draughts
+import draughts.engine
 
 logger = logging.getLogger(__name__)
 
@@ -381,4 +382,4 @@ class HubEngine:
                 ponder_board.move(move)
             ponder_move = draughts.Move(ponder_board, hub_position_move=pondermove + pondertaken)
 
-        return best_move, ponder_move
+        return draughts.engine.PlayResult(best_move, ponder_move, self.info)

@@ -11,3 +11,12 @@ class Limit:
         self.depth = depth
         self.nodes = nodes
         self.movetime = movetime
+
+
+class PlayResult:
+    def __init__(self, move=None, ponder=None, info=None, draw_offered=False, resign=False):
+        self.move = move
+        self.ponder = ponder
+        self.info = info
+        self.draw_offered = draw_offered
+        self.resign = resign

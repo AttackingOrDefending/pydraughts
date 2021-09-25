@@ -1,5 +1,6 @@
 import draughts.engines.dxp_communication.dxp_run as dxp
 import draughts
+import draughts.engine
 import subprocess
 import os
 import signal
@@ -151,7 +152,7 @@ class DXPEngine:
         best_move = self.recv_move()
         if best_move:
             best_move = draughts.Move(board, best_move)
-        return best_move, None
+        return draughts.engine.PlayResult(best_move, None)
 
     def quit(self):
         self.console.run_command('gameend 0')

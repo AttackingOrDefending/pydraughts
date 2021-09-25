@@ -2,6 +2,7 @@ from draughts.engines.checkerboard_extra.engine_64 import Engine64
 from draughts.engines.checkerboard_extra.engine_client import Engine32
 import os
 import draughts
+import draughts.engine
 
 
 class CheckerBoardEngine:
@@ -112,7 +113,7 @@ class CheckerBoardEngine:
 
         self.info = info.decode()
         self.result = result
-        return bestmove, None
+        return draughts.engine.PlayResult(bestmove, None, {'info': self.info, 'result': self.result})
 
     def row_col_to_num(self, board, row, col):
         if row % 2 == 0:
