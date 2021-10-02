@@ -37,6 +37,7 @@ class HubEngine:
         command = " ".join(command)
         self.p = self.open_process(command, cwd)
         self.last_sent = ""
+        self.hub()
 
     def open_process(self, command, cwd=None, shell=True, _popen_lock=threading.Lock()):
         kwargs = {
@@ -95,21 +96,21 @@ class HubEngine:
             if line:
                 return line
 
-    def recv_uci(self):
+    def recv_hub(self):
         command_and_args = self.recv().split(None, 1)
         if len(command_and_args) == 1:
             return command_and_args[0], ""
         elif len(command_and_args) == 2:
             return command_and_args
 
-    def uci(self):
+    def hub(self):
         self.send("hub")
 
         engine_info = {}
         variants = set()
 
         while True:
-            command, arg = self.recv_uci()
+            command, arg = self.recv_hub()
 
             if command == "wait":
                 return engine_info, variants
@@ -135,14 +136,14 @@ class HubEngine:
                     for variant in argvalues.split():
                         variants.add(variant)
             else:
-                logging.warning("Unexpected engine response to uci: %s %s", command, arg)
+                logging.warning("Unexpected engine response to hub: %s %s", command, arg)
             self.variants = variants
             self.id = engine_info
 
     def init(self):
         self.send("init")
         while True:
-            command, arg = self.recv_uci()
+            command, arg = self.recv_hub()
             if command == "ready":
                 break
             elif command == "init":
@@ -153,7 +154,7 @@ class HubEngine:
     def ping(self):
         self.send("ping")
         while True:
-            command, arg = self.recv_uci()
+            command, arg = self.recv_hub()
             if command == "pong":
                 break
             else:
@@ -227,7 +228,7 @@ class HubEngine:
 
         start = time.time()
         while True:
-            command, arg = self.recv_uci()
+            command, arg = self.recv_hub()
             arg_split = arg.split()
 
             forcestop = False
