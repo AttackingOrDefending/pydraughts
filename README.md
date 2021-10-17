@@ -51,7 +51,6 @@ fen = game.get_li_fen()
 ```python
 from draughts.engine import HubEngine, Limit
 engine = HubEngine("scan.exe hub")
-enigne.hub()
 engine.init()
 limit = Limit(time=10)
 engine_move = engine.play(game, limit, ponder=False)
