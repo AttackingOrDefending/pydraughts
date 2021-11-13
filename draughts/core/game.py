@@ -229,7 +229,7 @@ class Game:
                 last_3_moves = [self.move_stack[-6], self.move_stack[-4], self.move_stack[-2]]
                 last_3_moves = list(map(lambda move: move.li_one_move, last_3_moves))
                 last_3_moves_same_piece = last_3_moves[0][-2:] == last_3_moves[1][:2] and last_3_moves[1][-2:] == last_3_moves[2][:2]
-                was_a_capture = bool(list(filter(lambda captures: captures[0] is not None, [self.capture_stack[-6], self.capture_stack[-4], self.capture_stack[-2]])))
+                was_a_capture = bool(list(filter(bool, [self.capture_stack[-6], self.capture_stack[-4], self.capture_stack[-2]])))
                 piece = self.board.searcher.get_piece_by_position(int(last_3_moves[-1][-2:]))
                 if piece is None:  # It is None when the piece was captured
                     is_king = False
