@@ -37,6 +37,7 @@ class HubEngine:
         command = " ".join(command)
         self.p = self.open_process(command, cwd)
         self.last_sent = ""
+        self.init()
         self.hub()
 
     def open_process(self, command, cwd=None, shell=True, _popen_lock=threading.Lock()):
