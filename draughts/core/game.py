@@ -1,6 +1,7 @@
 from draughts.core.board import Board
 from draughts.core.move import Move
 import pickle
+from draughts.core.move import algebraic_to_numeric_square
 
 WHITE = 2
 BLACK = 1
@@ -350,26 +351,48 @@ class Game:
         return captures
 
     def li_fen_to_hub_fen(self, li_fen):
+        squares_per_letter = 4 if self.variant in ['english', 'italian', 'russian', 'brazilian'] else 5
         fen = ''
         li_fen = li_fen.split(':')
         fen += li_fen[0]
         white_pieces = li_fen[1][1:].split(',')
         black_pieces = li_fen[2][1:].split(',')
+        white_pieces_remove_hyphen = []
+        for white_piece in white_pieces:
+            if '-' in white_piece:
+                start_end = white_piece.split('-')
+                start, end = int(algebraic_to_numeric_square(start_end[0], squares_per_letter)), int(algebraic_to_numeric_square(start_end[1], squares_per_letter))
+                for number in range(start, end + 1):
+                    white_pieces_remove_hyphen.append(str(number))
+            else:
+                white_pieces_remove_hyphen.append(white_piece)
+        black_pieces_remove_hyphen = []
+        for black_piece in black_pieces:
+            if '-' in black_piece:
+                start_end = black_piece.split('-')
+                start, end = int(start_end[0]), int(start_end[1])
+                for number in range(start, end + 1):
+                    black_pieces_remove_hyphen.append(str(number))
+            else:
+                black_pieces_remove_hyphen.append(black_piece)
 
         if self.variant in ['brazilian', 'russian', 'english', 'italian']:
             position_count = 32
         else:
             position_count = 50
 
+        white_pieces_remove_hyphen = list(map(lambda move: algebraic_to_numeric_square(move, squares_per_letter), white_pieces_remove_hyphen))
+        black_pieces_remove_hyphen = list(map(lambda move: algebraic_to_numeric_square(move, squares_per_letter), black_pieces_remove_hyphen))
+
         for index in range(1, position_count + 1):
             str_index = str(index)
-            if str_index in white_pieces:
+            if str_index in white_pieces_remove_hyphen:
                 fen += 'w'
-            elif 'K' + str_index in white_pieces:
+            elif 'K' + str_index in white_pieces_remove_hyphen:
                 fen += 'W'
-            elif str_index in black_pieces:
+            elif str_index in black_pieces_remove_hyphen:
                 fen += 'b'
-            elif 'K' + str_index in black_pieces:
+            elif 'K' + str_index in black_pieces_remove_hyphen:
                 fen += 'B'
             else:
                 fen += 'e'

@@ -1,7 +1,7 @@
 # pydraughts
 [![PyPI version](https://badge.fury.io/py/pydraughts.svg)](https://badge.fury.io/py/pydraughts) [![Tests](https://github.com/AttackingOrDefending/pydraughts/actions/workflows/tests.yml/badge.svg)](https://github.com/AttackingOrDefending/pydraughts/actions/workflows/tests.yml) [![Build](https://github.com/AttackingOrDefending/pydraughts/actions/workflows/build.yml/badge.svg)](https://github.com/AttackingOrDefending/pydraughts/actions/workflows/build.yml) [![CodeQL](https://github.com/AttackingOrDefending/pydraughts/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/AttackingOrDefending/pydraughts/actions/workflows/codeql-analysis.yml)
 
-pydraughts is a draughts library for Python with move generation and engine communication. It is based on [ImparaAI/checkers](https://github.com/ImparaAI/checkers).
+pydraughts is a draughts library for Python with move generation, PDN reading and writing and engine communication. It is based on [ImparaAI/checkers](https://github.com/ImparaAI/checkers).
 
 Installing
 ----------
@@ -29,6 +29,8 @@ Engine protocols:
 * Hub
 * DXP
 * CheckerBoard
+
+PDN Reading and Writing
 <br/></br>
 * Import library
 ```python
@@ -61,6 +63,18 @@ engine = HubEngine("scan.exe hub")
 engine.init()
 limit = Limit(time=10)
 engine_move = engine.play(game, limit, ponder=False)
+```
+* Read PDN games
+```python
+from draughts.PDN import PDNReader
+games = PDNReader(filename=filepath)
+game = games.games[0]
+moves = game.moves
+```
+* Write PDN games
+```python
+from draughts.PDN import PDNWriter
+games = PDNWriter(filename=filepath, board=game)
 ```
 
 ## Acknowledgements
