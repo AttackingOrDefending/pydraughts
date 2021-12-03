@@ -20,15 +20,15 @@ class CheckerBoardEngine:
         self.result = None
         self.divide_time_by = divide_time_by
         self.checkerboard_timing = checkerboard_timing
-        self.sent_variant = False
-        self.bits = self.open_engine()
+        self._sent_variant = False
+        self.bits = self._open_engine()
         self.id["name"] = self.engine.enginecommand('name')[0].decode()
 
-    def open_engine(self):
+    def _open_engine(self):
         try:
             self.engine = Engine64(self.command, self.cwd)
             return 64
-        except:
+        except Exception:
             self.engine = Engine32(self.command)  # I will see what I will do with it
             return 32
 
@@ -54,7 +54,7 @@ class CheckerBoardEngine:
         if not inc:
             inc = 0
 
-        if not self.sent_variant:
+        if not self._sent_variant:
             if board.variant == 'russian':
                 self.engine.enginecommand('set gametype 25')
             elif board.variant == 'brazilian':
@@ -63,7 +63,7 @@ class CheckerBoardEngine:
                 self.engine.enginecommand('set gametype 22')
             elif board.variant == 'english':
                 self.engine.enginecommand('set gametype 21')
-            self.sent_variant = True
+            self._sent_variant = True
 
         if board.move_stack:
             gamehist = f'set gamehist {board.last_non_reversible_fen} {" ".join(list(map(lambda move: move.pdn_move, board.non_reversible_moves)))}'
@@ -107,7 +107,7 @@ class CheckerBoardEngine:
             positions.append(cbmove['to'])
             for pos in positions:
                 steps.append(
-                    self.row_col_to_num(board, pos[1], pos[0]))  # Checkerboard returns first the column, then the row
+                    self._row_col_to_num(board, pos[1], pos[0]))  # Checkerboard returns first the column, then the row
 
             bestmove = draughts.Move(board, steps_move=steps)
 
@@ -115,7 +115,7 @@ class CheckerBoardEngine:
         self.result = result
         return draughts.engine.PlayResult(bestmove, None, {'info': self.info, 'result': self.result})
 
-    def row_col_to_num(self, board, row, col):
+    def _row_col_to_num(self, board, row, col):
         if row % 2 == 0:
             col = ((col + 2) / 2) - 1
         else:

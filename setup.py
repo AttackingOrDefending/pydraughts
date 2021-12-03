@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="pydraughts",
-    version="0.3.0",
+    version="0.3.1",
     author="AttackingOrDefending",
     description="A draughts library for Python with move generation, PDN reading and writing and engine communication",
     long_description=long_description,

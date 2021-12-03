@@ -61,12 +61,15 @@ class Piece:
         return self.create_moves_from_new_positions(capture_move_positions)
 
     def get_position_behind_enemy(self, enemy_piece, captures):
+        """
+        Gets the positions the piece can land after capturing the enemy piece.
+        """
         if not self.king:
             current_row = self.get_row()
             current_column = self.get_column()
             enemy_column = enemy_piece.get_column()
             enemy_row = enemy_piece.get_row()
-            if self.variant == 'frisian' or self.variant == 'frysk!':
+            if self.variant == 'frisian' or self.variant == 'frysk!':  # Orthogonal captures for frisian and frysk!
                 if current_row - enemy_row == 2 and current_column - enemy_column == 0:
                     next_row = enemy_row - 2
                     if next_row not in self.board.position_layout:
@@ -103,7 +106,7 @@ class Piece:
             current_column = self.get_column()
             enemy_column = enemy_piece.get_column()
             enemy_row = enemy_piece.get_row()
-            if self.variant == 'frisian' or self.variant == 'frysk!':
+            if self.variant == 'frisian' or self.variant == 'frysk!':  # Orthogonal captures for frisian and frysk!
                 same_row = current_row == enemy_row
                 same_column = current_column == enemy_column and (current_row - enemy_row) % 2 == 0
                 positions_to_check = []
@@ -139,11 +142,11 @@ class Piece:
                         for semi_position in positions_to_check[:index + 1]:
                             piece = self.board.searcher.get_piece_by_position(semi_position)
                             if piece is not None:
-                                if piece.player == self.player or enemy_piece_found:
+                                if piece.player == self.player or enemy_piece_found:  # It stops if it meets a piece of the same color or another opponent piece
                                     break
                                 else:
                                     enemy_piece_found = True
-                            elif semi_position in captures:
+                            elif semi_position in captures:  # Kings in multi-captures can't go over a piece they have captured in that move sequence in most variants
                                 break
                         else:
                             if position in positions:
@@ -185,11 +188,11 @@ class Piece:
                         for semi_position in positions_to_check[:index + 1]:
                             piece = self.board.searcher.get_piece_by_position(semi_position)
                             if piece is not None:
-                                if piece.player == self.player or enemy_piece_found:
+                                if piece.player == self.player or enemy_piece_found:  # It stops if it meets a piece of the same color or another opponent piece
                                     break
                                 else:
                                     enemy_piece_found = True
-                            elif semi_position in captures:
+                            elif semi_position in captures:  # Kings in multi-captures can't go over a piece they have captured in that move sequence in most variants
                                 break
                         else:
                             if position in positions:
@@ -218,6 +221,9 @@ class Piece:
                 row = self.get_row_from_position(position)
                 down_direction_possible = row > enemy_row
                 left_direction_possible = column < enemy_column if enemy_row % 2 == 1 else column <= enemy_column
+                # Checks if the captured piece square is between the starting square and the landing square
+                # For example, if the captured piece square is to the left and down of the starting square, we check if the landing square is to the left and down of the captured piece square
+                # It also checks if the position is in a pseudolegal list of legal moves (because we can have landing squares that aren't in the same diagonal as the staring square (e.g. if the piece is in 28, 31 isn't a possible landing square))
                 if down_direction_possible == down_direction and left_direction_possible == left_direction and position in adjacent_positions:
                     legal_adjacent_positions.append(self.board.position_layout.get(row, {}).get(column))
             enemy_piece.king = was_king
@@ -257,16 +263,16 @@ class Piece:
                 else:
                     break
 
-            for index, position in enumerate(positions_to_check):
+            for index, position in enumerate(positions_to_check):  # Checks if the piece will encounter any other piece in its path
                 enemy_piece_found = False
                 for semi_position in positions_to_check[:index + 1]:
                     piece = self.board.searcher.get_piece_by_position(semi_position)
                     if piece is not None:
-                        if piece.player == self.player or enemy_piece_found:
+                        if piece.player == self.player or enemy_piece_found:  # It stops if it meets a piece of the same color or another opponent piece
                             break
                         else:
                             enemy_piece_found = True
-                    elif semi_position in captures:
+                    elif semi_position in captures:  # Kings in multi-captures can't go over a piece they have captured in that move sequence in most variants
                         break
                 else:
                     if position in adjacent_positions:
@@ -290,7 +296,7 @@ class Piece:
         return [[self.position, new_position] for new_position in new_positions]
 
     def get_adjacent_positions(self, capture=False):
-        criteria = bool(self.king) if self.variant == 'english' or self.variant == 'italian' else bool(capture or self.king)
+        criteria = bool(self.king) if self.variant == 'english' or self.variant == 'italian' else bool(capture or self.king)  # In english and italian men can't capture backwards
         return self.get_directional_adjacent_positions(forward=True, capture=capture) + (self.get_directional_adjacent_positions(forward=False, capture=capture) if criteria else [])
 
     def get_column(self):
@@ -309,11 +315,14 @@ class Piece:
         if not self.king:
             if (self.variant == 'frisian' or self.variant == 'frysk!') and capture:
                 # forward=True includes left and up and forward=False includes right and down
+                # e.g. If the piece is at 33, square 32 will be considered in forward=True and square 34 will be considered in forward=False
                 positions = []
                 current_row = self.get_row()
                 current_column = self.get_column()
                 next_row = current_row + ((2 if self.player == BLACK else -2) * (1 if forward else -1))
                 next_column = current_column + ((1 if self.player == BLACK else -1) * (1 if forward else -1))
+
+                # Orthogonal squares (only in frisian and frysk!)
                 if next_row not in self.board.position_layout:
                     pass
                 else:
@@ -323,6 +332,7 @@ class Piece:
                 else:
                     positions.append(self.board.position_layout[current_row][next_column])
 
+                # Diagonal squares (as in standard draughts)
                 next_row = current_row + ((1 if self.player == BLACK else -1) * (1 if forward else -1))
 
                 if next_row not in self.board.position_layout:
@@ -348,6 +358,7 @@ class Piece:
             current_row = self.get_row()
             current_column = self.get_column()
             if (self.variant == 'frisian' or self.variant == 'frysk!') and capture:
+                # Orthogonal squares
                 for add_column in range(1, self.board.width):
                     next_column = current_column + ((add_column if self.player == BLACK else -add_column) * (1 if forward else -1))
                     if next_column not in self.board.position_layout[current_row]:
@@ -371,6 +382,7 @@ class Piece:
 
                 return [self.board.position_layout[next_row][column_index] for column_index in next_column_indexes]
 
+            # Diagonal squares
             positions_diagonal_1 = []
             positions_diagonal_2 = []
             for i in range(1, self.board.height):
@@ -390,6 +402,7 @@ class Piece:
                 for semi_position in positions_diagonal_1[:index + 1]:
                     piece = self.board.searcher.get_piece_by_position(semi_position)
                     if piece is not None and not capture:
+                        # If we encounter a piece, and we are searching for a positional move not a capture move, we break the loop
                         break
                 else:
                     positions.append(position)
@@ -400,6 +413,7 @@ class Piece:
                 for semi_position in positions_diagonal_2[:index + 1]:
                     piece = self.board.searcher.get_piece_by_position(semi_position)
                     if piece is not None and not capture:
+                        # If we encounter a piece, and we are searching for a positional move not a capture move, we break the loop
                         break
                 else:
                     positions.append(position)
@@ -409,6 +423,13 @@ class Piece:
             return positions
 
     def get_next_column_indexes(self, current_row, current_column, i=1, unfiltered=False):
+        """
+        Get the index of the next column.
+        It isn't as simple as finding the next row (where we only add or subtract 1) but the column index only changes
+        once every 2 rows.
+        e.g. Square 32 and 27 are both in the second row, but 27 and 31 are not.
+        :param i: current_row ± i is the row we should search (the columns for current_row + i are the same as current_row - i). e.g if current row=3 and i=2, we will return the 2 possible columns for row 5 (which will be the same for row 1)
+        """
         column_indexes = [0, 0]
         start_right = True if current_row % 2 == 0 else False
         for semi_i in range(1, i + 1):

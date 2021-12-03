@@ -32,7 +32,7 @@ class MySocket:
     def open(self):
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        except:
+        except Exception:
             self.sock = None
             raise Exception("socket exception: failed to open")
         return self
@@ -51,7 +51,7 @@ class MySocket:
     def send(self, msg):
         try:
             self.sock.send(bytes(msg, 'utf-8') + b"\0")
-        except:
+        except Exception:
             raise Exception("send exception: no connection")
         return None
 
@@ -61,7 +61,7 @@ class MySocket:
             # Collect message chunks until null character found
             try:
                 chunk = self.sock.recv(1024)
-            except:
+            except Exception:
                 raise Exception("receive exception: no connection")
 
             if chunk == "":

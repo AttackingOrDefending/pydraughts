@@ -17,7 +17,7 @@ class Engine64:
         try:
             ctypes.windll.kernel32.FreeLibrary.argtypes = [wintypes.HMODULE]
             ctypes.windll.kernel32.FreeLibrary(handle)
-        except:
+        except Exception:
             self.engine.dlcose(handle)
 
     def enginecommand(self, command):

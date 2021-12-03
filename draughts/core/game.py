@@ -30,8 +30,8 @@ class Game:
         self.moves = []
         self.move_stack = []
         self.capture_stack = []
-        self.not_added_move = []
-        self.not_added_capture = []
+        self._not_added_move = []
+        self._not_added_capture = []
         self.non_reversible_moves = []
         self.consecutive_noncapture_move_limit = 1000  # The original was 40
         self.moves_since_last_capture = 0
@@ -45,24 +45,24 @@ class Game:
             raise ValueError('The provided move is not possible')
         turn = self.whose_turn()
 
-        self.board, enemy_position = self.board.create_new_board_from_move(move, len(self.move_stack) + 1, self.not_added_capture, return_captured=True)
+        self.board, enemy_position = self.board.create_new_board_from_move(move, len(self.move_stack) + 1, self._not_added_capture, return_captured=True)
         self.moves.append(move)
         self.moves_since_last_capture = 0 if self.board.previous_move_was_capture else self.moves_since_last_capture + 1
 
         if self.whose_turn() == turn:
-            self.not_added_move.append(move)
-            self.not_added_capture.append(enemy_position)
+            self._not_added_move.append(move)
+            self._not_added_capture.append(enemy_position)
         else:
-            captures = self.not_added_capture + [enemy_position]
+            captures = self._not_added_capture + [enemy_position]
             if captures[0] is None:
                 captures = []
-            move_to_add_board = self.not_added_move + [move]
+            move_to_add_board = self._not_added_move + [move]
             move_to_add_hub = self.make_len_2(move_to_add_board[0][0]) + self.make_len_2(move_to_add_board[-1][1]) + self.sort_captures(captures)
             move_to_add = Move(board_move=move_to_add_board, hub_position_move=move_to_add_hub, has_captures=bool(captures), hub_to_pdn_pseudolegal=True)
             self.move_stack.append(move_to_add)
             self.capture_stack.append(captures)
-            self.not_added_move = []
-            self.not_added_capture = []
+            self._not_added_move = []
+            self._not_added_capture = []
 
             piece = self.board.searcher.get_piece_by_position(move[1])
             if piece.king and not captures:
@@ -91,9 +91,9 @@ class Game:
         return self.move_limit_reached() or not self.legal_moves()[0]
 
     def get_winner(self):
-        if self.whose_turn() == BLACK and not self.board.count_movable_player_pieces(BLACK, self.not_added_capture):
+        if self.whose_turn() == BLACK and not self.board.count_movable_player_pieces(BLACK, self._not_added_capture):
             return WHITE
-        elif self.whose_turn() == WHITE and not self.board.count_movable_player_pieces(WHITE, self.not_added_capture):
+        elif self.whose_turn() == WHITE and not self.board.count_movable_player_pieces(WHITE, self._not_added_capture):
             return BLACK
         elif self.variant == 'breakthrough':
             for loc in range(1, self.board.position_count + 1):
@@ -105,7 +105,7 @@ class Game:
                         return BLACK
 
     def get_possible_moves(self):
-        return self.board.get_possible_moves(self.not_added_capture)
+        return self.board.get_possible_moves(self._not_added_capture)
 
     def whose_turn(self):
         return self.board.player_turn
@@ -172,6 +172,7 @@ class Game:
         turn = self.whose_turn()
         moves = []
         captured_pieces = []
+        # get_possible_moves returns only the first jump in a multi-capture sequence, so we use it again after the first jump to check if there are any further moves.
         for move in self.get_possible_moves():
             game_2 = self.copy()
             _, captures = game_2.move(move, return_captured=True)
@@ -187,6 +188,8 @@ class Game:
 
     def legal_moves(self):
         if self.variant == 'frisian' or self.variant == 'frysk!':
+            # Kings are worth 1.5 and men 1. The kings here are worth 1.501 because if we have a choice between 3 men or 2 kings (both are worth 3) we capture the kings.
+            # We have to choose the path that is worth the most
             king_value = 1.501
             man_value = 1
             moves, captures = self.get_moves()
@@ -208,6 +211,8 @@ class Game:
                 if value == max_value:
                     moves_pseudo_legal.append(move)
                     captures_pseudo_legal.append(capture)
+
+            # If a man and a king can play a capture sequence of equal value, it is forced play the capture sequence with the king.
             move_with_king = bool(list(filter(lambda move: self.board.searcher.get_piece_by_position(move[0][0]).king, moves_pseudo_legal)))
             if move_with_king:
                 moves_pseudo_legal_2 = []
@@ -220,6 +225,7 @@ class Game:
                 moves_pseudo_legal_2 = moves_pseudo_legal
                 captures_pseudo_legal_2 = captures_pseudo_legal
 
+            # The same king can't make more than 3 non-capturing moves in a row, if the player has men left.
             has_man = False
             for loc in range(1, self.board.position_count + 1):
                 piece = self.board.searcher.get_piece_by_position(loc)
@@ -256,6 +262,8 @@ class Game:
             moves, captures = self.get_moves()
             if not moves:
                 return moves, captures
+
+            # The move that captures the most pieces has to be played
             max_len_key = max(list(map(len, moves)))
             moves_pseudo_legal = []
             captures_pseudo_legal = []
@@ -264,6 +272,7 @@ class Game:
                     moves_pseudo_legal.append(move)
                     captures_pseudo_legal.append(capture)
 
+            # If a man and a king can play a capture the same number of pieces, it is forced play the capture sequence with the king.
             move_with_king = bool(list(filter(lambda move: self.board.searcher.get_piece_by_position(move[0][0]).king, moves_pseudo_legal)))
             if move_with_king:
                 moves_pseudo_legal_2 = []
@@ -276,6 +285,7 @@ class Game:
                 moves_pseudo_legal_2 = moves_pseudo_legal
                 captures_pseudo_legal_2 = captures_pseudo_legal
 
+            # The capture sequence that captures the most kings has to be played.
             max_kings = 0
             for move, capture in zip(moves_pseudo_legal_2, captures_pseudo_legal_2):
                 kings = 0
@@ -294,6 +304,7 @@ class Game:
                     moves_pseudo_legal_3.append(move)
                     captures_pseudo_legal_3.append(capture)
 
+            # The capture sequence where the king occurs first has to be played
             earliest_king = 100
             for move, capture in zip(moves_pseudo_legal_3, captures_pseudo_legal_3):
                 if capture[0] is not None:
@@ -325,6 +336,8 @@ class Game:
             moves, captures = self.get_moves()
             if not moves:
                 return moves, captures
+
+            # The move that captures the most pieces has to be played
             max_len_key = max(list(map(len, moves)))
             moves_legal = []
             captures_legal = []

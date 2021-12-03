@@ -35,11 +35,11 @@ class HubEngine:
         cwd = os.path.realpath(os.path.expanduser("."))
         command = list(filter(bool, command))
         command = " ".join(command)
-        self.p = self.open_process(command, cwd)
-        self.last_sent = ""
+        self.p = self._open_process(command, cwd)
+        self._last_sent = ""
         self.hub()
 
-    def open_process(self, command, cwd=None, shell=True, _popen_lock=threading.Lock()):
+    def _open_process(self, command, cwd=None, shell=True, _popen_lock=threading.Lock()):
         kwargs = {
             "shell": shell,
             "stdout": subprocess.PIPE,
@@ -75,13 +75,13 @@ class HubEngine:
 
     def send(self, line):
         if line == "ponder-hit":
-            while self.last_sent != "go ponder":
+            while self._last_sent != "go ponder":
                 pass
         logging.debug(f"{self.ENGINE} %s << %s {self.p.pid} {line}")
 
         self.p.stdin.write(line + "\n")
         self.p.stdin.flush()
-        self.last_sent = line
+        self._last_sent = line
 
     def recv(self):
         while True:
@@ -171,8 +171,8 @@ class HubEngine:
         if name == 'variant' and self.variants or name != 'variant':
             self.send("set-param name=%s value=%s" % (name, value))
 
-    def go(self, position, my_time=None, inc=None, movetime=None, clock=None, depth=None, analysisnodes=None, handicap=None, pst=None,
-           searchnodes=None, bookply=None, bookmargin=None, ply=None, moves=None, ponder=False):
+    def go(self, position, my_time=None, inc=None, movetime=None, clock=None, depth=None, analysisnodes=None, 
+           handicap=None, searchnodes=None, ply=None, moves=None, ponder=False):
         if moves is None:
             moves = ''
         if moves and len(moves) != 0:
@@ -338,9 +338,9 @@ class HubEngine:
                 self.send("stop")
 
     def known_variant(self, variant):
-        return self.parse_variant(variant) in ["normal", "bt", "frisian", "losing"]
+        return self._parse_variant(variant) in ["normal", "bt", "frisian", "losing"]
 
-    def parse_variant(self, variant):
+    def _parse_variant(self, variant):
         variant = variant.lower()
 
         if variant in ["standard", "fromposition"]:

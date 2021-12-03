@@ -6,7 +6,7 @@ from draughts.core.move import rotate_move, number_to_algebraic
 
 class _PDNGame:
     def __init__(self, pdn_text):
-        self.tag_value_to_int = ["WhiteRating", "BlackRating"]
+        self._tag_value_to_int = ["WhiteRating", "BlackRating"]
         self.values_to_variant = {20: "standard", 21: "english", 22: "italian", 23: "american pool", 24: "spanish", 25: "russian", 26: "brazilian", 27: "canadian", 28: "portuguese", 29: "czech", 30: "turkish", 31: "thai", 40: "frisian", 41: "spantsiretti"}
         self.tags = {}
         self.moves = []
@@ -15,10 +15,10 @@ class _PDNGame:
         self.notation_type = None
         self.game_ending = '*'
         self.pdn_text = pdn_text
-        self.rest_of_games = []
-        self.read()
+        self._rest_of_games = []
+        self._read()
 
-    def read(self):
+    def _read(self):
         lines = self.pdn_text
         lines = lines.split('\n')
         tag_lines = []
@@ -27,7 +27,7 @@ class _PDNGame:
             if line.startswith('['):
                 tag_lines.append(line)
                 last_tag_line = index
-            elif re.sub('\s', '', line):
+            elif re.sub(r'\s', '', line):
                 break
 
         for tag_line in tag_lines:
@@ -35,7 +35,7 @@ class _PDNGame:
             quote_index = line.index('"')
             name = line[:quote_index - 1]
             value = line[quote_index + 1:-1]
-            if name in self.tag_value_to_int:
+            if name in self._tag_value_to_int:
                 value = int(value)
             self.tags[name] = value
 
@@ -43,14 +43,14 @@ class _PDNGame:
         last_move_line = -1
         move_lines = []
         for index, line in enumerate(lines[last_tag_line + 1:]):
-            splitted_line = re.split('\s(1-0|1/2-1/2|0-1|2-0|1-1|0-2|0-0|\*)\s', ' ' + line + ' ', maxsplit=1)
+            splitted_line = re.split(r'\s(1-0|1/2-1/2|0-1|2-0|1-1|0-2|0-0|\*)\s', ' ' + line + ' ', maxsplit=1)
             if len(splitted_line) == 3:
                 move_lines.append(splitted_line[0])
                 last_move_line = index
                 self.game_ending = splitted_line[1]
                 rest_of_games.append(splitted_line[2])
                 break
-            if re.sub('\s', '', line):
+            if re.sub(r'\s', '', line):
                 move_lines.append(line)
                 last_move_line = index
 
@@ -86,7 +86,7 @@ class _PDNGame:
         moves = moves.replace('x ', 'x')
         moves = moves.replace(': ', ':')
 
-        move_numbers = re.findall("\d+\.", moves)
+        move_numbers = re.findall(r"\d+\.", moves)
         double_numbers = list(set(filter(lambda move: move_numbers.count(move) >= 2, move_numbers)))
         for move_number in double_numbers:
             moves = moves[:moves.index(move_number) + len(move_number)] + moves[moves.index(move_number) + len(move_number):].replace(move_number, "")
@@ -123,7 +123,7 @@ class _PDNGame:
             elif first_move[0] in string.ascii_letters:
                 self.variant = "russian"
 
-        self.rest_of_games = rest_of_games
+        self._rest_of_games = rest_of_games
 
     def get_titles(self):
         return [self.tags.get("WhiteTitle", ""), self.tags.get("BlackTitle", "")]
@@ -137,8 +137,8 @@ class _PDNGame:
     def get_types(self):
         return [self.tags.get("WhiteType", ""), self.tags.get("BlackType", "")]
 
-    def get_rest_of_games(self):
-        return '\n'.join(self.rest_of_games)
+    def _get_rest_of_games(self):
+        return '\n'.join(self._rest_of_games)
 
 
 class PDNReader:
@@ -155,7 +155,7 @@ class PDNReader:
                     with open(filename, encoding=encoding) as pdn_file:
                         pdn_text = pdn_file.read()
                     break
-                except:
+                except Exception:
                     pass
         self.pdn_text = pdn_text
         self.pdn_text = re.sub('\n +', '\n', self.pdn_text)
@@ -163,11 +163,11 @@ class PDNReader:
         self.games = []
         game = _PDNGame(self.pdn_text)
         self.games.append(game)
-        more_games = game.get_rest_of_games()
-        while re.sub('\s', '', more_games):
+        more_games = game._get_rest_of_games()
+        while re.sub(r'\s', '', more_games):
             game = _PDNGame(more_games)
             self.games.append(game)
-            more_games = game.get_rest_of_games()
+            more_games = game._get_rest_of_games()
 
 
 class PDNWriter:
@@ -190,7 +190,7 @@ class PDNWriter:
         else:
             self.moves = moves
             self.variant = variant or 'standard'
-            self.starting_fen = starting_fen or self.startpos_to_fen('startpos')
+            self.starting_fen = starting_fen or self._startpos_to_fen('startpos')
             self.tags = tags or {}
             self.to_standard_notation = False
         self.game_ending = game_ending
@@ -198,9 +198,9 @@ class PDNWriter:
         self.filename = filename
         self.file_encoding = file_encoding
         self.file_mode = file_mode
-        self.write()
+        self._write()
 
-    def write(self):
+    def _write(self):
         pdn_text = ''
         if 'GameType' not in self.tags:
             short_gametype = str(self.VARIANT_TO_GAMETYPE.get(self.variant.lower(), 20))
@@ -257,7 +257,7 @@ class PDNWriter:
             with open(self.filename, self.file_mode, encoding=self.file_encoding) as file:
                 file.write(self.pdn_text)
 
-    def startpos_to_fen(self, fen):
+    def _startpos_to_fen(self, fen):
         if fen != 'startpos':
             return fen
         if self.variant == 'frysk!':
@@ -266,4 +266,3 @@ class PDNWriter:
             return 'W:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12'
         else:
             return 'W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20'
-

@@ -28,49 +28,49 @@ class Move:
             if board or possible_moves and possible_captures:
                 if not possible_moves or not possible_captures:
                     self.possible_moves, self.possible_captures = board.legal_moves()
-                self.to_board()
+                self._to_board()
                 self.captures = self.possible_captures[self.possible_moves.index(self.board_move)]
                 self.captures = [] if self.captures[0] is None else self.captures
                 self.has_captures = bool(self.captures)
-                self.from_board()
+                self._from_board()
             else:
-                self.no_board()
+                self._no_board()
 
-    def make_len_2(self, move):
+    def _make_len_2(self, move):
         return f'0{move}' if len(str(move)) == 1 else str(move)
 
-    def sort_captures(self, captures):
+    def _sort_captures(self, captures):
         """
         This function is because hub engines returns the captures in alphabetical order
         (e.g. for the move 231201 scan returns 23x01x07x18 instead of 23x01x18x07)
         """
         if captures and captures[0] is None:
             captures = []
-        captures = list(map(self.make_len_2, captures))
+        captures = list(map(self._make_len_2, captures))
         captures.sort()
         captures = ''.join(captures)
         return captures
 
-    def to_board(self):
+    def _to_board(self):
         if self.hub_move:
             if "-" in self.hub_move:
-                self.hub_position_move = "".join(list(map(self.make_len_2, self.hub_move.split("-"))))
+                self.hub_position_move = "".join(list(map(self._make_len_2, self.hub_move.split("-"))))
             else:
-                self.hub_position_move = "".join(list(map(self.make_len_2, self.hub_move.split("x"))))
+                self.hub_position_move = "".join(list(map(self._make_len_2, self.hub_move.split("x"))))
         if self.pdn_move:
             self.pdn_move = algebraic_to_number(self.pdn_move, variant=self.variant, squares_per_letter=self.squares_per_letter)
             self.pdn_move = rotate_move(self.pdn_move, notation=self.notation, variant=self.variant)
 
             if "-" in self.pdn_move:
-                self.pdn_position_move = "".join(list(map(self.make_len_2, self.pdn_move.split("-"))))
+                self.pdn_position_move = "".join(list(map(self._make_len_2, self.pdn_move.split("-"))))
             else:
-                self.pdn_position_move = "".join(list(map(self.make_len_2, self.pdn_move.split("x"))))
+                self.pdn_position_move = "".join(list(map(self._make_len_2, self.pdn_move.split("x"))))
 
         if self.hub_position_move:
             moves_li_board = {}
             for possible_move, possible_capture in zip(self.possible_moves, self.possible_captures):
-                li_move = self.make_len_2(possible_move[0][0]) + self.make_len_2(
-                    possible_move[-1][1]) + self.sort_captures(possible_capture)
+                li_move = self._make_len_2(possible_move[0][0]) + self._make_len_2(
+                    possible_move[-1][1]) + self._sort_captures(possible_capture)
                 moves_li_board[li_move] = possible_move
             board_move = moves_li_board[self.hub_position_move]
             self.board_move = board_move
@@ -80,7 +80,7 @@ class Move:
             if len(self.pdn_position_move) == 4:
                 self.ambiguous = False
                 for possible_move, possible_capture in zip(self.possible_moves, self.possible_captures):
-                    li_move = self.make_len_2(possible_move[0][0]) + self.make_len_2(possible_move[-1][1])
+                    li_move = self._make_len_2(possible_move[0][0]) + self._make_len_2(possible_move[-1][1])
                     moves_li_board[li_move] = possible_move
             else:
                 self.ambiguous = True
@@ -88,7 +88,7 @@ class Move:
                     steps = [possible_move[0][0]]
                     for move in possible_move:
                         steps.append(move[1])
-                    li_move = "".join(list(map(self.make_len_2, steps)))
+                    li_move = "".join(list(map(self._make_len_2, steps)))
                     moves_li_board[li_move] = possible_move
             board_move = moves_li_board[self.pdn_position_move]
             self.board_move = board_move
@@ -112,7 +112,7 @@ class Move:
                 board_move.append([steps[index - 1], steps[index]])
             self.board_move = board_move
 
-    def from_board(self):
+    def _from_board(self):
         if not self.steps_move:
             steps = [self.board_move[0][0]]
             for move in self.board_move:
@@ -120,11 +120,11 @@ class Move:
             self.steps_move = steps
 
         if not self.hub_position_move:
-            self.hub_position_move = self.make_len_2(self.board_move[0][0]) + self.make_len_2(self.board_move[-1][1])
+            self.hub_position_move = self._make_len_2(self.board_move[0][0]) + self._make_len_2(self.board_move[-1][1])
             if self.captures:
-                sorted_captures = self.sort_captures(self.captures)
+                sorted_captures = self._sort_captures(self.captures)
                 sorted_captures = [sorted_captures[i:i + 2] for i in range(0, len(sorted_captures), 2)]
-                self.hub_position_move += "".join(list(map(self.make_len_2, sorted_captures)))
+                self.hub_position_move += "".join(list(map(self._make_len_2, sorted_captures)))
 
         if not self.hub_move:
             positions = [self.hub_position_move[i:i + 2] for i in range(0, len(self.hub_position_move), 2)]
@@ -134,12 +134,12 @@ class Move:
         if not self.pdn_position_move:
             starts_endings = []
             for possible_move in self.possible_moves:
-                starts_endings.append(self.make_len_2(possible_move[0][0]) + self.make_len_2(possible_move[-1][1]))
-            self.ambiguous = starts_endings.count(self.make_len_2(self.board_move[0][0]) + self.make_len_2(self.board_move[-1][1])) >= 2
+                starts_endings.append(self._make_len_2(possible_move[0][0]) + self._make_len_2(possible_move[-1][1]))
+            self.ambiguous = starts_endings.count(self._make_len_2(self.board_move[0][0]) + self._make_len_2(self.board_move[-1][1])) >= 2
             if self.ambiguous:
-                self.pdn_position_move = "".join(list(map(self.make_len_2, self.steps_move)))
+                self.pdn_position_move = "".join(list(map(self._make_len_2, self.steps_move)))
             else:
-                self.pdn_position_move = self.make_len_2(self.board_move[0][0]) + self.make_len_2(self.board_move[-1][1])
+                self.pdn_position_move = self._make_len_2(self.board_move[0][0]) + self._make_len_2(self.board_move[-1][1])
 
         if not self.pdn_move:
             positions = [self.pdn_position_move[i:i + 2] for i in range(0, len(self.pdn_position_move), 2)]
@@ -149,13 +149,13 @@ class Move:
         if not self.li_api_move:
             li_api_move = []
             for move in self.board_move:
-                li_api_move.append(self.make_len_2(move[0]) + self.make_len_2(move[1]))
+                li_api_move.append(self._make_len_2(move[0]) + self._make_len_2(move[1]))
             self.li_api_move = li_api_move
 
         if not self.li_one_move:
-            self.li_one_move = "".join(list(map(self.make_len_2, self.steps_move)))
+            self.li_one_move = "".join(list(map(self._make_len_2, self.steps_move)))
 
-    def no_board(self):
+    def _no_board(self):
         """
         Makes as many conversions as possible without the board.
         """
@@ -193,22 +193,22 @@ class Move:
             if not self.li_api_move:
                 li_api_move = []
                 for move in self.board_move:
-                    li_api_move.append(self.make_len_2(move[0]) + self.make_len_2(move[1]))
+                    li_api_move.append(self._make_len_2(move[0]) + self._make_len_2(move[1]))
                 self.li_api_move = li_api_move
 
             # li_one_move
             if not self.li_one_move:
-                self.li_one_move = "".join(list(map(self.make_len_2, self.steps_move)))
+                self.li_one_move = "".join(list(map(self._make_len_2, self.steps_move)))
 
         # Hub related moves
 
         if self.hub_move:
             if "-" in self.hub_move:
                 self.has_captures = False
-                self.hub_position_move = "".join(list(map(self.make_len_2, self.hub_move.split("-"))))
+                self.hub_position_move = "".join(list(map(self._make_len_2, self.hub_move.split("-"))))
             else:
                 self.has_captures = True
-                self.hub_position_move = "".join(list(map(self.make_len_2, self.hub_move.split("x"))))
+                self.hub_position_move = "".join(list(map(self._make_len_2, self.hub_move.split("x"))))
         elif self.hub_position_move:
             positions = [self.hub_position_move[i:i + 2] for i in range(0, len(self.hub_position_move), 2)]
             separator = "x" if self.has_captures else "-"
@@ -227,10 +227,10 @@ class Move:
 
             if "-" in self.pdn_move:
                 self.has_captures = False
-                self.pdn_position_move = "".join(list(map(self.make_len_2, self.pdn_move.split("-"))))
+                self.pdn_position_move = "".join(list(map(self._make_len_2, self.pdn_move.split("-"))))
             else:
                 self.has_captures = True
-                self.pdn_position_move = "".join(list(map(self.make_len_2, self.pdn_move.split("x"))))
+                self.pdn_position_move = "".join(list(map(self._make_len_2, self.pdn_move.split("x"))))
         elif self.pdn_position_move:
             positions = [self.pdn_position_move[i:i + 2] for i in range(0, len(self.pdn_position_move), 2)]
             separator = "x" if self.has_captures else "-"
