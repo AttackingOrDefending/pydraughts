@@ -45,7 +45,7 @@ class Game:
             raise ValueError('The provided move is not possible')
         turn = self.whose_turn()
 
-        self.board, enemy_position = self.board.create_new_board_from_move(move, len(self.move_stack) + 1, self._not_added_capture, return_captured=True)
+        self.board, enemy_position = self.board.push_move(move, len(self.move_stack) + 1, self._not_added_capture, return_captured=True)
         self.moves.append(move)
         self.moves_since_last_capture = 0 if self.board.previous_move_was_capture else self.moves_since_last_capture + 1
 

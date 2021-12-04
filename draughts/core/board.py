@@ -71,6 +71,23 @@ class Board:
         else:
             return new_board
 
+    def push_move(self, move, move_number, captures, return_captured=False):
+        # It takes 40% less time than create_new_board_from_move (60% faster)
+        enemy_position = None
+
+        if move in self.get_possible_capture_moves(captures):
+            if return_captured:
+                enemy_position = self.perform_capture_move(move, move_number, captures, return_captured=return_captured)
+            else:
+                self.perform_capture_move(move, move_number, captures)
+        else:
+            self.perform_positional_move(move, move_number)
+
+        if return_captured:
+            return self, enemy_position
+        else:
+            return self
+
     def perform_capture_move(self, move, move_number, captures, return_captured=False):
         self.previous_move_was_capture = True
         piece = self.searcher.get_piece_by_position(move[0])
