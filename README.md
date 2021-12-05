@@ -14,7 +14,7 @@ Download and install the latest release:
 
 Note: White always starts. Black always has the squares starting from 1 (e.g. 1-20 in international draughts).
 
-Variants:
+**Variants:**
 * Standard (International)
 * Frisian
 * frysk!
@@ -26,12 +26,12 @@ Variants:
 * Italian
 * Turkish
 
-Engine protocols:
+**Engine protocols:**
 * Hub
 * DXP
 * CheckerBoard
 
-PDN Reading and Writing
+**PDN Reading and Writing**
 <br/></br>
 * Import library
 ```python
