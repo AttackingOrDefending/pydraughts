@@ -27,6 +27,8 @@ class BoardInitializer:
 
     def set_starting_pieces(self):
         pieces = []
+        if self.board.variant == 'turkish' and self.fen == 'startpos':
+            self.fen = 'W:W41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56:B9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24'
         if self.fen != 'startpos':
             starting = self.fen[0]
             board = self.fen[1:]

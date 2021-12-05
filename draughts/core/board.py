@@ -17,12 +17,17 @@ class Board:
         if variant in ['brazilian', 'russian', 'english', 'italian']:
             self.width = 4
             self.height = 8
+        elif variant == 'turkish':
+            self.width = 8
+            self.height = 8
         else:
             self.width = 5
             self.height = 10
         self.position_count = self.width * self.height
         if variant == 'frysk!':
             self.rows_per_user_with_pieces = 1
+        elif variant == 'turkish':
+            self.rows_per_user_with_pieces = 2
         elif variant in ['brazilian', 'russian', 'english', 'italian']:
             self.rows_per_user_with_pieces = 3
         else:

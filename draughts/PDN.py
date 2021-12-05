@@ -171,8 +171,8 @@ class PDNReader:
 
 
 class PDNWriter:
-    VARIANT_TO_GAMETYPE = {'standard': 20, 'english': 21, 'italian': 22, 'russian': 25, 'brazilian': 26, 'frisian': 40, 'frysk!': 40}
-    SHORT_TO_LONG_GAMETYPE = {'20': '20,W,10,10,N2,0', '21': '21,B,8,8,N1,0', '22': '22,W,8,8,N2,1', '25': '25,W,8,8,A0,0', '26': '26,W,8,8,A0,0', '40': '40,W,10,10,N2,0'}
+    VARIANT_TO_GAMETYPE = {'standard': 20, 'english': 21, 'italian': 22, 'russian': 25, 'brazilian': 26, 'turkish': 30, 'frisian': 40, 'frysk!': 40}
+    SHORT_TO_LONG_GAMETYPE = {'20': '20,W,10,10,N2,0', '21': '21,B,8,8,N1,0', '22': '22,W,8,8,N2,1', '25': '25,W,8,8,A0,0', '26': '26,W,8,8,A0,0', '30': '30,W,8,8,A0,0', '40': '40,W,10,10,N2,0'}
 
     def __init__(self, filename=None, board=None, moves=None, variant=None, starting_fen=None, tags=None, game_ending='*', file_encoding='utf8', file_mode='a'):
         assert board or moves
@@ -262,6 +262,8 @@ class PDNWriter:
             return fen
         if self.variant == 'frysk!':
             return 'W:W46,47,48,49,50:B1,2,3,4,5'
+        elif self.variant == 'turkish':
+            return 'W:W41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56:B9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24'
         elif self.variant in ['brazilian', 'russian', 'english', 'italian']:
             return 'W:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12'
         else:

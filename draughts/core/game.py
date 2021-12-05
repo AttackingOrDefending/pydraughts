@@ -333,6 +333,7 @@ class Game:
         elif self.variant in ['russian', 'english']:
             return self.get_moves()
         else:
+            # Turkish also go in this category (together with international etc.) because the rule that prohibits a piece from turning 180 degrees is accounted for in get_position_behind_enemy
             moves, captures = self.get_moves()
             if not moves:
                 return moves, captures
@@ -364,7 +365,11 @@ class Game:
         return captures
 
     def li_fen_to_hub_fen(self, li_fen):
-        squares_per_letter = 4 if self.variant in ['english', 'italian', 'russian', 'brazilian'] else 5
+        squares_per_letter = 5
+        if self.variant in ['english', 'italian', 'russian', 'brazilian']:
+            squares_per_letter = 4
+        elif self.variant == 'turkish':
+            squares_per_letter = 8
         fen = ''
         li_fen = li_fen.split(':')
         fen += li_fen[0]
@@ -391,11 +396,13 @@ class Game:
 
         if self.variant in ['brazilian', 'russian', 'english', 'italian']:
             position_count = 32
+        elif self.variant == 'turkish':
+            position_count = 64
         else:
             position_count = 50
 
-        white_pieces_remove_hyphen = list(map(lambda move: algebraic_to_numeric_square(move, squares_per_letter), white_pieces_remove_hyphen))
-        black_pieces_remove_hyphen = list(map(lambda move: algebraic_to_numeric_square(move, squares_per_letter), black_pieces_remove_hyphen))
+        white_pieces_remove_hyphen = list(map(lambda move: algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, white_pieces_remove_hyphen))
+        black_pieces_remove_hyphen = list(map(lambda move: algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, black_pieces_remove_hyphen))
 
         for index in range(1, position_count + 1):
             str_index = str(index)
@@ -416,6 +423,8 @@ class Game:
             return fen
         if self.variant == 'frysk!':
             return 'W:W46,47,48,49,50:B1,2,3,4,5'
+        elif self.variant == 'turkish':
+            return 'W:W41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56:B9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24'
         elif self.variant in ['brazilian', 'russian', 'english', 'italian']:
             return 'W:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12'
         else:

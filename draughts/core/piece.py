@@ -13,6 +13,7 @@ class Piece:
         self.captured = False
         self.position = None
         self.board = None
+        self.bp = None
         self.became_king = -100
         self.capture_move_enemies = {}
         self.variant = variant
@@ -27,6 +28,7 @@ class Piece:
 
     def capture(self):
         self.captured = True
+        self.bp = self.position
         self.position = None
 
     def move(self, new_position, move_number):
@@ -45,7 +47,6 @@ class Piece:
     def build_possible_capture_moves(self, captures):
         adjacent_enemy_positions = list(filter((lambda position: position in self.board.searcher.get_positions_by_player(self.other_player)), self.get_adjacent_positions(capture=True)))
         capture_move_positions = []
-
         for enemy_position in adjacent_enemy_positions:
             enemy_piece = self.board.searcher.get_piece_by_position(enemy_position)
             if self.variant == 'italian' and not self.king and enemy_piece.king:
@@ -63,37 +64,21 @@ class Piece:
     def get_position_behind_enemy(self, enemy_piece, captures):
         """
         Gets the positions the piece can land after capturing the enemy piece.
+        :param captures: it contains all the positions of the pieces that this piece has captured during this multi-capture,
+        because kings in multi-captures can't go over a piece they have captured in that move sequence in most variants
         """
         if not self.king:
             current_row = self.get_row()
             current_column = self.get_column()
             enemy_column = enemy_piece.get_column()
             enemy_row = enemy_piece.get_row()
-            if self.variant == 'frisian' or self.variant == 'frysk!':  # Orthogonal captures for frisian and frysk!
-                if current_row - enemy_row == 2 and current_column - enemy_column == 0:
-                    next_row = enemy_row - 2
-                    if next_row not in self.board.position_layout:
-                        pass
-                    else:
-                        return [self.board.position_layout.get(next_row, {}).get(current_column)]
-                elif current_row - enemy_row == -2 and current_column - enemy_column == 0:
-                    next_row = enemy_row + 2
-                    if next_row not in self.board.position_layout:
-                        pass
-                    else:
-                        return [self.board.position_layout.get(next_row, {}).get(current_column)]
-                elif current_row - enemy_row == 0 and current_column - enemy_column == 1:
-                    next_column = enemy_column - 1
-                    if next_column not in self.board.position_layout[current_row]:
-                        pass
-                    else:
-                        return [self.board.position_layout.get(current_row, {}).get(next_column)]
-                elif current_row - enemy_row == 0 and current_column - enemy_column == -1:
-                    next_column = enemy_column + 1
-                    if next_column not in self.board.position_layout[current_row]:
-                        pass
-                    else:
-                        return [self.board.position_layout.get(current_row, {}).get(next_column)]
+            if self.variant in ['frisian', 'frysk!', 'turkish']:  # Orthogonal captures
+                row_difference = current_row - enemy_row
+                column_difference = current_column - enemy_column
+                if (column_difference == 0 or row_difference == 0) and (row_difference % 2 == 0 if self.variant in ['frisian', 'frysk!'] else True):
+                    next_row = enemy_row - row_difference
+                    next_column = enemy_column - column_difference
+                    return [self.board.position_layout.get(next_row, {}).get(next_column)]
 
             column_adjustment = -1 if current_row % 2 == 0 else 1
             column_behind_enemy = current_column + column_adjustment if current_column == enemy_column else enemy_column
@@ -106,81 +91,32 @@ class Piece:
             current_column = self.get_column()
             enemy_column = enemy_piece.get_column()
             enemy_row = enemy_piece.get_row()
-            if self.variant == 'frisian' or self.variant == 'frysk!':  # Orthogonal captures for frisian and frysk!
-                same_row = current_row == enemy_row
-                same_column = current_column == enemy_column and (current_row - enemy_row) % 2 == 0
+            if self.variant in ['frisian', 'frysk!', 'turkish']:  # Orthogonal captures
                 positions_to_check = []
-                if same_row:
-                    if current_column > enemy_column:
-                        for add_column in range(1, self.board.width):
-                            next_column = enemy_column - add_column
-                            if next_column not in self.board.position_layout[current_row]:
-                                pass
-                            else:
-                                positions.append(self.board.position_layout.get(current_row, {}).get(next_column))
-                            position_to_check = current_column - add_column
-                            if position_to_check not in self.board.position_layout[current_row]:
-                                pass
-                            else:
-                                positions_to_check.append(self.board.position_layout.get(current_row, {}).get(position_to_check))
-                    else:
-                        for add_column in range(1, self.board.width):
-                            next_column = enemy_column + add_column
-                            if next_column not in self.board.position_layout[current_row]:
-                                pass
-                            else:
-                                positions.append(self.board.position_layout.get(current_row, {}).get(next_column))
-                            position_to_check = current_column + add_column
-                            if position_to_check not in self.board.position_layout[current_row]:
-                                pass
-                            else:
-                                positions_to_check.append(self.board.position_layout.get(current_row, {}).get(position_to_check))
-
-                    new_positions = []
-                    for index, position in enumerate(positions_to_check):
-                        enemy_piece_found = False
-                        for semi_position in positions_to_check[:index + 1]:
-                            piece = self.board.searcher.get_piece_by_position(semi_position)
-                            if piece is not None:
-                                if piece.player == self.player or enemy_piece_found:  # It stops if it meets a piece of the same color or another opponent piece
-                                    break
-                                else:
-                                    enemy_piece_found = True
-                            elif semi_position in captures:  # Kings in multi-captures can't go over a piece they have captured in that move sequence in most variants
-                                break
-                        else:
-                            if position in positions:
-                                new_positions.append(position)
+                row_difference = current_row - enemy_row
+                column_difference = current_column - enemy_column
+                add_row = 0
+                if row_difference < 0:
+                    add_row = -1
+                elif row_difference > 0:
+                    add_row = 1
+                add_column = 0
+                if column_difference < 0:
+                    add_column = -1
+                elif column_difference > 0:
+                    add_column = 1
+                if (column_difference == 0 or row_difference == 0) and (row_difference % 2 == 0 if self.variant in ['frisian', 'frysk!'] else True):
+                    for multiplier in range(1, max(self.board.width, self.board.height)):
+                        if multiplier % 2 == 1 and self.variant in ['frisian', 'frysk!']:
                             continue
-                        break
-                    positions = new_positions
-
-                    return positions
-                elif same_column:
-                    if current_row > enemy_row:
-                        for add_row in range(2, self.board.height, 2):
-                            next_row = enemy_row - add_row
-                            if next_row not in self.board.position_layout:
-                                pass
-                            else:
-                                positions.append(self.board.position_layout.get(next_row, {}).get(current_column))
-                            position_to_check = current_row - add_row
-                            if position_to_check not in self.board.position_layout:
-                                pass
-                            else:
-                                positions_to_check.append(self.board.position_layout.get(position_to_check, {}).get(current_column))
-                    else:
-                        for add_row in range(2, self.board.height, 2):
-                            next_row = enemy_row + add_row
-                            if next_row not in self.board.position_layout:
-                                pass
-                            else:
-                                positions.append(self.board.position_layout.get(next_row, {}).get(current_column))
-                            position_to_check = current_row + add_row
-                            if position_to_check not in self.board.position_layout:
-                                pass
-                            else:
-                                positions_to_check.append(self.board.position_layout.get(position_to_check, {}).get(current_column))
+                        next_row = current_row - multiplier * add_row
+                        next_column = current_column - multiplier * add_column
+                        if next_row in self.board.position_layout and next_column in self.board.position_layout[next_row]:
+                            positions_to_check.append(self.board.position_layout.get(next_row, {}).get(next_column))
+                        next_row = enemy_row - multiplier * add_row
+                        next_column = enemy_column - multiplier * add_column
+                        if next_row in self.board.position_layout and next_column in self.board.position_layout[next_row]:
+                            positions.append(self.board.position_layout.get(next_row, {}).get(next_column))
 
                     new_positions = []
                     for index, position in enumerate(positions_to_check):
@@ -192,7 +128,9 @@ class Piece:
                                     break
                                 else:
                                     enemy_piece_found = True
-                            elif semi_position in captures:  # Kings in multi-captures can't go over a piece they have captured in that move sequence in most variants
+                            elif semi_position in ([captures[-1]] if self.variant == 'turkish' and captures else captures):
+                                # Kings in multi-captures can't go over a piece they have captured in that move sequence in frisian and frysk!
+                                # In turkish they can but we use the last capture, so we prevent the piece from turning 180 degrees, which is not allowed
                                 break
                         else:
                             if position in positions:
@@ -296,7 +234,7 @@ class Piece:
         return [[self.position, new_position] for new_position in new_positions]
 
     def get_adjacent_positions(self, capture=False):
-        criteria = bool(self.king) if self.variant == 'english' or self.variant == 'italian' else bool(capture or self.king)  # In english and italian men can't capture backwards
+        criteria = bool(self.king) if self.variant in ['english', 'italian', 'turkish'] else bool(capture or self.king)  # In english, italian and turkish men can't capture backwards
         return self.get_directional_adjacent_positions(forward=True, capture=capture) + (self.get_directional_adjacent_positions(forward=False, capture=capture) if criteria else [])
 
     def get_column(self):
@@ -312,10 +250,26 @@ class Piece:
         return ceil(position / self.board.width) - 1
 
     def get_directional_adjacent_positions(self, forward, capture=False):
+        # In frisian, forward=True includes left and up and forward=False includes right and down
+        # e.g. If the piece is at 33, square 32 will be considered in forward=True and square 34 will be considered in forward=False
+        # In turkish, if the piece is a king, forward=True includes left and up and forward=False includes right and down
+        # if it isn't a king forward=True, calculates up, left and right
         if not self.king:
+            if self.variant == 'turkish':
+                positions = []
+                current_row = self.get_row()
+                current_column = self.get_column()
+                next_row = current_row + (1 if self.player == BLACK else -1)
+                if next_row in self.board.position_layout:
+                    positions.append(self.board.position_layout[next_row][current_column])
+                next_column = current_column - 1
+                if next_column in self.board.position_layout[current_row]:
+                    positions.append(self.board.position_layout[current_row][next_column])
+                next_column = current_column + 1
+                if next_column in self.board.position_layout[current_row]:
+                    positions.append(self.board.position_layout[current_row][next_column])
+                return positions
             if (self.variant == 'frisian' or self.variant == 'frysk!') and capture:
-                # forward=True includes left and up and forward=False includes right and down
-                # e.g. If the piece is at 33, square 32 will be considered in forward=True and square 34 will be considered in forward=False
                 positions = []
                 current_row = self.get_row()
                 current_column = self.get_column()
@@ -357,6 +311,16 @@ class Piece:
             positions = []
             current_row = self.get_row()
             current_column = self.get_column()
+            if self.variant == 'turkish':
+                for multiplier in range(1, self.board.height):
+                    next_row = current_row + multiplier * (1 if self.player == BLACK else -1) * (1 if forward else -1)
+                    if next_row in self.board.position_layout:
+                        positions.append(self.board.position_layout[next_row][current_column])
+                for multiplier in range(1, self.board.width):
+                    next_column = current_column + multiplier * (1 if self.player == BLACK else -1) * (1 if forward else -1)
+                    if next_column in self.board.position_layout[current_row]:
+                        positions.append(self.board.position_layout[current_row][next_column])
+                return positions
             if (self.variant == 'frisian' or self.variant == 'frysk!') and capture:
                 # Orthogonal squares
                 for add_column in range(1, self.board.width):
