@@ -2,6 +2,7 @@ import re
 import string
 from functools import reduce
 from draughts.core.move import rotate_move, number_to_algebraic
+from draughts import Game, Move
 
 
 class _PDNGame:
@@ -174,7 +175,12 @@ class PDNWriter:
     VARIANT_TO_GAMETYPE = {'standard': 20, 'english': 21, 'italian': 22, 'russian': 25, 'brazilian': 26, 'turkish': 30, 'frisian': 40, 'frysk!': 40}
     SHORT_TO_LONG_GAMETYPE = {'20': '20,W,10,10,N2,0', '21': '21,B,8,8,N1,0', '22': '22,W,8,8,N2,1', '25': '25,W,8,8,A0,0', '26': '26,W,8,8,A0,0', '30': '30,W,8,8,A0,0', '40': '40,W,10,10,N2,0'}
 
-    def __init__(self, filename=None, board=None, moves=None, variant=None, starting_fen=None, tags=None, game_ending='*', file_encoding='utf8', file_mode='a'):
+    def __init__(self, filename=None, board=None, moves=None, variant=None, starting_fen=None, tags=None, game_ending='*', replay_moves_from_board=True, file_encoding='utf8', file_mode='a'):
+        """
+        :param replay_moves_from_board: The already saved pdn_move in move_stack may be wrong because it is pseudolegal
+        and doesn't account for ambiguous moves. If replay_moves_from_board is enabled, it will replay all the moves to
+        find the correct representation of them.
+        """
         assert board or moves
         self.pdn_text = ''
         self.notation_type = None
@@ -195,10 +201,24 @@ class PDNWriter:
             self.to_standard_notation = False
         self.game_ending = game_ending
 
+        self.replay_moves_from_board = replay_moves_from_board
         self.filename = filename
         self.file_encoding = file_encoding
         self.file_mode = file_mode
+        self._fix_ambiguous_moves()
         self._write()
+
+    def _fix_ambiguous_moves(self):
+        if self.moves and type(self.moves[0]) == str:
+            return
+        game = Game(self.variant, self.starting_fen)
+        correct_moves = []
+        for move in self.moves:
+            correct_move = Move(game, board_move=move.board_move)
+            correct_moves.append(correct_move)
+            for semi_move in move.board_move:
+                game.move(semi_move)
+        self.moves = correct_moves
 
     def _write(self):
         pdn_text = ''
@@ -233,12 +253,18 @@ class PDNWriter:
 
             standard_moves.append(standard_move)
 
-        if self.starting_fen[0] == 'W':
-            pdn_text += f'1. {standard_moves[0]} {standard_moves[1]}'
-            standard_moves = standard_moves[2:]
+        if not standard_moves:
+            pass
+        elif len(standard_moves) == 1 and self.starting_fen[0] == 'W':
+            pdn_text += f'1. {standard_moves[0]}'
+            standard_moves = []
         else:
-            pdn_text += f'1... {standard_moves[0]}'
-            standard_moves = standard_moves[1:]
+            if self.starting_fen[0] == 'W':
+                pdn_text += f'1. {standard_moves[0]} {standard_moves[1]}'
+                standard_moves = standard_moves[2:]
+            else:
+                pdn_text += f'1... {standard_moves[0]}'
+                standard_moves = standard_moves[1:]
 
         write_move_number = True
         move_number = 2
