@@ -13,7 +13,6 @@ class Piece:
         self.captured = False
         self.position = None
         self.board = None
-        self.bp = None
         self.became_king = -100
         self.capture_move_enemies = {}
         self.variant = variant
@@ -28,7 +27,6 @@ class Piece:
 
     def capture(self):
         self.captured = True
-        self.bp = self.position
         self.position = None
 
     def move(self, new_position, move_number):
