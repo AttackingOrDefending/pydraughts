@@ -24,6 +24,7 @@ Variants:
 * Brazilian
 * English/American
 * Italian
+* Turkish
 
 Engine protocols:
 * Hub
