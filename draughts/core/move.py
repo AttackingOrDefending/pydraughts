@@ -58,8 +58,7 @@ class Move:
             else:
                 self.hub_position_move = "".join(list(map(self._make_len_2, self.hub_move.split("x"))))
         if self.pdn_move:
-            self.pdn_move = algebraic_to_number(self.pdn_move, variant=self.variant, squares_per_letter=self.squares_per_letter)
-            self.pdn_move = rotate_move(self.pdn_move, notation=self.notation, variant=self.variant)
+            self.pdn_move = from_variant(self.pdn_move, variant=self.variant, notation=self.notation, squares_per_letter=self.squares_per_letter)
 
             if "-" in self.pdn_move:
                 self.pdn_position_move = "".join(list(map(self._make_len_2, self.pdn_move.split("-"))))
@@ -222,8 +221,7 @@ class Move:
         # PDN related moves
 
         if self.pdn_move:
-            self.pdn_move = algebraic_to_number(self.pdn_move, variant=self.variant, squares_per_letter=self.squares_per_letter)
-            self.pdn_move = rotate_move(self.pdn_move, notation=self.notation, variant=self.variant)
+            self.pdn_move = from_variant(self.pdn_move, variant=self.variant, notation=self.notation, squares_per_letter=self.squares_per_letter)
 
             if "-" in self.pdn_move:
                 self.has_captures = False
@@ -240,7 +238,7 @@ class Move:
             self.ambiguous = not (len(self.pdn_position_move) == 4)
 
 
-def rotate_move(internal_move, notation=None, variant=None):
+def _rotate_move(internal_move, notation=None, variant=None):
     separators = ['-', 'x', ':']
     splitted_move = None
     correct_seperator = None
@@ -295,7 +293,7 @@ def rotate_move(internal_move, notation=None, variant=None):
     return correct_seperator.join(rotated_move)
 
 
-def algebraic_to_number(algebraic_move, squares_per_letter=None, variant=None, every_other_square=None):
+def _algebraic_to_number(algebraic_move, squares_per_letter=None, variant=None, every_other_square=None):
     if every_other_square is None:
         if variant == 'turkish':
             every_other_square = False
@@ -331,12 +329,12 @@ def algebraic_to_number(algebraic_move, squares_per_letter=None, variant=None, e
 
     numeric_move = []
     for move in splitted_move:
-        numeric_move.append(algebraic_to_numeric_square(move, squares_per_letter, every_other_square=every_other_square))
+        numeric_move.append(_algebraic_to_numeric_square(move, squares_per_letter, every_other_square=every_other_square))
     numeric_move = list(map(str, numeric_move))
     return correct_seperator.join(numeric_move)
 
 
-def algebraic_to_numeric_square(square, squares_per_letter, every_other_square=True):
+def _algebraic_to_numeric_square(square, squares_per_letter, every_other_square=True):
     algebraic_notation = square[0] in string.ascii_letters
     if not algebraic_notation:
         return square
@@ -345,7 +343,7 @@ def algebraic_to_numeric_square(square, squares_per_letter, every_other_square=T
     return (int(square[1]) - 1) * squares_per_letter + ceil(string.ascii_lowercase.index(square[0]) // 2) + 1
 
 
-def number_to_algebraic(number_move, width=None, variant=None, every_other_square=None):
+def _number_to_algebraic(number_move, width=None, variant=None, every_other_square=None):
     if every_other_square is None:
         if variant == 'turkish':
             every_other_square = False
@@ -380,12 +378,12 @@ def number_to_algebraic(number_move, width=None, variant=None, every_other_squar
 
     algebraic_move = []
     for move in splitted_move:
-        algebraic_move.append(numeric_to_algebraic_square(move, width, every_other_square=every_other_square))
+        algebraic_move.append(_numeric_to_algebraic_square(move, width, every_other_square=every_other_square))
     algebraic_move = list(map(str, algebraic_move))
     return correct_seperator.join(algebraic_move)
 
 
-def numeric_to_algebraic_square(square, width, every_other_square=True):
+def _numeric_to_algebraic_square(square, width, every_other_square=True):
     algebraic_notation = square[0] in string.ascii_letters
     if algebraic_notation:
         return square
@@ -396,3 +394,18 @@ def numeric_to_algebraic_square(square, width, every_other_square=True):
         column *= 2
         column += 1 if row % 2 == 1 else 0
     return string.ascii_lowercase[column] + str(row + 1)
+
+
+def from_variant(move, variant=None, notation=None, squares_per_letter=None):
+    variant = variant.lower()
+    move = _algebraic_to_number(move, variant=variant, squares_per_letter=squares_per_letter)
+    move = _rotate_move(move, variant=variant, notation=notation)
+    return move
+
+
+def to_variant(move, variant=None, notation=None, width=None, every_other_square=None, to_algebraic=None):
+    variant = variant.lower()
+    move = _rotate_move(move, variant=variant, notation=notation)
+    if to_algebraic or variant in ['russian', 'brazilian', 'turkish']:
+        move = _number_to_algebraic(move, variant=variant, width=width, every_other_square=every_other_square)
+    return move

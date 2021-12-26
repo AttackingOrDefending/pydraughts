@@ -1,7 +1,7 @@
 import re
 import string
 from functools import reduce
-from draughts.core.move import rotate_move, number_to_algebraic
+from draughts.core.move import to_variant
 from draughts import Game, Move
 
 
@@ -247,9 +247,7 @@ class PDNWriter:
                 standard_move = move
 
             if self.to_standard_notation:
-                standard_move = rotate_move(standard_move, variant=self.variant.lower())
-                if self.notation_type == 'a':
-                    standard_move = number_to_algebraic(standard_move, variant=self.variant.lower())
+                standard_move = to_variant(standard_move, variant=self.variant)
 
             standard_moves.append(standard_move)
 
