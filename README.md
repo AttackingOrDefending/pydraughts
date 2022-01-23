@@ -83,4 +83,4 @@ Thanks to [RoepStoep](https://github.com/RoepStoep) for his [draughtsnet](https:
 
 ## License
 pydraughts is licensed under the GPL 3 (or any later version at your option). Check out `LICENSE` for the full text.
-The licenses of the other projects that pydraughts uses are in the `other licenses` folder.
+The licenses of the other projects that pydraughts uses are in the `other_licenses` folder.
