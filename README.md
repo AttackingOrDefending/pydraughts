@@ -82,5 +82,5 @@ games = PDNWriter(filename=filepath, board=game)
 Thanks to [RoepStoep](https://github.com/RoepStoep) for his [draughtsnet](https://github.com/RoepStoep/draughtsnet) which was modified to add support for Hub engines. Thanks to [akalverboer](https://github.com/akalverboer) for their [DXC100_draughts_client](https://github.com/akalverboer/DXC100_draughts_client) which was modified to add support for DXP engines.
 
 ## License
-pydraughts is licensed under the GPL 3 (or any later version at your option). Check out license/LICENSE for the full text.
+pydraughts is licensed under the GPL 3 (or any later version at your option). Check out licenses/LICENSE for the full text.
 The licenses of the other projects that pydraughts uses are in the licenses folder.
