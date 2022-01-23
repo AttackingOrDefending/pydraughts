@@ -1,7 +1,7 @@
 from draughts.core.board import Board
 from draughts.core.move import Move
 import pickle
-from draughts.core.move import algebraic_to_numeric_square
+from draughts.core.move import _algebraic_to_numeric_square
 
 WHITE = 2
 BLACK = 1
@@ -379,7 +379,7 @@ class Game:
         for white_piece in white_pieces:
             if '-' in white_piece:
                 start_end = white_piece.split('-')
-                start, end = int(algebraic_to_numeric_square(start_end[0], squares_per_letter)), int(algebraic_to_numeric_square(start_end[1], squares_per_letter))
+                start, end = int(_algebraic_to_numeric_square(start_end[0], squares_per_letter)), int(_algebraic_to_numeric_square(start_end[1], squares_per_letter))
                 for number in range(start, end + 1):
                     white_pieces_remove_hyphen.append(str(number))
             else:
@@ -401,8 +401,8 @@ class Game:
         else:
             position_count = 50
 
-        white_pieces_remove_hyphen = list(map(lambda move: algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, white_pieces_remove_hyphen))
-        black_pieces_remove_hyphen = list(map(lambda move: algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, black_pieces_remove_hyphen))
+        white_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, white_pieces_remove_hyphen))
+        black_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, black_pieces_remove_hyphen))
 
         for index in range(1, position_count + 1):
             str_index = str(index)

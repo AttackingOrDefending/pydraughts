@@ -104,7 +104,7 @@ class DXPEngine:
             logger.debug(f'wait time: {wait_time}')
             if wait_time > 0:
                 time.sleep(wait_time)
-        self.console.run_command(f'_connect {self.ip} {self.port}')
+        self.console.run_command(f'connect {self.ip} {self.port}')
 
     def _start(self, board, time):
         self._connect()

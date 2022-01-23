@@ -397,14 +397,14 @@ def _numeric_to_algebraic_square(square, width, every_other_square=True):
 
 
 def from_variant(move, variant=None, notation=None, squares_per_letter=None):
-    variant = variant.lower()
+    variant = variant.lower() if variant else variant
     move = _algebraic_to_number(move, variant=variant, squares_per_letter=squares_per_letter)
     move = _rotate_move(move, variant=variant, notation=notation)
     return move
 
 
 def to_variant(move, variant=None, notation=None, width=None, every_other_square=None, to_algebraic=None):
-    variant = variant.lower()
+    variant = variant.lower() if variant else variant
     move = _rotate_move(move, variant=variant, notation=notation)
     if to_algebraic or variant in ['russian', 'brazilian', 'turkish']:
         move = _number_to_algebraic(move, variant=variant, width=width, every_other_square=every_other_square)
