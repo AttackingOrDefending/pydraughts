@@ -28,7 +28,7 @@ class Ballots:
         filepath = os.path.join(os.path.dirname(__file__), 'ballot_files', self.filename)
         with open(filepath) as file:
             data = json.load(file)
-        keys = data['standard'] + (data.get('lost') if self.include_lost_games else [])
+        keys = data['standard'] + (data.get('lost', []) if self.include_lost_games else [])
         return data['all'], keys
 
     def get_ballot(self):
