@@ -109,7 +109,7 @@ class _PDNGame:
             values = game_type.split(',')
             variant_number = int(values[0])
             self.variant = self.values_to_variant.get(variant_number, None)
-            if len(values) == 5:
+            if len(values) == 6:
                 notation = values[4]
                 self.notation_type = notation[0].lower()
                 self.notation = int(notation[1])
@@ -288,7 +288,9 @@ class PDNWriter:
             return 'W:W46,47,48,49,50:B1,2,3,4,5'
         elif self.variant == 'turkish':
             return 'W:W41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56:B9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24'
-        elif self.variant in ['brazilian', 'russian', 'english', 'italian']:
+        elif self.variant in ['brazilian', 'russian', 'italian']:
             return 'W:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12'
+        elif self.variant == 'english':
+            return 'B:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12'
         else:
             return 'W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20'

@@ -248,7 +248,7 @@ def _rotate_move(internal_move, notation=None, variant=None):
             correct_seperator = separator
             break
     splitted_move = list(map(int, splitted_move))
-    variant_to_notation = {'standard': 2, 'english': 0, 'italian': 2, 'russian': 0, 'brazilian': 0, 'turkish': 0, 'frisian': 2, 'frysk!': 2, 'antidraughts': 2, 'breakthrough': 2}
+    variant_to_notation = {'standard': 2, 'english': 1, 'italian': 2, 'russian': 0, 'brazilian': 0, 'turkish': 0, 'frisian': 2, 'frysk!': 2, 'antidraughts': 2, 'breakthrough': 2}
     value = variant_to_notation.get(variant, 2)
     if notation is None:
         notation = value
