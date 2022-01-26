@@ -1,12 +1,14 @@
+# 11 english, 11 italian, 4 move english and 5 move english ballots are from Ed Gilbert (http://edgilbert.org/Checkers/KingsRow.htm).
 import random
 import json
 import os
 
 
 class Ballots:
-    def __init__(self, variant, moves=3, basic_positions=False, include_lost_games=False):
+    def __init__(self, variant, moves=3, eleven_pieces=False, basic_positions=False, include_lost_games=False):
         self.variant = variant
         self.moves = moves
+        self.eleven_pieces = eleven_pieces
         self.basic_positions = basic_positions
         self.include_lost_games = include_lost_games
         self.filename = self._find_file()
@@ -14,8 +16,17 @@ class Ballots:
         self.keys_to_use = self.keys.copy()
 
     def _find_file(self):
-        if self.variant == 'english' and self.moves == 2:
-            return '2move_english.json'
+        if self.variant == 'italian':
+            return '11_italian.json'
+        if self.variant == 'english':
+            if self.eleven_pieces:
+                return '11_english.json'
+            if self.moves == 2:
+                return '2move_english.json'
+            if self.moves == 4:
+                return '4move_english.json'
+            if self.moves == 5:
+                return '5move_english.json'
         if self.basic_positions:
             return '150russian_and_brazilian.json'
         if self.variant == 'russian':
