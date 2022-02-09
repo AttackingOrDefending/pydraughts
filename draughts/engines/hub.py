@@ -34,11 +34,9 @@ class HubEngine:
         cwd = os.path.realpath(os.path.expanduser(cwd))
         if type(command) == str:
             command = [command]
-            command = list(filter(bool, command))
-        else:
-            command = list(filter(bool, command))
-            command[0] = os.path.realpath(os.path.expanduser(command[0]))
-            command[0] = '"' + command[0] + '"'
+        command = list(filter(bool, command))
+        command[0] = os.path.realpath(os.path.expanduser(command[0]))
+        command[0] = '"' + command[0] + '"'
         command = ' '.join(command)
         self.p = self._open_process(command, cwd)
         self._last_sent = ""
