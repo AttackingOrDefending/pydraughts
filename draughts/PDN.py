@@ -1,7 +1,7 @@
 import re
 import string
 from functools import reduce
-from draughts.core.move import to_variant
+from draughts.convert import move_to_variant, fen_to_variant
 from draughts import Game, Move
 
 
@@ -185,6 +185,7 @@ class PDNWriter:
         self.pdn_text = ''
         self.notation_type = None
         self.notation = None
+        self.convert_fen = True
 
         self.board = board
         if self.board:
@@ -196,6 +197,8 @@ class PDNWriter:
         else:
             self.moves = moves
             self.variant = variant or 'standard'
+            if starting_fen:
+                self.convert_fen = False
             self.starting_fen = starting_fen or self._startpos_to_fen('startpos')
             self.tags = tags or {}
             self.to_standard_notation = False
@@ -227,6 +230,8 @@ class PDNWriter:
             long_gametype = self.SHORT_TO_LONG_GAMETYPE[short_gametype]
             self.tags['GameType'] = long_gametype
         if 'FEN' not in self.tags:
+            if self.convert_fen:
+                self.starting_fen = fen_to_variant(self.starting_fen, variant=self.variant)
             self.tags['FEN'] = self.starting_fen
         for tag in self.tags:
             pdn_text += f'[{tag} "{self.tags[tag]}"]\n'
@@ -247,7 +252,7 @@ class PDNWriter:
                 standard_move = move
 
             if self.to_standard_notation:
-                standard_move = to_variant(standard_move, variant=self.variant)
+                standard_move = move_to_variant(standard_move, variant=self.variant)
 
             standard_moves.append(standard_move)
 

@@ -27,14 +27,19 @@ logger = logging.getLogger(__name__)
 
 class HubEngine:
     def __init__(self, command, cwd=None, ENGINE=5):
-        if type(command) == str:
-            command = [command]
         self.ENGINE = ENGINE
         self.info = {}
         self.id = {}
-        cwd = cwd or os.path.realpath(os.path.expanduser("."))
-        command = list(filter(bool, command))
-        command = " ".join(command)
+        cwd = cwd or os.getcwd()
+        cwd = os.path.realpath(os.path.expanduser(cwd))
+        if type(command) == str:
+            command = [command]
+            command = list(filter(bool, command))
+        else:
+            command = list(filter(bool, command))
+            command[0] = os.path.realpath(os.path.expanduser(command[0]))
+            command[0] = '"' + command[0] + '"'
+        command = ' '.join(command)
         self.p = self._open_process(command, cwd)
         self._last_sent = ""
         self.hub()

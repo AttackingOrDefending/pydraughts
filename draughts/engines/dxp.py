@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class DXPEngine:
-    def __init__(self, command, options=None, initial_time=0, ENGINE=5):
+    def __init__(self, command=None, options=None, initial_time=0, ENGINE=5):
         global dxp
         dxp = reload(dxp)
         if options is None:
@@ -22,11 +22,9 @@ class DXPEngine:
         self.max_moves = 0
         self.ip = '127.0.0.1'
         self.port = '27531'
+        self.command = command
         self.engine_opened = True  # Whether the engine is already open or pydraughts should open it
         self.wait_to_open_time = 10
-        if type(command) == str:
-            command = [command]
-        self.command = command
         self.ENGINE = ENGINE
         self.info = {}
         self.id = {}
@@ -39,9 +37,17 @@ class DXPEngine:
             self.setoption(name, value)
 
         if not self.engine_opened:
-            cwd = os.path.realpath(os.path.expanduser("."))
-            command = list(filter(bool, self.command))
-            command = " ".join(command)
+            cwd = os.getcwd()
+            cwd = os.path.realpath(os.path.expanduser(cwd))
+            if type(command) == str:
+                command = [command]
+                command = list(filter(bool, command))
+            else:
+                command = list(filter(bool, command))
+                command[0] = os.path.realpath(os.path.expanduser(command[0]))
+                command[0] = '"' + command[0] + '"'
+            command = ' '.join(command)
+            self.command = command
             self.p = self._open_process(command, cwd)
             self.thr = threading.Thread(target=self._recv)
             self.thr.start()

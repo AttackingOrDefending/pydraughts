@@ -1,7 +1,7 @@
 from draughts.core.board import Board
 from draughts.core.move import Move
 import pickle
-from draughts.core.move import _algebraic_to_numeric_square
+from draughts.convert import _algebraic_to_numeric_square
 
 WHITE = 2
 BLACK = 1
@@ -366,10 +366,12 @@ class Game:
 
     def li_fen_to_hub_fen(self, li_fen):
         squares_per_letter = 5
+        every_other_square = True
         if self.variant in ['english', 'italian', 'russian', 'brazilian']:
             squares_per_letter = 4
         elif self.variant == 'turkish':
             squares_per_letter = 8
+            every_other_square = False
         fen = ''
         li_fen = li_fen.split(':')
         fen += li_fen[0]
@@ -379,7 +381,7 @@ class Game:
         for white_piece in white_pieces:
             if '-' in white_piece:
                 start_end = white_piece.split('-')
-                start, end = int(_algebraic_to_numeric_square(start_end[0], squares_per_letter)), int(_algebraic_to_numeric_square(start_end[1], squares_per_letter))
+                start, end = int(_algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square)), int(_algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square))
                 for number in range(start, end + 1):
                     white_pieces_remove_hyphen.append(str(number))
             else:
@@ -388,7 +390,7 @@ class Game:
         for black_piece in black_pieces:
             if '-' in black_piece:
                 start_end = black_piece.split('-')
-                start, end = int(start_end[0]), int(start_end[1])
+                start, end = int(_algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square)), int(_algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square))
                 for number in range(start, end + 1):
                     black_pieces_remove_hyphen.append(str(number))
             else:
