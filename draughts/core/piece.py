@@ -78,7 +78,7 @@ class Piece:
                     next_column = enemy_column - column_difference
                     return [self.board.position_layout.get(next_row, {}).get(next_column)]
 
-            column_adjustment = -1 if current_row % 2 == 0 else 1
+            column_adjustment = -1 if current_row % 2 == (0 if self.variant != 'italian' else 1) else 1
             column_behind_enemy = current_column + column_adjustment if current_column == enemy_column else enemy_column
             row_behind_enemy = enemy_row + (enemy_row - current_row)
 
@@ -140,7 +140,7 @@ class Piece:
                     return positions
             elif self.variant == 'english' or self.variant == 'italian':
                 # Same as if it is not a king
-                column_adjustment = -1 if current_row % 2 == 0 else 1
+                column_adjustment = -1 if current_row % 2 == (0 if self.variant != 'italian' else 1) else 1
                 column_behind_enemy = current_column + column_adjustment if current_column == enemy_column else enemy_column
                 row_behind_enemy = enemy_row + (enemy_row - current_row)
 
@@ -393,7 +393,7 @@ class Piece:
         :param i: current_row ± i is the row we should search (the columns for current_row + i are the same as current_row - i). e.g if current row=3 and i=2, we will return the 2 possible columns for row 5 (which will be the same for row 1)
         """
         column_indexes = [0, 0]
-        start_right = True if current_row % 2 == 0 else False
+        start_right = True if current_row % 2 == (0 if self.variant != 'italian' else 1) else False
         for semi_i in range(1, i + 1):
             if start_right and semi_i % 2 == 1 or not start_right and semi_i % 2 == 0:
                 column_indexes[1] += 1
