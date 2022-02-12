@@ -76,7 +76,7 @@ def _algebraic_to_number(algebraic_move, squares_per_letter=None, variant=None, 
             squares_per_letter = 8
 
     separators = ['-', 'x', ':']
-    special_seperators = ['([a-zA-z]+\d+)']
+    special_seperators = [r'([a-zA-z]+\d+)']
     splitted_move = None
     correct_seperator = ''
     for separator in separators:
@@ -125,7 +125,7 @@ def _number_to_algebraic(number_move, width=None, variant=None, every_other_squa
             width = 8
 
     separators = ['-', 'x', ':']
-    special_seperators = ['([a-zA-z]+\d+)']
+    special_seperators = [r'([a-zA-z]+\d+)']
     splitted_move = None
     correct_seperator = ''
     for separator in separators:
