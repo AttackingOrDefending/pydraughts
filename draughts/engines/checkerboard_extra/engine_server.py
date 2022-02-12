@@ -27,7 +27,7 @@ class Engine32Server(Server32):
 
         board = get_board(game)
 
-        # Reversed color because red (black) starts first in Checkerboard and not white in english
+        # Reversed color because red (black) starts first in Checkerboard and not white in english checkers
         color = BLACK if game.whose_turn() == draughts.WHITE else WHITE
         if game.variant != 'english':
             color = 3 - color
