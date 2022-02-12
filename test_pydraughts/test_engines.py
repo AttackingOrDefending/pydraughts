@@ -60,15 +60,37 @@ def download_cake():
     shutil.copyfile('./TEMP/book.bin', 'book.bin')
 
 
+def download_saltare():
+    headers = {'User-Agent': 'User Agent', 'From': 'mail@mail.com'}
+    response = requests.get('http://www.fierz.ch/saltare.zip', headers=headers)
+    with open('./TEMP/saltare_zip.zip', 'wb') as file:
+        file.write(response.content)
+    with zipfile.ZipFile('./TEMP/saltare_zip.zip', 'r') as zip_ref:
+        zip_ref.extractall('./TEMP/')
+    shutil.copyfile('./TEMP/saltare.dll', 'saltare.dll')
+
+
+def download_kestog():
+    headers = {'User-Agent': 'User Agent', 'From': 'mail@mail.com'}
+    response = requests.get('http://www.fierz.ch/KestoG.zip', headers=headers)
+    with open('./TEMP/kestog_zip.zip', 'wb') as file:
+        file.write(response.content)
+    with zipfile.ZipFile('./TEMP/kestog_zip.zip', 'r') as zip_ref:
+        zip_ref.extractall('./TEMP/')
+    shutil.copyfile('./TEMP/KestoG.dll', 'kestog.dll')
+
+
 if os.path.exists('TEMP'):
     shutil.rmtree('TEMP')
 os.mkdir('TEMP')
 download_scan()
 download_kr()
 download_cake()
+download_saltare()
+download_kestog()
 
 
-@pytest.mark.timeout(300, method="thread")
+@pytest.mark.timeout(150, method="thread")
 def test_hub_dxp_engines():
     if platform != 'win32':
         assert True
@@ -98,31 +120,6 @@ def test_hub_dxp_engines():
     logger.info('Quited hub 1')
     hub.kill_process()
     logger.info('Killed hub 1')
-    hub = HubEngine('kr_hub.exe')
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
-    limit = Limit(10)
-    game = draughts.Game()
-    logger.info('Starting game 2')
-    while not game.is_over() and len(game.move_stack) < 100:
-        logger.info(f'move2: {len(game.move_stack)}')
-        if len(game.move_stack) % 2 == 1:
-            best_move = dxp.play(game)
-        else:
-            best_move = hub.play(game, limit, False)
-        if best_move.move:
-            for move in best_move.move.board_move:
-                game.move(move)
-        else:
-            break
-    logger.info('Finished playing 2')
-    dxp.quit()
-    logger.info('Quitted dxp 2')
-    dxp.kill_process()
-    logger.info('Killed dxp 2')
-    hub.quit()
-    logger.info('Quited hub 2')
-    hub.kill_process()
-    logger.info('Killed hub 2')
 
 
 @pytest.mark.timeout(150, method="thread")
@@ -133,6 +130,27 @@ def test_checkerboard_engines():
     checkerboard = CheckerBoardEngine('cake_189f.dll')
     limit = Limit(10, 2)
     game = draughts.Game(variant='english')
+    logger.info('Starting game 1')
+    while not game.is_over() and len(game.move_stack) < 100:
+        logger.info(f'move1: {len(game.move_stack)}')
+        best_move = checkerboard.play(game, limit)
+        if best_move.move:
+            for move in best_move.move.board_move:
+                game.move(move)
+        else:
+            break
+    logger.info('Finished playing 1')
+    checkerboard.kill_process()
+
+
+@pytest.mark.timeout(150, method="thread")
+def test_russian_checkerboard_engines():
+    if platform != 'win32':
+        assert True
+        return
+    checkerboard = CheckerBoardEngine('kestog.dll')
+    limit = Limit(10, 2)
+    game = draughts.Game(variant='russian')
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
         logger.info(f'move1: {len(game.move_stack)}')
