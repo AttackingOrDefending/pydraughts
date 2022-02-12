@@ -68,7 +68,7 @@ download_kr()
 download_cake()
 
 
-@pytest.mark.timeout(150, method="thread")
+@pytest.mark.timeout(300, method="thread")
 def test_hub_dxp_engines():
     if platform != 'win32':
         assert True
