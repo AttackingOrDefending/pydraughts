@@ -3,7 +3,6 @@ from draughts.engines.checkerboard_extra.engine_client import Engine32
 import os
 import draughts
 import draughts.engine
-import draughts.convert
 
 
 class CheckerBoardEngine:
