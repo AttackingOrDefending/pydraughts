@@ -3,6 +3,7 @@ from draughts.engines.checkerboard_extra.engine_client import Engine32
 import os
 import draughts
 import draughts.engine
+import draughts.convert
 
 
 class CheckerBoardEngine:
@@ -29,7 +30,7 @@ class CheckerBoardEngine:
             self.engine = Engine64(self.command, self.cwd)
             return 64
         except Exception:
-            self.engine = Engine32(self.command)  # I will see what I will do with it
+            self.engine = Engine32(self.command)
             return 32
 
     def setoption(self, name, value):
@@ -106,8 +107,7 @@ class CheckerBoardEngine:
                 positions.append(pos)
             positions.append(cbmove['to'])
             for pos in positions:
-                steps.append(
-                    self._row_col_to_num(board, pos[1], pos[0]))  # Checkerboard returns first the column, then the row
+                steps.append(self._row_col_to_num(board, pos[1], pos[0]))  # Checkerboard returns first the column, then the row
 
             bestmove = draughts.Move(board, steps_move=steps)
 
@@ -120,6 +120,9 @@ class CheckerBoardEngine:
             col = ((col + 2) / 2) - 1
         else:
             col = ((col + 1) / 2) - 1
-        row = (board.board.height - 1) - row
+        if board.variant not in ['english', 'italian']:
+            col = board.board.width - 1 - col
+        if board.variant == 'english':
+            row = (board.board.height - 1) - row
         loc = board.board.position_layout.get(row, {}).get(col)
         return loc
