@@ -90,7 +90,7 @@ download_saltare()
 download_kestog()
 
 
-@pytest.mark.timeout(300, method="thread")
+@pytest.mark.timeout(150, method="thread")
 def test_hub_dxp_engines():
     if platform != 'win32':
         assert True
@@ -122,7 +122,7 @@ def test_hub_dxp_engines():
     logger.info('Killed hub 1')
 
 
-@pytest.mark.timeout(300, method="thread")
+@pytest.mark.timeout(150, method="thread")
 def test_checkerboard_engines():
     if platform != 'win32':
         assert True
@@ -143,28 +143,7 @@ def test_checkerboard_engines():
     checkerboard.kill_process()
 
 
-@pytest.mark.timeout(300, method="thread")
-def test_italian_checkerboard_engines():
-    if platform != 'win32':
-        assert True
-        return
-    checkerboard = CheckerBoardEngine('saltare.dll')
-    limit = Limit(10, 2)
-    game = draughts.Game(variant='italian')
-    logger.info('Starting game 1')
-    while not game.is_over() and len(game.move_stack) < 100:
-        logger.info(f'move1: {len(game.move_stack)}')
-        best_move = checkerboard.play(game, limit)
-        if best_move.move:
-            for move in best_move.move.board_move:
-                game.move(move)
-        else:
-            break
-    logger.info('Finished playing 1')
-    checkerboard.kill_process()
-
-
-@pytest.mark.timeout(300, method="thread")
+@pytest.mark.timeout(150, method="thread")
 def test_russian_checkerboard_engines():
     if platform != 'win32':
         assert True
