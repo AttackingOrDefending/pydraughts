@@ -40,6 +40,10 @@ class Game:
         # At least 6 times faster than deepcopy
         return pickle.loads(pickle.dumps(self, -1))
 
+    def copy_fast(self):
+        # More than 10x faster than .copy() but it doesn't transfer all the data
+        return Game(self.variant, self.get_fen())
+
     def move(self, move, return_captured=False):
         if move not in self.get_possible_moves():
             raise ValueError('The provided move is not possible')
@@ -174,7 +178,7 @@ class Game:
         captured_pieces = []
         # get_possible_moves returns only the first jump in a multi-capture sequence, so we use it again after the first jump to check if there are any further moves.
         for move in self.get_possible_moves():
-            game_2 = self.copy()
+            game_2 = self.copy_fast()
             _, captures = game_2.move(move, return_captured=True)
             if game_2.whose_turn() == turn:
                 more_moves, more_captures = game_2.get_moves()
