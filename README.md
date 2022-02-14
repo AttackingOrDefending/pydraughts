@@ -52,9 +52,9 @@ moves, captures = game.legal_moves()
 * Detect wins and draws
 ```python
 has_white_won = game.has_player_won(WHITE)
-is_draw = self.is_draw()
-winnner = self.get_winner()
-is_game_over = self.game_over()
+is_draw = game.is_draw()
+winnner = game.get_winner()
+is_game_over = game.game_over()
 ```
 * Convert move to other types
 ```python
