@@ -35,7 +35,7 @@ Note: White always starts. Black always has the squares starting from 1 (e.g. 1-
 <br/></br>
 * Import pydraughts
 ```python
-from draughts import Game, Move
+from draughts import Game, Move, WHITE, BLACK
 ```
 * Create a game
 ```python
@@ -48,6 +48,13 @@ game.move([34, 30])
 * Get legal moves
 ```python
 moves, captures = game.legal_moves()
+```
+* Detect wins and draws
+```python
+has_white_won = game.has_player_won(WHITE)
+is_draw = self.is_draw()
+winnner = self.get_winner()
+is_game_over = self.game_over()
 ```
 * Convert move to other types
 ```python
