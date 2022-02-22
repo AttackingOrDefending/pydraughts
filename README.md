@@ -93,8 +93,8 @@ ballot2 = ballots.get_ballot()
 ```
 
 ## Acknowledgements
-Thanks to [RoepStoep](https://github.com/RoepStoep) for his [draughtsnet](https://github.com/RoepStoep/draughtsnet) which was modified to add support for Hub engines. Thanks to [akalverboer](https://github.com/akalverboer) for their [DXC100_draughts_client](https://github.com/akalverboer/DXC100_draughts_client) which was modified to add support for DXP engines.
+Thanks to [fishnet](https://github.com/lichess-org/fishnet/tree/ebd2a5e16d37135509cbfbff9998e0b798866ef5) which was modified to add support for Hub engines. Thanks to [akalverboer](https://github.com/akalverboer) for their [DXC100_draughts_client](https://github.com/akalverboer/DXC100_draughts_client) which was modified to add support for DXP engines.
 
 ## License
-pydraughts is licensed under the GPL 3 (or any later version at your option). Check out `LICENSE` for the full text.
+pydraughts is licensed under The MIT License. Check out `LICENSE` for the full text.
 The licenses of the other projects that pydraughts uses are in the `other_licenses` folder.
