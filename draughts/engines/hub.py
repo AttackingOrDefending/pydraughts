@@ -165,25 +165,26 @@ class HubEngine:
             self.send("set-param name=%s value=%s" % (name, value))
 
     def go(self, fen, moves=None, my_time=None, inc=None, moves_left=None, movetime=None, depth=None, nodes=None, ponder=False):
-        assert my_time or movetime or depth or nodes
         if moves:
             self.send(f'pos pos={fen} moves="{moves}"')
         else:
             self.send(f'pos pos={fen}')
 
-        if my_time and inc and moves_left:
+        if my_time is not None and inc and moves_left:
+            my_time -= inc  # Hub engines first add the increment
             self.send(f'level moves={moves_left} time={my_time} inc={inc}')
-        elif my_time and inc:
+        elif my_time is not None and inc:
+            my_time -= inc  # Hub engines first add the increment
             self.send(f'level time={my_time} inc={inc}')
-        elif my_time and moves_left:
+        elif my_time is not None and moves_left:
             self.send(f'level moves={moves_left} time={my_time}')
-        elif my_time:
+        elif my_time is not None:
             self.send(f'level time={my_time}')
-        elif movetime:
+        elif movetime is not None:
             self.send(f'level move-time={movetime}')
-        elif depth:
+        elif depth is not None:
             self.send(f'level depth={depth}')
-        elif nodes:
+        elif nodes is not None:
             self.send(f'level nodes={nodes}')
 
         if ponder:
