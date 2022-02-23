@@ -1,4 +1,4 @@
-# This file is an adaptation of DXC100_draughts_client (https://github.com/akalverboer/DXC100_draughts_client) by akalverboer which is licensed under the MIT License.
+# This file is an adaptation of DXC100_draughts_client (https://github.com/akalverboer/DXC100_draughts_client) by akalverboer.
 
 import threading
 import logging
