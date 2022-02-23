@@ -95,7 +95,7 @@ def test_hub_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
-    hub = HubEngine(['scan.exe', 'hub']')
+    hub = HubEngine(['scan.exe', 'hub'])
     limit = Limit(10)
     game = draughts.Game()
     logger.info('Starting game 1')
