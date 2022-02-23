@@ -96,6 +96,7 @@ def test_hub_engines():
         assert True
         return
     hub = HubEngine([f'scan{file_extension}', 'hub'])
+    hub.init()
     limit = Limit(10)
     game = draughts.Game()
     logger.info('Starting game 1')
@@ -120,6 +121,7 @@ def test_hub_dxp_engines():
         assert True
         return
     hub = HubEngine('kr_hub.exe')
+    hub.init()
     dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
     limit = Limit(10)
     game = draughts.Game()
