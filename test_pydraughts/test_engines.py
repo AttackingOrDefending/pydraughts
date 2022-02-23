@@ -91,6 +91,30 @@ download_kestog()
 
 
 @pytest.mark.timeout(150, method="thread")
+def test_hub_engines():
+    if platform not in ['win32', 'linux', 'darwin']:
+        assert True
+        return
+    hub = HubEngine(['scan.exe', 'hub']')
+    limit = Limit(10)
+    game = draughts.Game()
+    logger.info('Starting game 1')
+    while not game.is_over() and len(game.move_stack) < 100:
+        logger.info(f'move1: {len(game.move_stack)}')
+        best_move = hub.play(game, limit, False)
+        if best_move.move:
+            for move in best_move.move.board_move:
+                game.move(move)
+        else:
+            break
+    logger.info('Finished playing 1')
+    hub.quit()
+    logger.info('Quited hub 1')
+    hub.kill_process()
+    logger.info('Killed hub 1')
+
+
+@pytest.mark.timeout(150, method="thread")
 def test_hub_dxp_engines():
     if platform != 'win32':
         assert True
