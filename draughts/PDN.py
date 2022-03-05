@@ -60,19 +60,19 @@ class _PDNGame:
 
         moves = " ".join(move_lines)
 
-        # Changes to the PDN
+        # Changes to the PDN.
 
         # From https://stackoverflow.com/a/37538815/10014873
         def remove_text_between_parens(text):
-            n = 1  # run at least once
+            n = 1  # Run at least once.
             while n:
-                text, n = re.subn(r'\([^()]*\)', '', text)  # remove non-nested/flat balanced parts
+                text, n = re.subn(r'\([^()]*\)', '', text)  # Remove non-nested/flat balanced parts.
             return text
 
         def remove_text_between_brackets(text):
-            n = 1  # run at least once
+            n = 1  # Run at least once.
             while n:
-                text, n = re.subn(r'{[^{}]*}', '', text)  # remove non-nested/flat balanced parts
+                text, n = re.subn(r'{[^{}]*}', '', text)  # Remove non-nested/flat balanced parts.
             return text
 
         moves = remove_text_between_parens(moves)
@@ -114,7 +114,7 @@ class _PDNGame:
                 notation = values[4]
                 self.notation_type = notation[0].lower()
                 self.notation = int(notation[1])
-        else:  # Try to guess the variant
+        else:  # Try to guess the variant.
             board_10 = ['31', '32', '33', '34', '35', '16', '17', '18', '19', '20']
             board_8 = ['21', '22', '23', '24', '9', '09', '10', '11', '12']
             first_move = moves[0]

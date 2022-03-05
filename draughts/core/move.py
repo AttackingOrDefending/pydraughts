@@ -166,8 +166,8 @@ class Move:
         # PDN related moves
 
         if not self.pdn_position_move:
-            # starts_endings contains the start position and the end position of every possible move. It is used to
-            # detect ambiguous PDN moves, so we know when we have to expand the PDN move.
+            # starts_endings contains the start position and the end position of every possible move.
+            # It is used to detect ambiguous PDN moves, so we know when we have to expand the PDN move.
             # e.g. Use 3x14x23 instead of 3x23.
 
             # PDN position move

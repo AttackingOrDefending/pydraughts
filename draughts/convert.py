@@ -198,7 +198,7 @@ def _change_fen_from_variant(li_fen, notation=None, squares_per_letter=5, every_
         else:
             black_pieces_remove_hyphen.append(_rotate_move(black_piece, notation=notation, variant=variant))
 
-    # Because in english black starts
+    # Because in english black starts.
     white_starts = variant not in ['english']
     if not white_starts:
         white_pieces_remove_hyphen, black_pieces_remove_hyphen = black_pieces_remove_hyphen, white_pieces_remove_hyphen

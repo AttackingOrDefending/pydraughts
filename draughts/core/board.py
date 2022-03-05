@@ -72,7 +72,7 @@ class Board:
 
     def create_new_board_from_move(self, move, move_number, captures, return_captured=False):
         """Create a new board and play the move given."""
-        new_board = pickle.loads(pickle.dumps(self, -1))  # A lot faster that deepcopy
+        new_board = pickle.loads(pickle.dumps(self, -1))  # A lot faster that deepcopy.
         enemy_position = None
 
         if move in self.get_possible_capture_moves(captures):
@@ -90,7 +90,7 @@ class Board:
 
     def push_move(self, move, move_number, captures, return_captured=False):
         """Play the move given without creating a new board."""
-        # It takes 40% less time than create_new_board_from_move (60% faster)
+        # It takes 40% less time than create_new_board_from_move (60% faster).
         enemy_position = None
 
         if move in self.get_possible_capture_moves(captures):

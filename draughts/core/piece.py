@@ -20,16 +20,16 @@ class Piece:
         self.diagonal_moves = self.variant not in ['turkish']
         self.orthogonal_moves = self.variant in ['turkish']
         self.orthogonal_captures = self.variant in ['frisian', 'frysk!', 'turkish']
-        self.half_of_the_squares_are_playable = self.variant not in ['turkish']  # In most draughts variants only the dark squares are playable
-        self.bottom_left_square_is_playable = self.variant in ['italian']  # The bottom left square isn't a playing square in italian draughts
-        self.man_can_capture_king = self.variant not in ['italian']  # Men can't capture kings in italian draughts
+        self.half_of_the_squares_are_playable = self.variant not in ['turkish']  # In most draughts variants only the dark squares are playable.
+        self.bottom_left_square_is_playable = self.variant in ['italian']  # The bottom left square isn't a playing square in italian draughts.
+        self.man_can_capture_king = self.variant not in ['italian']  # Men can't capture kings in italian draughts.
         # There are three possible values for squares_per_row (4, 5, 8), which is why two lines are needed.
         self.squares_per_row = 4 if self.variant in ['russian', 'brazilian', 'english', 'italian'] else 5
         self.squares_per_row = 8 if self.variant in ['turkish'] else self.squares_per_row
         self.kings_can_move_more_than_one_square = self.variant not in ['english', 'italian']
         self.men_can_capture_backwards = self.variant not in ['english', 'italian', 'turkish']
         self.kings_can_jump_over_an_already_captured_piece = self.variant in ['turkish']
-        self.kings_can_turn_180_degrees_in_multicapture = False  # No variant supports it for now
+        self.kings_can_turn_180_degrees_in_multicapture = False  # No variant supports it for now.
 
     def reset_for_new_board(self):
         """Reset possible moves to None."""
