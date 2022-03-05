@@ -1,4 +1,4 @@
-# This workflow will install build the library.
+# This workflow will build the library.
 
 name: Build
 
@@ -18,9 +18,9 @@ jobs:
         python: ["3.10"]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Set up Python ${{ matrix.python }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python }}
     - name: Install dependencies
