@@ -103,7 +103,7 @@ class Piece:
         column_behind_enemy = current_column + column_adjustment if current_column == enemy_column else enemy_column
         row_behind_enemy = enemy_row + (enemy_row - current_row)
 
-        return [self.board.position_layout.get(row_behind_enemy, {}).get(column_behind_enemy)]
+        return [self.get_square(row_behind_enemy, column_behind_enemy)]
 
     def get_orthogonal_one_square_behind_enemy(self, enemy_piece):
         """
@@ -126,7 +126,7 @@ class Piece:
         if (column_difference == 0 or row_difference == 0) and (row_difference % 2 == 0 if self.half_of_the_squares_are_playable else True):
             next_row = enemy_row - row_difference
             next_column = enemy_column - column_difference
-            return [self.board.position_layout.get(next_row, {}).get(next_column)]
+            return [self.get_square(next_row, next_column)]
         return []
 
     def get_diagonal_multiple_squares_behind_enemy(self, enemy_piece, captures):
@@ -158,7 +158,7 @@ class Piece:
             # For example, if the captured piece square is to the left and down of the starting square, we check if the landing square is to the left and down of the captured piece square
             # It also checks if the position is in a pseudolegal list of legal moves (because we can have landing squares that aren't in the same diagonal as the staring square (e.g. if the piece is in 28, 31 isn't a possible landing square))
             if down_direction_possible == down_direction and left_direction_possible == left_direction and position in adjacent_positions:
-                legal_adjacent_positions.append(self.board.position_layout.get(row, {}).get(column))
+                legal_adjacent_positions.append(self.get_square(row, column))
 
         enemy_piece.king = was_king
         adjacent_positions = legal_adjacent_positions
@@ -254,12 +254,12 @@ class Piece:
                 next_row = current_row - multiplier * add_row
                 next_column = current_column - multiplier * add_column
                 if next_row in self.board.position_layout and next_column in self.board.position_layout[next_row]:
-                    positions_to_check.append(self.board.position_layout.get(next_row, {}).get(next_column))
+                    positions_to_check.append(self.get_square(next_row, next_column))
 
                 next_row = enemy_row - multiplier * add_row
                 next_column = enemy_column - multiplier * add_column
                 if next_row in self.board.position_layout and next_column in self.board.position_layout[next_row]:
-                    positions.append(self.board.position_layout.get(next_row, {}).get(next_column))
+                    positions.append(self.get_square(next_row, next_column))
 
             # Kings in multi-captures can't go over a piece they have captured in that move sequence in
             # frisian and frysk!. In turkish they can, but we use the last capture to prevent the piece from
