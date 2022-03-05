@@ -3,7 +3,27 @@ import string
 import re
 
 
+def _get_squares(variant):
+    """Returns the total squares, squares per row, squares per column and if every other square is playable."""
+    # The default values are for International draughts.
+    total_squares = 50
+    squares_per_row = 5
+    squares_per_column = 5
+    every_other_square = True
+    if variant in ['english', 'italian', 'russian', 'brazilian']:
+        total_squares = 32
+        squares_per_row = 4
+        squares_per_column = 4
+    elif variant in ['turkish']:
+        total_squares = 64
+        squares_per_row = 8
+        squares_per_column = 8
+        every_other_square = False
+    return total_squares, squares_per_row, squares_per_column, every_other_square
+
+
 def _rotate_move(internal_move, notation=None, variant=None):
+    """Rotate the move."""
     separators = ['-', 'x', ':']
     splitted_move = None
     correct_seperator = ''
@@ -19,11 +39,7 @@ def _rotate_move(internal_move, notation=None, variant=None):
         notation = value
 
     def reverse_column(splitted_int_move):
-        per_row = 5
-        if variant in ['english', 'italian', 'russian', 'brazilian']:
-            per_row = 4
-        elif variant == 'turkish':
-            per_row = 8
+        per_row = _get_squares(variant)[1]
         for index, square in enumerate(splitted_int_move):
             square_in_row = square % per_row
             if square_in_row == 0:
@@ -32,12 +48,7 @@ def _rotate_move(internal_move, notation=None, variant=None):
         return splitted_int_move
 
     def reverse_row_and_column(splitted_int_move):
-        if variant in ['brazilian', 'russian', 'english', 'italian']:
-            squares = 32
-        elif variant == 'turkish':
-            squares = 64
-        else:
-            squares = 50
+        squares = _get_squares(variant)[0]
         splitted_int_move = list(map(lambda square: squares + 1 - square, splitted_int_move))
         return splitted_int_move
 
@@ -59,6 +70,7 @@ def _rotate_move(internal_move, notation=None, variant=None):
 
 
 def _algebraic_to_number(algebraic_move, squares_per_letter=None, variant=None, every_other_square=None):
+    """Convert an algebraic move to a numeric move."""
     if every_other_square is None:
         if variant == 'turkish':
             every_other_square = False
@@ -69,11 +81,7 @@ def _algebraic_to_number(algebraic_move, squares_per_letter=None, variant=None, 
         return algebraic_move
     algebraic_move = algebraic_move.lower()
     if squares_per_letter is None:
-        squares_per_letter = 5
-        if variant in ['english', 'italian', 'russian', 'brazilian']:
-            squares_per_letter = 4
-        elif variant == 'turkish':
-            squares_per_letter = 8
+        squares_per_letter = _get_squares(variant)[2]
 
     separators = ['-', 'x', ':']
     special_seperators = [r'([a-zA-z]+\d+)']
@@ -100,6 +108,7 @@ def _algebraic_to_number(algebraic_move, squares_per_letter=None, variant=None, 
 
 
 def _algebraic_to_numeric_square(square, squares_per_letter, every_other_square=True):
+    """Convert an algebraic square to a numeric square."""
     algebraic_notation = square[0] in string.ascii_letters
     if not algebraic_notation:
         return square
@@ -109,6 +118,7 @@ def _algebraic_to_numeric_square(square, squares_per_letter, every_other_square=
 
 
 def _number_to_algebraic(number_move, width=None, variant=None, every_other_square=None):
+    """Convert a numeric move to an algebraic move."""
     if every_other_square is None:
         if variant == 'turkish':
             every_other_square = False
@@ -118,11 +128,7 @@ def _number_to_algebraic(number_move, width=None, variant=None, every_other_squa
     if algebraic_notation:
         return number_move
     if width is None:
-        width = 5
-        if variant in ['english', 'italian', 'russian', 'brazilian']:
-            width = 4
-        elif variant == 'turkish':
-            width = 8
+        width = _get_squares(variant)[1]
 
     separators = ['-', 'x', ':']
     special_seperators = [r'([a-zA-z]+\d+)']
@@ -149,6 +155,7 @@ def _number_to_algebraic(number_move, width=None, variant=None, every_other_squa
 
 
 def _numeric_to_algebraic_square(square, width, every_other_square=True):
+    """Convert a numeric square to an algebraic square."""
     algebraic_notation = square[0] in string.ascii_letters
     if algebraic_notation:
         return square
@@ -162,15 +169,15 @@ def _numeric_to_algebraic_square(square, width, every_other_square=True):
 
 
 def _change_fen_from_variant(li_fen, notation=None, squares_per_letter=5, every_other_square=True, variant=None):
-    if variant in ['english', 'italian', 'russian', 'brazilian']:
-        squares_per_letter = 4
-    elif variant == 'turkish':
-        squares_per_letter = 8
-        every_other_square = False
+    """Convert an internal fen to the correct fen for the variant."""
+    if variant:
+        _, _, squares_per_letter, every_other_square = _get_squares(variant)
+
     li_fen = li_fen.split(':')
     starts = li_fen[0]
     white_pieces = li_fen[1][1:].split(',')
     black_pieces = li_fen[2][1:].split(',')
+
     white_pieces_remove_hyphen = []
     for white_piece in white_pieces:
         if '-' in white_piece:
@@ -180,6 +187,7 @@ def _change_fen_from_variant(li_fen, notation=None, squares_per_letter=5, every_
                 white_pieces_remove_hyphen.append(_rotate_move(str(number), notation=notation, variant=variant))
         else:
             white_pieces_remove_hyphen.append(_rotate_move(white_piece, notation=notation, variant=variant))
+
     black_pieces_remove_hyphen = []
     for black_piece in black_pieces:
         if '-' in black_piece:
@@ -189,9 +197,13 @@ def _change_fen_from_variant(li_fen, notation=None, squares_per_letter=5, every_
                 black_pieces_remove_hyphen.append(_rotate_move(str(number), notation=notation, variant=variant))
         else:
             black_pieces_remove_hyphen.append(_rotate_move(black_piece, notation=notation, variant=variant))
-    if variant == 'english':
+
+    # Because in english black starts
+    white_starts = variant not in ['english']
+    if not white_starts:
         white_pieces_remove_hyphen, black_pieces_remove_hyphen = black_pieces_remove_hyphen, white_pieces_remove_hyphen
         starts = 'W' if starts == 'B' else 'B'
+
     white_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, white_pieces_remove_hyphen))
     black_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, black_pieces_remove_hyphen))
     white_pieces_remove_hyphen = list(map(int, white_pieces_remove_hyphen))
@@ -204,12 +216,14 @@ def _change_fen_from_variant(li_fen, notation=None, squares_per_letter=5, every_
 
 
 def fen_from_variant(fen, variant=None, notation=None, squares_per_letter=None, every_other_square=None):
+    """Convert variant fen to internal fen."""
     variant = variant.lower() if variant else variant
     fen = _change_fen_from_variant(fen, variant=variant, notation=notation, squares_per_letter=squares_per_letter, every_other_square=every_other_square)
     return fen
 
 
 def fen_to_variant(fen, variant=None, notation=None, width=None, squares_per_letter=None, every_other_square=None, to_algebraic=None):
+    """Convert internal fen to variant fen."""
     variant = variant.lower() if variant else variant
     fen = _change_fen_from_variant(fen, variant=variant, notation=notation, squares_per_letter=squares_per_letter, every_other_square=every_other_square)
     if to_algebraic or variant in ['russian', 'brazilian', 'turkish']:
@@ -234,6 +248,7 @@ def fen_to_variant(fen, variant=None, notation=None, width=None, squares_per_let
 
 
 def move_from_variant(move, variant=None, notation=None, squares_per_letter=None, every_other_square=None):
+    """Convert variant PDN move to internal PDN move."""
     variant = variant.lower() if variant else variant
     move = _algebraic_to_number(move, variant=variant, squares_per_letter=squares_per_letter, every_other_square=every_other_square)
     move = _rotate_move(move, variant=variant, notation=notation)
@@ -241,6 +256,7 @@ def move_from_variant(move, variant=None, notation=None, squares_per_letter=None
 
 
 def move_to_variant(move, variant=None, notation=None, width=None, every_other_square=None, to_algebraic=None):
+    """Convert internal PDN move to variant PDN move."""
     variant = variant.lower() if variant else variant
     move = _rotate_move(move, variant=variant, notation=notation)
     if to_algebraic or variant in ['russian', 'brazilian', 'turkish']:

@@ -15,11 +15,13 @@ class Engine32Server(Server32):
         super(Engine32Server, self).__init__(DLL_name, 'windll', host, port)
 
     def enginecommand(self, command):
+        """Send an enginecommand to the engine."""
         output = ctypes.create_string_buffer(b'', 1024)
         result = self.lib.enginecommand(ctypes.create_string_buffer(bytes(command.encode('ascii')), 256), output)
         return output.value, result
 
     def getmove(self, game, maxtime, time, increment, movetime):
+        """Send a getmove to the engine."""
 
         # From CheckerBoard API:
         WHITE = 1
@@ -27,9 +29,10 @@ class Engine32Server(Server32):
 
         board = get_board(game)
 
-        # Reversed color because red (black) starts first in Checkerboard and not white in english checkers
+        # Reversed color because red (black) starts first and not white in english checkers in Checkerboard.
         color = BLACK if game.whose_turn() == draughts.WHITE else WHITE
-        if game.variant != 'english':
+        white_starts = board.variant not in ['english']
+        if white_starts:
             color = 3 - color
 
         info = 0

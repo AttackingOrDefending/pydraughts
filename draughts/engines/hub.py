@@ -33,6 +33,7 @@ class HubEngine:
         self.hub()
 
     def _open_process(self, command, cwd=None, shell=True, _popen_lock=threading.Lock()):
+        """Open the engine process."""
         kwargs = {
             "shell": shell,
             "stdout": subprocess.PIPE,
@@ -57,6 +58,7 @@ class HubEngine:
             return subprocess.Popen(command, **kwargs)
 
     def kill_process(self):
+        """Kill the engine process."""
         try:
             # Windows
             self.p.send_signal(signal.CTRL_BREAK_EVENT)
@@ -67,6 +69,7 @@ class HubEngine:
         self.p.communicate()
 
     def send(self, line):
+        """Send a command to the engine."""
         if line == "ponder-hit":
             while self._last_sent != "go ponder":
                 pass
@@ -77,6 +80,7 @@ class HubEngine:
         self._last_sent = line
 
     def recv(self):
+        """Receive a line from the engine."""
         while True:
             line = self.p.stdout.readline()
             if line == "":
@@ -90,6 +94,7 @@ class HubEngine:
                 return line
 
     def recv_hub(self):
+        """Receive a line from the engine and split at the first space."""
         command_and_args = self.recv().split(None, 1)
         if len(command_and_args) == 1:
             return command_and_args[0], ""
@@ -97,6 +102,7 @@ class HubEngine:
             return command_and_args
 
     def hub(self):
+        """Send the hub command to an engine."""
         self.send("hub")
 
         engine_info = {}
@@ -134,6 +140,7 @@ class HubEngine:
             self.id = engine_info
 
     def init(self):
+        """Initialize the engine."""
         self.send("init")
         while True:
             command, arg = self.recv_hub()
@@ -145,6 +152,7 @@ class HubEngine:
                 logger.warning("Unexpected engine response to init: %s %s", command, arg)
 
     def ping(self):
+        """Send the engine ping. They should reply with pong."""
         self.send("ping")
         while True:
             command, arg = self.recv_hub()
@@ -154,6 +162,7 @@ class HubEngine:
                 logger.warning("Unexpected engine response to ping: %s %s", command, arg)
 
     def setoption(self, name, value):
+        """Set an engine option."""
         if value is True:
             value = "true"
         elif value is False:
@@ -165,6 +174,7 @@ class HubEngine:
             self.send("set-param name=%s value=%s" % (name, value))
 
     def go(self, fen, moves=None, my_time=None, inc=None, moves_left=None, movetime=None, depth=None, nodes=None, ponder=False):
+        """Send the engine a go command."""
         if moves:
             self.send(f'pos pos={fen} moves="{moves}"')
         else:
@@ -227,15 +237,19 @@ class HubEngine:
                 logger.warning("Unexpected engine response to go: %s %s", command, arg)
 
     def stop(self):
+        """Stop the engine from searching."""
         self.send("stop")
 
     def ponderhit(self):
+        """Send ponder-hit to the engine."""
         self.send("ponder-hit")
 
     def quit(self):
+        """Quit the engine."""
         self.send("quit")
 
     def play(self, board, time_limit, ponder):
+        """Engine search."""
         time = time_limit.time
         inc = time_limit.inc
         depth = time_limit.depth

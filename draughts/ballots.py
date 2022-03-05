@@ -16,6 +16,7 @@ class Ballots:
         self.keys_to_use = self.keys.copy()
 
     def _find_file(self):
+        """Get the filename of the ballots."""
         if self.variant == 'italian':
             return '11_italian.json'
         if self.variant == 'english':
@@ -36,6 +37,7 @@ class Ballots:
         return '3move_english.json'
 
     def open_file(self):
+        """Open the ballot file."""
         filepath = os.path.join(os.path.dirname(__file__), 'ballot_files', self.filename)
         with open(filepath) as file:
             data = json.load(file)
@@ -43,6 +45,7 @@ class Ballots:
         return data['all'], keys
 
     def get_ballot(self):
+        """Get one ballot."""
         if not self.keys_to_use:
             self.keys_to_use = self.keys.copy()
         key = self.keys_to_use.pop(random.randint(0, len(self.keys_to_use) - 1))

@@ -25,6 +25,7 @@ class CheckerBoardEngine:
         self.id["name"] = self.engine.enginecommand('name')[0].decode()
 
     def _open_engine(self):
+        """Open the engine process."""
         try:
             self.engine = Engine64(self.command, self.cwd)
             return 64
@@ -33,18 +34,21 @@ class CheckerBoardEngine:
             return 32
 
     def setoption(self, name, value):
+        """Set an engine option."""
         if name == 'divide-time-by':
             self.divide_time_by = value
         else:
             self.engine.enginecommand(f"set {name} {value}")
 
     def kill_process(self):
+        """Kill the engine process."""
         if self.bits == 32:
             self.engine.shutdown_server32()
         else:
             self.engine.kill_process()
 
     def play(self, board, time_limit):
+        """Engine search."""
         time = time_limit.time
         inc = time_limit.inc
         depth = time_limit.depth
@@ -115,13 +119,21 @@ class CheckerBoardEngine:
         return draughts.engine.PlayResult(bestmove, None, {'info': self.info, 'result': self.result})
 
     def _row_col_to_num(self, board, row, col):
+        """Get the square from the row and column."""
         if row % 2 == 0:
             col = ((col + 2) / 2) - 1
         else:
             col = ((col + 1) / 2) - 1
-        if board.variant not in ['english', 'italian']:
+        # Because:
+        # 1. In italian the bottom-left square isn't playable, so in CheckerBoard the board is flipped vertically.
+        # 2. In most variants the bottom-left square for the starting side (usually white) is in column a,
+        # while in english black starts, so the bottom-left square for the starting side (black) is in row h.
+        flip_board = board.variant not in ['english', 'italian']
+        if flip_board:
             col = board.board.width - 1 - col
-        if board.variant == 'english':
+        # Because in english black starts
+        white_starts = board.variant not in ['english']
+        if not white_starts:
             row = (board.board.height - 1) - row
         loc = board.board.position_layout.get(row, {}).get(col)
         return loc

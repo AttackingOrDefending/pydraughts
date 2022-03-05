@@ -15,6 +15,7 @@ class ConsoleHandler:
         self.isRunning = False  # not used
 
     def run_command(self, comm):
+        """Send a command to the DXP engine."""
 
         global current, mySock, lock
         global accepted, last_move
@@ -190,6 +191,7 @@ class ReceiveHandler(threading.Thread):
         self.isListening = False
 
     def run(self):
+        """Start the receiver. It receives the moves from the DXP engine."""
         # Handling incoming messages from server.
         # Excutes when thread started. Overriding python threading.Thread.run()
 

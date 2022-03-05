@@ -13,6 +13,7 @@ class Engine64:
         self.engine = ctypes.windll.LoadLibrary(command)
 
     def kill_process(self):
+        """Kill the engine process."""
         handle = self.engine._handle
         try:
             ctypes.windll.kernel32.FreeLibrary.argtypes = [wintypes.HMODULE]
@@ -21,11 +22,13 @@ class Engine64:
             self.engine.dlcose(handle)
 
     def enginecommand(self, command):
+        """Send an enginecommand to the engine."""
         output = ctypes.create_string_buffer(b'', 1024)
         result = self.engine.enginecommand(ctypes.create_string_buffer(bytes(command.encode('ascii')), 256), output)
         return output.value, result
 
     def getmove(self, game, maxtime=None, time=None, increment=None, movetime=None):
+        """Send a getmove to the engine."""
         assert maxtime is not None or time is not None or movetime is not None
 
         # From CheckerBoard API:
@@ -34,9 +37,10 @@ class Engine64:
 
         board = get_board(game)
 
-        # Reversed color because red (black) starts first in Checkerboard and not white in english checkers
+        # Reversed color because red (black) starts first and not white in english checkers in Checkerboard.
         color = BLACK if game.whose_turn() == draughts.WHITE else WHITE
-        if game.variant != 'english':
+        white_starts = board.variant not in ['english']
+        if white_starts:
             color = 3 - color
 
         info = 0

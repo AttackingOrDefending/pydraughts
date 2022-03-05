@@ -11,10 +11,12 @@ class BoardInitializer:
         self.fen = fen
 
     def initialize(self):
+        """Initialize the board."""
         self.build_position_layout()
         self.set_starting_pieces()
 
     def build_position_layout(self):
+        """Build the position layout."""
         self.board.position_layout = {}
         position = 1
 
@@ -26,8 +28,9 @@ class BoardInitializer:
                 position += 1
 
     def set_starting_pieces(self):
+        """Create the pieces."""
         pieces = []
-        if self.fen != 'startpos':
+        if self.fen != 'startpos':  # Hub fen
             # starting = self.fen[0]
             board = self.fen[1:]
             for index, position in enumerate(board):
@@ -41,7 +44,7 @@ class BoardInitializer:
                     piece.king = True
                 if piece:
                     pieces.append(piece)
-        else:
+        else:  # Not used, but it isn't removed, because it may be needed in the future
             starting_piece_count = self.board.width * self.board.rows_per_user_with_pieces
             player_starting_positions = {
                 1: list(range(1, starting_piece_count + 1)),
@@ -58,6 +61,7 @@ class BoardInitializer:
         self.board.pieces = pieces
 
     def create_piece(self, player_number, position):
+        """Create a piece."""
         piece = Piece(variant=self.board.variant)
         piece.player = player_number
         piece.position = position
