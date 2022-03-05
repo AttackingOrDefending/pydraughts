@@ -547,7 +547,7 @@ class Game:
         Sort the captures from the smallest number to the highest.
         e.g. [10, 30, 19] will change to '101930'.
         This function exists because hub engines return the captures in alphabetical order
-        (e.g. for the move 231201 scan returns 23x01x07x18 instead of 23x01x18x07)
+        (e.g. for the move 231201 scan returns 23x01x07x18 instead of 23x01x18x07).
         """
         captures = list(map(self.make_len_2, captures))
         captures.sort()
