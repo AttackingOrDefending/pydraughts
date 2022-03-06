@@ -86,6 +86,9 @@ class Game:
             self._not_added_move = []
             self._not_added_capture = []
 
+            print(move)
+            print(self.board.searcher.get_piece_by_position(move[1]))
+            print(self.board.searcher.get_piece_by_position(move[0]))
             piece = self.board.searcher.get_piece_by_position(move[1])
             self.moves_since_last_capture = 0 if self.board.previous_move_was_capture else self.moves_since_last_capture + 1
             if piece.king and not captures:
@@ -347,6 +350,8 @@ class Game:
         # so we use it again after the first jump to check if there are any further moves.
         for move in self.get_possible_moves():
             game_2 = self.copy_fast()
+            print(game_2.get_li_fen())
+            print(move)
             _, captures = game_2.move(move, return_captured=True)
             if game_2.whose_turn() == turn:
                 more_moves, more_captures = game_2.get_moves()
@@ -591,8 +596,8 @@ class Game:
 
         white_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, white_pieces_remove_hyphen))
         black_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, black_pieces_remove_hyphen))
-        white_pieces_remove_hyphen = list(map(str, white_pieces_remove_hyphen))
-        black_pieces_remove_hyphen = list(map(str, black_pieces_remove_hyphen))
+        # white_pieces_remove_hyphen = list(map(str, white_pieces_remove_hyphen))
+        # black_pieces_remove_hyphen = list(map(str, black_pieces_remove_hyphen))
 
         for index in range(1, position_count + 1):
             str_index = str(index)

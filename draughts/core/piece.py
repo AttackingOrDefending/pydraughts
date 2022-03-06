@@ -56,6 +56,7 @@ class Piece:
 
     def move(self, new_position: int, move_number: int) -> None:
         """Move the piece to a new position."""
+        print(new_position, move_number)
         self.position = new_position
         was_king = self.king
         self.king = self.king or self.is_on_enemy_home_row()

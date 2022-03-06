@@ -100,8 +100,6 @@ class Board:
         """Make a capture move."""
         self.previous_move_was_capture = True
         piece = self.searcher.get_piece_by_position(move[0])
-        if piece is None:
-            raise IndexError(f"Position {move[0]} is out of the board.")
         originally_was_king = piece.king
         enemy_piece = piece.capture_move_enemies[move[1]]
         enemy_position = enemy_piece.position
@@ -137,6 +135,7 @@ class Board:
 
     def move_piece(self, move: List[int], move_number: int) -> None:
         """Move a piece."""
+        print(move)
         self.searcher.get_piece_by_position(move[0]).move(move[1], move_number)
 
     def is_valid_row_and_column(self, row: int, column: int) -> bool:
