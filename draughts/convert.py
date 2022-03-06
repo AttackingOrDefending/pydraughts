@@ -1,7 +1,7 @@
 from math import ceil
 import string
 import re
-from typing import Tuple, Optional, List, Union
+from typing import Tuple, Optional, List
 
 
 def _get_squares(variant: Optional[str]) -> Tuple[int, int, int, bool]:
@@ -107,7 +107,7 @@ def _algebraic_to_number(algebraic_move: str, squares_per_letter: Optional[int] 
     return correct_seperator.join(numeric_move)
 
 
-def _algebraic_to_numeric_square(square: str, squares_per_letter: int, every_other_square: bool = True) -> Union[int, str]:
+def _algebraic_to_numeric_square(square: str, squares_per_letter: int, every_other_square: bool = True) -> int:
     """Convert an algebraic square to a numeric square."""
     algebraic_notation = square[0] in string.ascii_letters
     if not algebraic_notation:
