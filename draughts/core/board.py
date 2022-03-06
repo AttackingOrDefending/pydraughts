@@ -135,8 +135,8 @@ class Board:
 
     def move_piece(self, move: List[int], move_number: int) -> None:
         """Move a piece."""
-        print(move)
         self.searcher.get_piece_by_position(move[0]).move(move[1], move_number)
+        self.pieces = sorted(self.pieces, key=lambda piece: piece.position if piece.position else 0)
 
     def is_valid_row_and_column(self, row: int, column: int) -> bool:
         """Get if the given row and column is inside the board."""

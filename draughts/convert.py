@@ -111,7 +111,7 @@ def _algebraic_to_numeric_square(square: str, squares_per_letter: int, every_oth
     """Convert an algebraic square to a numeric square."""
     algebraic_notation = square[0] in string.ascii_letters
     if not algebraic_notation:
-        return square
+        return int(square)
     if not every_other_square:
         return (int(square[1]) - 1) * squares_per_letter + string.ascii_lowercase.index(square[0]) + 1
     return (int(square[1]) - 1) * squares_per_letter + ceil(string.ascii_lowercase.index(square[0]) // 2) + 1
@@ -181,7 +181,7 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
     for white_piece in white_pieces:
         if '-' in white_piece:
             start_end = white_piece.split('-')
-            start, end = int(_algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square)), int(_algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square))
+            start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
             for number in range(start, end + 1):
                 white_pieces_remove_hyphen.append(_rotate_move(str(number), notation=notation, variant=variant))
         else:
@@ -191,7 +191,7 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
     for black_piece in black_pieces:
         if '-' in black_piece:
             start_end = black_piece.split('-')
-            start, end = int(_algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square)), int(_algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square))
+            start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
             for number in range(start, end + 1):
                 black_pieces_remove_hyphen.append(_rotate_move(str(number), notation=notation, variant=variant))
         else:
