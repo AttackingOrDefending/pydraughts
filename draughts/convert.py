@@ -212,17 +212,17 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
     return f'{starts}:W{",".join(white_pieces_remove_hyphen)}:B{",".join(black_pieces_remove_hyphen)}'
 
 
-def fen_from_variant(fen: str, variant: Optional[str] = None) -> str:
+def fen_from_variant(fen, variant=None, notation=None, squares_per_letter=None, every_other_square=None):
     """Convert variant fen to internal fen."""
     variant = variant.lower() if variant else variant
-    fen = _change_fen_from_variant(fen, variant=variant)
+    fen = _change_fen_from_variant(fen, variant=variant, notation=notation, squares_per_letter=squares_per_letter, every_other_square=every_other_square)
     return fen
 
 
-def fen_to_variant(fen: str, variant: Optional[str] = None, to_algebraic: Optional[bool] = None) -> str:
+def fen_to_variant(fen, variant=None, notation=None, width=None, squares_per_letter=None, every_other_square=None, to_algebraic=None):
     """Convert internal fen to variant fen."""
     variant = variant.lower() if variant else variant
-    fen = _change_fen_from_variant(fen, variant=variant)
+    fen = _change_fen_from_variant(fen, variant=variant, notation=notation, squares_per_letter=squares_per_letter, every_other_square=every_other_square)
     if to_algebraic or variant in ['russian', 'brazilian', 'turkish']:
         new_white_pieces = []
         new_black_pieces = []
@@ -233,29 +233,29 @@ def fen_to_variant(fen: str, variant: Optional[str] = None, to_algebraic: Option
             if piece.lower().startswith('k'):
                 add = 'K'
                 piece = piece[1:]
-            new_white_pieces.append(add + _number_to_algebraic(piece, variant=variant))
+            new_white_pieces.append(add + _number_to_algebraic(piece, variant=variant, width=width, every_other_square=every_other_square))
         for piece in black_pieces.split(','):
             add = ''
             if piece.lower().startswith('k'):
                 add = 'K'
                 piece = piece[1:]
-            new_black_pieces.append(add + _number_to_algebraic(piece, variant=variant))
+            new_black_pieces.append(add + _number_to_algebraic(piece, variant=variant, width=width, every_other_square=every_other_square))
         fen = f'{fen[0]}:W{",".join(new_white_pieces)}:B{",".join(new_black_pieces)}'
     return fen
 
 
-def move_from_variant(move: str, variant: Optional[str] = None) -> str:
+def move_from_variant(move, variant=None, notation=None, squares_per_letter=None, every_other_square=None):
     """Convert variant PDN move to internal PDN move."""
     variant = variant.lower() if variant else variant
-    move = _algebraic_to_number(move, variant=variant)
-    move = _rotate_move(move, variant=variant)
+    move = _algebraic_to_number(move, variant=variant, squares_per_letter=squares_per_letter, every_other_square=every_other_square)
+    move = _rotate_move(move, variant=variant, notation=notation)
     return move
 
 
-def move_to_variant(move: str, variant: Optional[str] = None, to_algebraic: Optional[bool] = None) -> str:
+def move_to_variant(move, variant=None, notation=None, width=None, every_other_square=None, to_algebraic=None):
     """Convert internal PDN move to variant PDN move."""
     variant = variant.lower() if variant else variant
-    move = _rotate_move(move, variant=variant)
+    move = _rotate_move(move, variant=variant, notation=notation)
     if to_algebraic or variant in ['russian', 'brazilian', 'turkish']:
-        move = _number_to_algebraic(move, variant=variant)
+        move = _number_to_algebraic(move, variant=variant, width=width, every_other_square=every_other_square)
     return move

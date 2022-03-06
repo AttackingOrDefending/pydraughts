@@ -591,6 +591,8 @@ class Game:
 
         white_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, white_pieces_remove_hyphen))
         black_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, black_pieces_remove_hyphen))
+        white_pieces_remove_hyphen = list(map(str, white_pieces_remove_hyphen))
+        black_pieces_remove_hyphen = list(map(str, black_pieces_remove_hyphen))
 
         for index in range(1, position_count + 1):
             str_index = str(index)

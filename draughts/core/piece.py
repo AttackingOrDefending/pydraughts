@@ -1,6 +1,6 @@
 from __future__ import annotations
 from math import ceil
-from typing import List, Dict, Union, Any, Optional
+from typing import List
 
 WHITE = 2
 BLACK = 1

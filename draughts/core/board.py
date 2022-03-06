@@ -1,10 +1,9 @@
 from __future__ import annotations
 from draughts.core.board_searcher import BoardSearcher
 from draughts.core.board_initializer import BoardInitializer
-from draughts.core.piece import Piece
 from functools import reduce
 import pickle
-from typing import Optional, List, Union, Tuple, Any, Dict
+from typing import Optional, List, Tuple, Any
 
 WHITE = 2
 BLACK = 1

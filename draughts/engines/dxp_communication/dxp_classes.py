@@ -183,7 +183,7 @@ class DamExchange:
             msg = msg + item
         return msg
 
-    def msg_gameend(self, reason: int) -> str:
+    def msg_gameend(self, reason: str) -> str:
         """Generate a GAMEEND message."""
         # Generate GAMEEND message. Example: E00
         gameend = []

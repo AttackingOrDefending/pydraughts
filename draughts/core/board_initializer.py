@@ -7,7 +7,7 @@ BLACK = 1
 
 class BoardInitializer:
 
-    def __init__(self, board: Any, fen='startpos') -> None:
+    def __init__(self, board: Any, fen: str = 'startpos') -> None:
         self.board = board
         self.fen = fen
 
