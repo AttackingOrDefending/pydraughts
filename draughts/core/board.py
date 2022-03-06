@@ -38,8 +38,8 @@ class Board:
             self.rows_per_user_with_pieces = 4
 
         self.position_count = self.width * self.height
-        self.position_layout: Dict[int, Dict[int, int]] = {}
-        self.piece_requiring_further_capture_moves: Optional[Piece] = None
+        self.position_layout = {}
+        self.piece_requiring_further_capture_moves = None
         self.previous_move_was_capture = False
         self.variant = variant
         self.fen = fen
@@ -51,10 +51,9 @@ class Board:
 
     def count_movable_player_pieces(self, player_number: int = 1, captures: Optional[List[int]] = None) -> int:
         """Count the pieces of one player that can be moved."""
-        captures_for_is_movable = []
-        if captures:
-            captures_for_is_movable = captures
-        return reduce((lambda count, piece: count + (1 if piece.is_movable(captures_for_is_movable) else 0)), self.searcher.get_pieces_by_player(player_number), 0)
+        if captures is None:
+            captures = []
+        return reduce((lambda count, piece: count + (1 if piece.is_movable(captures) else 0)), self.searcher.get_pieces_by_player(player_number), 0)
 
     def get_possible_moves(self, captures: List[int]) -> List[List[int]]:
         """Get all possible moves."""
@@ -139,11 +138,7 @@ class Board:
 
     def move_piece(self, move: List[int], move_number: int) -> None:
         """Move a piece."""
-        piece = self.searcher.get_piece_by_position(move[0])
-        if piece is None:
-            raise IndexError(f"Position {move[0]} is out of the board.")
-        piece.move(move[1], move_number)
-        self.pieces = sorted(self.pieces, key=lambda piece: piece.position if piece.position else 0)
+        self.searcher.get_piece_by_position(move[0]).move(move[1], move_number)
 
     def is_valid_row_and_column(self, row: int, column: int) -> bool:
         """Get if the given row and column is inside the board."""

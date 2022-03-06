@@ -35,7 +35,7 @@ class BoardInitializer:
             # starting = self.fen[0]
             board = self.fen[1:]
             for index, position in enumerate(board):
-                piece: Any = None
+                piece = None
                 if position.lower() == 'w':
                     # Index + 1 because enumerate returns 0-49 while the board takes 1-50.
                     piece = self.create_piece(2, index + 1)
@@ -61,7 +61,7 @@ class BoardInitializer:
 
         self.board.pieces = pieces
 
-    def create_piece(self, player_number, position) -> Piece:
+    def create_piece(self, player_number: int, position: int) -> Piece:
         """Create a piece."""
         piece = Piece(variant=self.board.variant)
         piece.player = player_number

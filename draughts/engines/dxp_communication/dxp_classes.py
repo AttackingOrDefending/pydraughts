@@ -1,8 +1,10 @@
 # This file is an adaptation of DXC100_draughts_client (https://github.com/akalverboer/DXC100_draughts_client) by akalverboer.
 
+from __future__ import annotations
 import socket
 import logging
 import draughts
+from typing import Dict, Optional, List
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +13,7 @@ DXP_BLACK = 1
 
 
 class GameStatus:
-    def __init__(self, fen='startpos', myColor=DXP_WHITE, started=False, variant='standard'):
+    def __init__(self, fen: str = 'startpos', myColor: int = DXP_WHITE, started: bool = False, variant: str = 'standard') -> None:
         self.fen = fen
         self.myColor = myColor
         self.started = started
@@ -21,16 +23,16 @@ class GameStatus:
         self.engineName = ''
         self.result = None
 
-    def get_color(self):
+    def get_color(self) -> int:
         """Get the color of the playing side."""
         return DXP_WHITE if self.pos.whose_turn() == draughts.WHITE else DXP_BLACK
 
 
 class MySocket:
-    def __init__(self):
+    def __init__(self) -> None:
         self.sock = None
 
-    def open(self):
+    def open(self) -> MySocket:
         """Open the socket."""
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -39,7 +41,7 @@ class MySocket:
             raise Exception("socket exception: failed to open")
         return self
 
-    def connect(self, host, port):
+    def connect(self, host: str, port: int) -> MySocket:
         """Connect to the engine."""
         self.sock.settimeout(10)  # timeout for connection
         try:
@@ -51,7 +53,7 @@ class MySocket:
             self.sock.settimeout(None)  # default
         return self
 
-    def send(self, msg):
+    def send(self, msg: str) -> None:
         """Send a message to the engine."""
         try:
             self.sock.send(bytes(msg, 'utf-8') + b"\0")
@@ -59,7 +61,7 @@ class MySocket:
             raise Exception("send exception: no connection")
         return None
 
-    def receive(self):
+    def receive(self) -> str:
         """Receive a message from the engine."""
         msg = ""
         while True:
@@ -87,7 +89,7 @@ class MySocket:
 
 
 class DamExchange:
-    def parse(self, msg):
+    def parse(self, msg: str) -> Dict[str, str]:
         """Parse an incoming DXP message."""
         # Parse incoming DXP message. Returns relevant items depending on mtype.
         result = {}
@@ -134,13 +136,13 @@ class DamExchange:
             result['type'] = "?"
         return result
 
-    def msg_chat(self, str):
+    def msg_chat(self, msg: str) -> str:
         """Generate a CHAT message."""
         # Generate CHAT message. Example: CWhat do you think about move 35?
-        msg = "C" + str
+        msg = "C" + msg
         return msg
 
-    def msg_gamereq(self, myColor, gameTime, numMoves, pos=None, colorToMove=None):
+    def msg_gamereq(self, myColor: int, gameTime: int, numMoves: int, pos: Optional[draughts.Game] = None, colorToMove: Optional[int] = None) -> str:
         """Generate a GAMEREQ message."""
         # Generate GAMEREQ message. Example: R01Tornado voor Windows 4.0        W060065A
         gamereq = []
@@ -163,7 +165,7 @@ class DamExchange:
             msg = msg + item
         return msg
 
-    def msg_move(self, steps, captures, timeSpend):
+    def msg_move(self, steps: List[int], captures: List[int], timeSpend: int) -> str:
         """Generate a MOVE message."""
         # Generate MOVE message. Example: M001205250422122320
         # Parm rmove is a "two-color" move
@@ -181,7 +183,7 @@ class DamExchange:
             msg = msg + item
         return msg
 
-    def msg_gameend(self, reason):
+    def msg_gameend(self, reason: int) -> str:
         """Generate a GAMEEND message."""
         # Generate GAMEEND message. Example: E00
         gameend = []
@@ -193,7 +195,7 @@ class DamExchange:
             msg = msg + item
         return msg
 
-    def msg_backreq(self, moveId, colorToMove):
+    def msg_backreq(self, moveId: int, colorToMove: int) -> str:
         """Generate a BACKREQ message."""
         # Generate BACKREQ message. Example: B005Z
         backreq = []
@@ -205,7 +207,7 @@ class DamExchange:
             msg = msg + item
         return msg
 
-    def msg_backacc(self, accCode):
+    def msg_backacc(self, accCode: str) -> str:
         """Generate the response to a BACKREQ request."""
         # Generate BACKREQ message. Example: K1
         backreq = []

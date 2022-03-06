@@ -26,17 +26,17 @@ def _get_squares(variant: Optional[str]) -> Tuple[int, int, int, bool]:
 def _rotate_move(internal_move: str, notation: Optional[int] = None, variant: Optional[str] = None) -> str:
     """Rotate the move."""
     separators = ['-', 'x', ':']
-    splitted_str_move: List[str] = []
+    splitted_move = None
     correct_seperator = ''
     for separator in separators:
-        splitted_str_move = internal_move.split(separator)
-        if splitted_str_move[0] != internal_move:
+        splitted_move = internal_move.split(separator)
+        if splitted_move[0] != internal_move:
             correct_seperator = separator
             break
-    splitted_move = list(map(int, splitted_str_move))
+    splitted_move = list(map(int, splitted_move))
     variant_to_notation = {'standard': 2, 'english': 1, 'italian': 2, 'russian': 0, 'brazilian': 0, 'turkish': 0, 'frisian': 2, 'frysk!': 2, 'antidraughts': 2, 'breakthrough': 2}
     if notation is None:
-        notation = variant_to_notation.get(variant, 2) if variant else 2
+        notation = variant_to_notation.get(variant, 2)
 
     def reverse_column(splitted_int_move: List[int]) -> List[int]:
         per_row = _get_squares(variant)[1]
@@ -55,17 +55,18 @@ def _rotate_move(internal_move: str, notation: Optional[int] = None, variant: Op
     def reverse_row(splitted_int_move: List[int]) -> List[int]:
         return reverse_column(reverse_row_and_column(splitted_int_move))
 
+    rotated_move = None
     if notation == 0:
         rotated_move = reverse_row(splitted_move)
     elif notation == 1:
         rotated_move = reverse_row_and_column(splitted_move)
     elif notation == 2:
         rotated_move = splitted_move
-    else:  # notation == 3
+    elif notation == 3:
         rotated_move = reverse_column(splitted_move)
 
-    rotated_str_move = list(map(str, rotated_move))
-    return correct_seperator.join(rotated_str_move)
+    rotated_move = list(map(str, rotated_move))
+    return correct_seperator.join(rotated_move)
 
 
 def _algebraic_to_number(algebraic_move: str, squares_per_letter: Optional[int] = None, variant: Optional[str] = None, every_other_square: Optional[bool] = None) -> str:
@@ -84,7 +85,7 @@ def _algebraic_to_number(algebraic_move: str, squares_per_letter: Optional[int] 
 
     separators = ['-', 'x', ':']
     special_seperators = [r'([a-zA-z]+\d+)']
-    splitted_move = []
+    splitted_move = None
     correct_seperator = ''
     for separator in separators:
         splitted_move = list(filter(bool, re.split(separator, algebraic_move)))
@@ -102,8 +103,8 @@ def _algebraic_to_number(algebraic_move: str, squares_per_letter: Optional[int] 
     numeric_move = []
     for move in splitted_move:
         numeric_move.append(_algebraic_to_numeric_square(move, squares_per_letter, every_other_square=every_other_square))
-    numeric_str_move: List[str] = list(map(str, numeric_move))
-    return correct_seperator.join(numeric_str_move)
+    numeric_move = list(map(str, numeric_move))
+    return correct_seperator.join(numeric_move)
 
 
 def _algebraic_to_numeric_square(square: str, squares_per_letter: int, every_other_square: bool = True) -> int:
@@ -131,7 +132,7 @@ def _number_to_algebraic(number_move: str, width: Optional[int] = None, variant:
 
     separators = ['-', 'x', ':']
     special_seperators = [r'([a-zA-z]+\d+)']
-    splitted_move = []
+    splitted_move = None
     correct_seperator = ''
     for separator in separators:
         splitted_move = list(filter(bool, re.split(separator, number_move)))
@@ -157,9 +158,9 @@ def _numeric_to_algebraic_square(square: str, width: int, every_other_square: Op
     algebraic_notation = square[0] in string.ascii_letters
     if algebraic_notation:
         return square
-    int_square = int(square)
-    row = ceil(int_square / width) - 1
-    column = (int_square - 1) % width
+    square = int(square)
+    row = ceil(square / width) - 1
+    column = (square - 1) % width
     if every_other_square:
         column *= 2
         column += 1 if row % 2 == 1 else 0
@@ -171,10 +172,10 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
     if variant:
         _, _, squares_per_letter, every_other_square = _get_squares(variant)
 
-    split_li_fen = li_fen.split(':')
-    starts = split_li_fen[0]
-    white_pieces = split_li_fen[1][1:].split(',')
-    black_pieces = split_li_fen[2][1:].split(',')
+    li_fen = li_fen.split(':')
+    starts = li_fen[0]
+    white_pieces = li_fen[1][1:].split(',')
+    black_pieces = li_fen[2][1:].split(',')
 
     white_pieces_remove_hyphen = []
     for white_piece in white_pieces:
@@ -202,12 +203,12 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
         white_pieces_remove_hyphen, black_pieces_remove_hyphen = black_pieces_remove_hyphen, white_pieces_remove_hyphen
         starts = 'W' if starts == 'B' else 'B'
 
-    white_pieces_int_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, white_pieces_remove_hyphen))
-    black_pieces_int_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, black_pieces_remove_hyphen))
-    white_pieces_int_remove_hyphen.sort()
-    black_pieces_int_remove_hyphen.sort()
-    white_pieces_remove_hyphen = list(map(str, white_pieces_int_remove_hyphen))
-    black_pieces_remove_hyphen = list(map(str, black_pieces_int_remove_hyphen))
+    white_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, white_pieces_remove_hyphen))
+    black_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, black_pieces_remove_hyphen))
+    white_pieces_remove_hyphen.sort()
+    black_pieces_remove_hyphen.sort()
+    white_pieces_remove_hyphen = list(map(str, white_pieces_remove_hyphen))
+    black_pieces_remove_hyphen = list(map(str, black_pieces_remove_hyphen))
     return f'{starts}:W{",".join(white_pieces_remove_hyphen)}:B{",".join(black_pieces_remove_hyphen)}'
 
 

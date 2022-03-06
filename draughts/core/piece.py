@@ -9,13 +9,13 @@ BLACK = 1
 class Piece:
 
     def __init__(self, variant: str = 'standard') -> None:
-        self.player: Any = None
+        self.player = None
         self.king = False
         self.captured = False
-        self.position: Any = None
-        self.board: Any = None
+        self.position = None
+        self.board = None
         self.became_king = -100
-        self.capture_move_enemies: Dict[Union[int, None], Piece] = {}
+        self.capture_move_enemies = {}
         self.variant = variant
         self.reset_for_new_board()
 
@@ -38,8 +38,8 @@ class Piece:
 
     def reset_for_new_board(self) -> None:
         """Reset possible moves to None."""
-        self.possible_capture_moves: Any = None
-        self.possible_positional_moves: Any = None
+        self.possible_capture_moves = None
+        self.possible_positional_moves = None
 
     def get_square(self, row: int, column: int) -> int:
         """Get the square given the row and column."""
@@ -128,8 +128,7 @@ class Piece:
 
         # If half_of_the_squares_are_playable the square in the front is not playable
         # (e.g. a1 is playable but a2 isn't, so the square directly in front of it is a3)
-        if (column_difference == 0 or row_difference == 0) and (
-        row_difference % 2 == 0 if self.half_of_the_squares_are_playable else True):
+        if (column_difference == 0 or row_difference == 0) and (row_difference % 2 == 0 if self.half_of_the_squares_are_playable else True):
             next_row = enemy_row - row_difference
             next_column = enemy_column - column_difference
             return [self.get_square(next_row, next_column)]
@@ -407,8 +406,7 @@ class Piece:
             # self.orthogonal_moves is True.
             # This is used for example in turkish.
 
-            next_row = current_row + (
-                        (row_in_front if self.player == BLACK else -row_in_front) * (1 if forward else -1))
+            next_row = current_row + ((row_in_front if self.player == BLACK else -row_in_front) * (1 if forward else -1))
             next_column = current_column + ((1 if self.player == BLACK else -1) * (1 if forward else -1))
 
             if next_row in self.board.position_layout:
@@ -425,7 +423,7 @@ class Piece:
 
     def get_directional_diagonal_multiple_squares_adjacent_positions(self, forward: bool, capture: bool) -> List[int]:
         """Get the diagonal directional adjacent positions if the piece can move more than one square (kings)."""
-        positions: List[int] = []
+        positions = []
         current_row = self.get_row()
         current_column = self.get_column()
 
@@ -477,8 +475,7 @@ class Piece:
         row_in_front = 2 if self.half_of_the_squares_are_playable else 1
 
         for multiplier in range(1, self.board.height):
-            next_row = current_row + multiplier * (row_in_front if self.player == BLACK else -row_in_front) * (
-                1 if forward else -1)
+            next_row = current_row + multiplier * (row_in_front if self.player == BLACK else -row_in_front) * (1 if forward else -1)
             if next_row in self.board.position_layout:
                 positions.append(self.board.position_layout[next_row][current_column])
 

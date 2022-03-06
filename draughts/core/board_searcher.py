@@ -13,11 +13,11 @@ class BoardSearcher:
         """Build the searcher."""
         self.board = board
         self.uncaptured_pieces = list(filter(lambda piece: not piece.captured, board.pieces))
-        self.open_positions: List[int] = []
-        self.filled_positions: List[int] = []
-        self.player_positions: Dict[int, List[int]] = {}
-        self.player_pieces: Dict[int, List[Piece]] = {}
-        self.position_pieces: Dict[int, Piece] = {}
+        self.open_positions = []
+        self.filled_positions = []
+        self.player_positions = {}
+        self.player_pieces = {}
+        self.position_pieces = {}
 
         self.build_filled_positions()
         self.build_open_positions()

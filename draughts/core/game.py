@@ -31,24 +31,24 @@ class Game:
         self.last_non_reversible_fen = self.initial_fen
 
         # moves has every move of a multi-capture as a separate move.
-        self.moves: List[List[int]] = []
+        self.moves = []
 
         # move_stack contains the moves played but a multi-capture is only considered as one move.
         # move_stack is preferred to moves.
-        self.move_stack: List[Move] = []
-        self.capture_stack: List[List[Optional[int]]] = []
+        self.move_stack = []
+        self.capture_stack = []
 
         # _not_added_move and _not_added_capture contain the moves that are part of a multi-capture.
         # that hasn't been completed yet.
-        self._not_added_move: List[List[int]] = []
-        self._not_added_capture: List[int] = []
+        self._not_added_move = []
+        self._not_added_capture = []
 
         # non_reversible_moves contains the moves since the last capture or move of a man.
         # (so it only contains non-capture king moves).
-        self.non_reversible_moves: List[Move] = []
+        self.non_reversible_moves = []
 
         # fens stores the Hub fen of each position to detect threefold repetition.
-        self.fens: List[str] = []
+        self.fens = []
         self.moves_since_last_capture = 0
         self.consecutive_noncapture_king_moves = 0
 
@@ -75,7 +75,7 @@ class Game:
             self._not_added_move.append(move)
             self._not_added_capture.append(enemy_position)
         else:
-            captures: List[Optional[int]] = self._not_added_capture + [enemy_position]
+            captures = self._not_added_capture + [enemy_position]
             if captures[0] is None:
                 captures = []
             move_to_add_board = self._not_added_move + [move]
