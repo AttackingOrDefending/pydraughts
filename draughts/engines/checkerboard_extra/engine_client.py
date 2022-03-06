@@ -13,8 +13,10 @@ class Engine32(Client64):
         super(Engine32, self).__init__(module32='engine_server', append_sys_path=os.path.dirname(__file__))
 
     def enginecommand(self, command):
+        """Send an enginecommand to the engine."""
         return self.request32('enginecommand', command)
 
     def getmove(self, game, maxtime=None, time=None, increment=None, movetime=None):
+        """Send a getmove to the engine."""
         assert maxtime is not None or time is not None or movetime is not None
         return self.request32('getmove', game, maxtime, time, increment, movetime)

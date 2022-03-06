@@ -20,6 +20,7 @@ class _PDNGame:
         self._read()
 
     def _read(self):
+        """Read a PDN game."""
         lines = self.pdn_text
         lines = lines.split('\n')
         tag_lines = []
@@ -59,19 +60,19 @@ class _PDNGame:
 
         moves = " ".join(move_lines)
 
-        # Changes to the PDN
+        # Changes to the PDN.
 
         # From https://stackoverflow.com/a/37538815/10014873
         def remove_text_between_parens(text):
-            n = 1  # run at least once
+            n = 1  # Run at least once.
             while n:
-                text, n = re.subn(r'\([^()]*\)', '', text)  # remove non-nested/flat balanced parts
+                text, n = re.subn(r'\([^()]*\)', '', text)  # Remove non-nested/flat balanced parts.
             return text
 
         def remove_text_between_brackets(text):
-            n = 1  # run at least once
+            n = 1  # Run at least once.
             while n:
-                text, n = re.subn(r'{[^{}]*}', '', text)  # remove non-nested/flat balanced parts
+                text, n = re.subn(r'{[^{}]*}', '', text)  # Remove non-nested/flat balanced parts.
             return text
 
         moves = remove_text_between_parens(moves)
@@ -113,7 +114,7 @@ class _PDNGame:
                 notation = values[4]
                 self.notation_type = notation[0].lower()
                 self.notation = int(notation[1])
-        else:  # Try to guess the variant
+        else:  # Try to guess the variant.
             board_10 = ['31', '32', '33', '34', '35', '16', '17', '18', '19', '20']
             board_8 = ['21', '22', '23', '24', '9', '09', '10', '11', '12']
             first_move = moves[0]
@@ -127,18 +128,24 @@ class _PDNGame:
         self._rest_of_games = rest_of_games
 
     def get_titles(self):
+        """Get player titles."""
         return [self.tags.get("WhiteTitle", ""), self.tags.get("BlackTitle", "")]
 
     def get_ratings(self):
+        """Get player ratings."""
         return [self.tags.get("WhiteRating", ""), self.tags.get("BlackRating", "")]
 
     def get_na(self):
+        """Get player network address."""
         return [self.tags.get("WhiteNA", ""), self.tags.get("BlackNA", "")]
 
     def get_types(self):
+        """Get player types (human, computer, etc.)."""
         return [self.tags.get("WhiteType", ""), self.tags.get("BlackType", "")]
 
     def _get_rest_of_games(self):
+        """Get the rest of the games."""
+        # This class only reads the first game. You can get the rest with this function.
         return '\n'.join(self._rest_of_games)
 
 
@@ -212,6 +219,7 @@ class PDNWriter:
         self._write()
 
     def _fix_ambiguous_moves(self):
+        """Replay the moves to fix any ambiguous PDN move."""
         if self.moves and type(self.moves[0]) == str:
             return
         game = Game(self.variant, self.starting_fen)
@@ -224,6 +232,7 @@ class PDNWriter:
         self.moves = correct_moves
 
     def _write(self):
+        """Write the PDN file."""
         pdn_text = ''
         if 'GameType' not in self.tags:
             short_gametype = str(self.VARIANT_TO_GAMETYPE.get(self.variant.lower(), 20))
@@ -287,6 +296,7 @@ class PDNWriter:
                 file.write(self.pdn_text)
 
     def _startpos_to_fen(self, fen):
+        """Get the starting fen."""
         if fen != 'startpos':
             return fen
         if self.variant == 'frysk!':

@@ -53,6 +53,7 @@ class DXPEngine:
         self.start_time = time.perf_counter_ns()
 
     def setoption(self, name, value):
+        """Set a DXP option."""
         if name == 'engine-opened':
             self.engine_opened = value
         elif name == 'ip':
@@ -67,6 +68,7 @@ class DXPEngine:
             self.initial_time = 0
 
     def _open_process(self, command, cwd=None, shell=True, _popen_lock=threading.Lock()):
+        """Open the engine process."""
         kwargs = {
             "shell": shell,
             "stdout": subprocess.PIPE,
@@ -92,6 +94,7 @@ class DXPEngine:
             return subprocess.Popen(command, **kwargs)
 
     def kill_process(self):
+        """Kill the engine process."""
         if not self.engine_opened:
             try:
                 # Windows
@@ -103,6 +106,7 @@ class DXPEngine:
             self.p.communicate()
 
     def _connect(self):
+        """Connect to the engine."""
         if not self.engine_opened:
             wait_time = self.start_time / 1e9 + self.wait_to_open_time - time.perf_counter_ns() / 1e9
             logger.debug(f'wait time: {wait_time}')
@@ -111,6 +115,7 @@ class DXPEngine:
         self.console.run_command(f'connect {self.ip} {self.port}')
 
     def _start(self, board, time):
+        """Start the game."""
         self._connect()
         color = 'B' if board.whose_turn() == draughts.WHITE else 'W'
         time = str(round(time // 60))
@@ -122,6 +127,8 @@ class DXPEngine:
         self.id["name"] = dxp.current.engineName
 
     def _recv(self):
+        """Receive a line from the engine, if the engine is opened by pydraughts."""
+        # The engine doesn't work otherwise.
         while True:
             line = self.p.stdout.readline()
 
@@ -131,11 +138,13 @@ class DXPEngine:
                 logging.debug(f"{self.ENGINE} %s >> %s {self.p.pid} {line}")
 
     def _recv_accept(self):
+        """Get if the game was accepted."""
         while True:
             if dxp.accepted is not None:
                 return dxp.accepted
 
     def _recv_move(self):
+        """Receive the engine move."""
         while True:
             if not dxp.tReceiveHandler.isListening:
                 break
@@ -145,6 +154,7 @@ class DXPEngine:
                 return self._last_move
 
     def play(self, board):
+        """Engine search."""
         if not self.game_started:
             self._start(board, self.initial_time)
             self.game_started = True
@@ -159,4 +169,5 @@ class DXPEngine:
         return draughts.engine.PlayResult(best_move, None)
 
     def quit(self):
+        """Quit the engine."""
         self.console.run_command('gameend 0')

@@ -22,6 +22,7 @@ class GameStatus:
         self.result = None
 
     def get_color(self):
+        """Get the color of the playing side."""
         return DXP_WHITE if self.pos.whose_turn() == draughts.WHITE else DXP_BLACK
 
 
@@ -30,6 +31,7 @@ class MySocket:
         self.sock = None
 
     def open(self):
+        """Open the socket."""
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         except Exception:
@@ -38,6 +40,7 @@ class MySocket:
         return self
 
     def connect(self, host, port):
+        """Connect to the engine."""
         self.sock.settimeout(10)  # timeout for connection
         try:
             self.sock.connect((host, port))
@@ -49,6 +52,7 @@ class MySocket:
         return self
 
     def send(self, msg):
+        """Send a message to the engine."""
         try:
             self.sock.send(bytes(msg, 'utf-8') + b"\0")
         except Exception:
@@ -56,6 +60,7 @@ class MySocket:
         return None
 
     def receive(self):
+        """Receive a message from the engine."""
         msg = ""
         while True:
             # Collect message chunks until null character found
@@ -83,6 +88,7 @@ class MySocket:
 
 class DamExchange:
     def parse(self, msg):
+        """Parse an incoming DXP message."""
         # Parse incoming DXP message. Returns relevant items depending on mtype.
         result = {}
         mtype = msg[0:1]
@@ -129,11 +135,13 @@ class DamExchange:
         return result
 
     def msg_chat(self, str):
+        """Generate a CHAT message."""
         # Generate CHAT message. Example: CWhat do you think about move 35?
         msg = "C" + str
         return msg
 
     def msg_gamereq(self, myColor, gameTime, numMoves, pos=None, colorToMove=None):
+        """Generate a GAMEREQ message."""
         # Generate GAMEREQ message. Example: R01Tornado voor Windows 4.0        W060065A
         gamereq = []
         gamereq.append("R")  # header
@@ -156,6 +164,7 @@ class DamExchange:
         return msg
 
     def msg_move(self, steps, captures, timeSpend):
+        """Generate a MOVE message."""
         # Generate MOVE message. Example: M001205250422122320
         # Parm rmove is a "two-color" move
         move = []
@@ -173,6 +182,7 @@ class DamExchange:
         return msg
 
     def msg_gameend(self, reason):
+        """Generate a GAMEEND message."""
         # Generate GAMEEND message. Example: E00
         gameend = []
         gameend.append("E")  # header
@@ -184,6 +194,7 @@ class DamExchange:
         return msg
 
     def msg_backreq(self, moveId, colorToMove):
+        """Generate a BACKREQ message."""
         # Generate BACKREQ message. Example: B005Z
         backreq = []
         backreq.append("B")
@@ -195,6 +206,7 @@ class DamExchange:
         return msg
 
     def msg_backacc(self, accCode):
+        """Generate the response to a BACKREQ request."""
         # Generate BACKREQ message. Example: K1
         backreq = []
         backreq.append("K")
