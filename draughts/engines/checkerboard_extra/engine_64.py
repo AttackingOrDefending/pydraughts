@@ -28,7 +28,7 @@ class Engine64:
         result = self.engine.enginecommand(ctypes.create_string_buffer(bytes(command.encode('ascii')), 256), output)
         return output.value, result
 
-    def getmove(self, game: draughts.Game, maxtime: Optional[Union[int, float]] = None, time: Optional[Union[int, float]] = None, increment: Optional[Union[int, float]] = None, movetime: Optional[Union[int, float]] = None) -> Tuple[Optional[str], bytes, Dict[str, Any], int]:
+    def getmove(self, game: draughts.Game, maxtime: Union[int, float, None] = None, time: Union[int, float, None] = None, increment: Union[int, float, None] = None, movetime: Union[int, float, None] = None) -> Tuple[Optional[str], bytes, Dict[str, Any], int]:
         """Send a getmove to the engine."""
         assert maxtime is not None or time is not None or movetime is not None
 
