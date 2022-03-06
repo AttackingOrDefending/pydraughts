@@ -174,7 +174,7 @@ class HubEngine:
         if name == 'variant' and self.variants or name != 'variant':
             self.send("set-param name=%s value=%s" % (name, value))
 
-    def go(self, fen: str, moves: Optional[str] = None, my_time: Optional[Union[int, float]] = None, inc: Optional[Union[int, float]] = None, moves_left: Optional[int] = None, movetime: Optional[Union[int, float]] = None, depth: Optional[int] = None, nodes: Optional[int] = None, ponder: Optional[bool] = False) -> Tuple[str, Optional[str]]:
+    def go(self, fen: str, moves: Optional[str] = None, my_time: Union[int, float, None] = None, inc: Union[int, float, None] = None, moves_left: Optional[int] = None, movetime: Union[int, float, None] = None, depth: Optional[int] = None, nodes: Optional[int] = None, ponder: Optional[bool] = False) -> Tuple[str, Optional[str]]:
         """Send the engine a go command."""
         if moves:
             self.send(f'pos pos={fen} moves="{moves}"')

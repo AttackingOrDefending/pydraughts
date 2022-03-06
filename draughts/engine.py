@@ -6,7 +6,7 @@ from draughts.core.move import Move
 
 
 class Limit:
-    def __init__(self, time: Optional[Union[int, float]] = None, inc: Optional[Union[int, float]] = None, depth: Optional[int] = None, nodes: Optional[int] = None, movetime: Optional[Union[int, float]] = None):
+    def __init__(self, time: Union[int, float, None] = None, inc: Union[int, float, None] = None, depth: Optional[int] = None, nodes: Optional[int] = None, movetime: Union[int, float, None] = None):
         assert time is not None or depth is not None or nodes is not None or movetime is not None
         self.time = time
         self.inc = inc

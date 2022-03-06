@@ -151,7 +151,7 @@ class _PDNGame:
 
 
 class PDNReader:
-    def __init__(self, pdn_text: Optional[str] = None, filename: Optional[str] = None, encodings: Optional[Union[List[str], str]] = None) -> None:
+    def __init__(self, pdn_text: Optional[str] = None, filename: Optional[str] = None, encodings: Union[List[str], str, None] = None) -> None:
         if encodings is None:
             encodings = ['utf8', 'ISO 8859/1']
         if type(encodings) == str:
