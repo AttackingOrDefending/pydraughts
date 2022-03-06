@@ -128,19 +128,19 @@ class _PDNGame:
 
         self._rest_of_games = rest_of_games
 
-    def get_titles(self) -> List[str, str]:
+    def get_titles(self) -> List[str]:
         """Get player titles."""
         return [self.tags.get("WhiteTitle", ""), self.tags.get("BlackTitle", "")]
 
-    def get_ratings(self) -> List[str, str]:
+    def get_ratings(self) -> List[str]:
         """Get player ratings."""
         return [self.tags.get("WhiteRating", ""), self.tags.get("BlackRating", "")]
 
-    def get_na(self) -> List[str, str]:
+    def get_na(self) -> List[str]:
         """Get player network address."""
         return [self.tags.get("WhiteNA", ""), self.tags.get("BlackNA", "")]
 
-    def get_types(self) -> List[str, str]:
+    def get_types(self) -> List[str]:
         """Get player types (human, computer, etc.)."""
         return [self.tags.get("WhiteType", ""), self.tags.get("BlackType", "")]
 

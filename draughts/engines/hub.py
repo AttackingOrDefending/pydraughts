@@ -94,11 +94,11 @@ class HubEngine:
             if line:
                 return line
 
-    def recv_hub(self) -> Union[Tuple[str, str], List[str, str]]:
+    def recv_hub(self) -> List[str]:
         """Receive a line from the engine and split at the first space."""
         command_and_args = self.recv().split(None, 1)
         if len(command_and_args) == 1:
-            return command_and_args[0], ""
+            return [command_and_args[0], ""]
         elif len(command_and_args) == 2:
             return command_and_args
 
@@ -249,7 +249,7 @@ class HubEngine:
         """Quit the engine."""
         self.send("quit")
 
-    def play(self, board: draughts.Game, time_limit: draughts.engine.Limit, ponder: bool) -> draughts.engine.PlayResult:
+    def play(self, board: draughts.Game, time_limit: Any, ponder: bool) -> Any:
         """Engine search."""
         time = time_limit.time
         inc = time_limit.inc

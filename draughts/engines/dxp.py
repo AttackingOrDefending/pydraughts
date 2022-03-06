@@ -154,7 +154,7 @@ class DXPEngine:
                 logger.debug(f'new last move: {self._last_move}')
                 return self._last_move
 
-    def play(self, board: draughts.Game) -> draughts.engine.PlayResult:
+    def play(self, board: draughts.Game) -> Any:
         """Engine search."""
         if not self.game_started:
             self._start(board, self.initial_time)

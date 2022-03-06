@@ -3,7 +3,7 @@ from draughts.engines.checkerboard_extra.engine_client import Engine32
 import os
 import draughts
 import draughts.engine
-from typing import Union, List
+from typing import Union, List, Any
 
 
 class CheckerBoardEngine:
@@ -48,7 +48,7 @@ class CheckerBoardEngine:
         else:
             self.engine.kill_process()
 
-    def play(self, board: draughts.Game, time_limit: draughts.engine.Limit) -> draughts.engine.PlayResult:
+    def play(self, board: draughts.Game, time_limit: Any) -> Any:
         """Engine search."""
         time = time_limit.time
         inc = time_limit.inc
