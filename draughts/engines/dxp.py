@@ -8,12 +8,13 @@ import threading
 import time
 import logging
 from importlib import reload
+from typing import Optional, Dict, Union, List, Any
 
 logger = logging.getLogger(__name__)
 
 
 class DXPEngine:
-    def __init__(self, command=None, options=None, initial_time=0, ENGINE=5):
+    def __init__(self, command: Optional[Union[List[str], str]] = None, options: Optional[Dict[str, Union[str, int, bool]]] = None, initial_time: int = 0, ENGINE: int = 5) -> None:
         global dxp
         dxp = reload(dxp)
         if options is None:
@@ -52,7 +53,7 @@ class DXPEngine:
 
         self.start_time = time.perf_counter_ns()
 
-    def setoption(self, name, value):
+    def setoption(self, name: str, value: Union[str, int, bool]) -> None:
         """Set a DXP option."""
         if name == 'engine-opened':
             self.engine_opened = value
@@ -67,7 +68,7 @@ class DXPEngine:
         elif name == 'initial-time':
             self.initial_time = 0
 
-    def _open_process(self, command, cwd=None, shell=True, _popen_lock=threading.Lock()):
+    def _open_process(self, command: str, cwd: Optional[str] = None, shell: bool = True, _popen_lock: Any = threading.Lock()) -> subprocess.Popen:
         """Open the engine process."""
         kwargs = {
             "shell": shell,
@@ -93,7 +94,7 @@ class DXPEngine:
         with _popen_lock:  # Work around Python 2 Popen race condition
             return subprocess.Popen(command, **kwargs)
 
-    def kill_process(self):
+    def kill_process(self) -> None:
         """Kill the engine process."""
         if not self.engine_opened:
             try:
@@ -105,7 +106,7 @@ class DXPEngine:
 
             self.p.communicate()
 
-    def _connect(self):
+    def _connect(self) -> None:
         """Connect to the engine."""
         if not self.engine_opened:
             wait_time = self.start_time / 1e9 + self.wait_to_open_time - time.perf_counter_ns() / 1e9
@@ -114,7 +115,7 @@ class DXPEngine:
                 time.sleep(wait_time)
         self.console.run_command(f'connect {self.ip} {self.port}')
 
-    def _start(self, board, time):
+    def _start(self, board: draughts.Game, time: int) -> None:
         """Start the game."""
         self._connect()
         color = 'B' if board.whose_turn() == draughts.WHITE else 'W'
@@ -126,7 +127,7 @@ class DXPEngine:
         logger.debug(f'Aceepted: {accepted}')
         self.id["name"] = dxp.current.engineName
 
-    def _recv(self):
+    def _recv(self) -> None:
         """Receive a line from the engine, if the engine is opened by pydraughts."""
         # The engine doesn't work otherwise.
         while True:
@@ -137,13 +138,13 @@ class DXPEngine:
             if line:
                 logging.debug(f"{self.ENGINE} %s >> %s {self.p.pid} {line}")
 
-    def _recv_accept(self):
+    def _recv_accept(self) -> bool:
         """Get if the game was accepted."""
         while True:
             if dxp.accepted is not None:
                 return dxp.accepted
 
-    def _recv_move(self):
+    def _recv_move(self) -> Optional[str]:
         """Receive the engine move."""
         while True:
             if not dxp.tReceiveHandler.isListening:
@@ -153,7 +154,7 @@ class DXPEngine:
                 logger.debug(f'new last move: {self._last_move}')
                 return self._last_move
 
-    def play(self, board):
+    def play(self, board: draughts.Game) -> draughts.engine.PlayResult:
         """Engine search."""
         if not self.game_started:
             self._start(board, self.initial_time)
@@ -168,6 +169,6 @@ class DXPEngine:
             best_move = draughts.Move(board, best_move)
         return draughts.engine.PlayResult(best_move, None)
 
-    def quit(self):
+    def quit(self) -> None:
         """Quit the engine."""
         self.console.run_command('gameend 0')

@@ -3,10 +3,11 @@ import string
 from functools import reduce
 from draughts.convert import move_to_variant, fen_to_variant
 from draughts import Game, Move
+from typing import List, Optional, Dict, Union
 
 
 class _PDNGame:
-    def __init__(self, pdn_text):
+    def __init__(self, pdn_text: str) -> None:
         self._tag_value_to_int = ["WhiteRating", "BlackRating"]
         self.values_to_variant = {20: "standard", 21: "english", 22: "italian", 23: "american pool", 24: "spanish", 25: "russian", 26: "brazilian", 27: "canadian", 28: "portuguese", 29: "czech", 30: "turkish", 31: "thai", 40: "frisian", 41: "spantsiretti"}
         self.tags = {}
@@ -19,7 +20,7 @@ class _PDNGame:
         self._rest_of_games = []
         self._read()
 
-    def _read(self):
+    def _read(self) -> None:
         """Read a PDN game."""
         lines = self.pdn_text
         lines = lines.split('\n')
@@ -127,30 +128,30 @@ class _PDNGame:
 
         self._rest_of_games = rest_of_games
 
-    def get_titles(self):
+    def get_titles(self) -> List[str, str]:
         """Get player titles."""
         return [self.tags.get("WhiteTitle", ""), self.tags.get("BlackTitle", "")]
 
-    def get_ratings(self):
+    def get_ratings(self) -> List[str, str]:
         """Get player ratings."""
         return [self.tags.get("WhiteRating", ""), self.tags.get("BlackRating", "")]
 
-    def get_na(self):
+    def get_na(self) -> List[str, str]:
         """Get player network address."""
         return [self.tags.get("WhiteNA", ""), self.tags.get("BlackNA", "")]
 
-    def get_types(self):
+    def get_types(self) -> List[str, str]:
         """Get player types (human, computer, etc.)."""
         return [self.tags.get("WhiteType", ""), self.tags.get("BlackType", "")]
 
-    def _get_rest_of_games(self):
+    def _get_rest_of_games(self) -> str:
         """Get the rest of the games."""
         # This class only reads the first game. You can get the rest with this function.
         return '\n'.join(self._rest_of_games)
 
 
 class PDNReader:
-    def __init__(self, pdn_text=None, filename=None, encodings=None):
+    def __init__(self, pdn_text: Optional[str] = None, filename: Optional[str] = None, encodings: Optional[Union[List[str], str]] = None) -> None:
         if encodings is None:
             encodings = ['utf8', 'ISO 8859/1']
         if type(encodings) == str:
@@ -182,7 +183,7 @@ class PDNWriter:
     VARIANT_TO_GAMETYPE = {'standard': 20, 'english': 21, 'italian': 22, 'russian': 25, 'brazilian': 26, 'turkish': 30, 'frisian': 40, 'frysk!': 40}
     SHORT_TO_LONG_GAMETYPE = {'20': '20,W,10,10,N2,0', '21': '21,B,8,8,N1,0', '22': '22,W,8,8,N2,1', '25': '25,W,8,8,A0,0', '26': '26,W,8,8,A0,0', '30': '30,W,8,8,A0,0', '40': '40,W,10,10,N2,0'}
 
-    def __init__(self, filename=None, board=None, moves=None, variant=None, starting_fen=None, tags=None, game_ending='*', replay_moves_from_board=True, file_encoding='utf8', file_mode='a'):
+    def __init__(self, filename: str, board: Optional[Game] = None, moves: List[Union[str, Move]] = None, variant: Optional[str] = None, starting_fen: Optional[str] = None, tags: Optional[Dict[str, str]] = None, game_ending: str = '*', replay_moves_from_board: bool = True, file_encoding: str = 'utf8', file_mode: str = 'a') -> None:
         """
         :param replay_moves_from_board: The already saved pdn_move in move_stack may be wrong because it is pseudolegal
         and doesn't account for ambiguous moves. If replay_moves_from_board is enabled, it will replay all the moves to
@@ -218,7 +219,7 @@ class PDNWriter:
         self._fix_ambiguous_moves()
         self._write()
 
-    def _fix_ambiguous_moves(self):
+    def _fix_ambiguous_moves(self) -> None:
         """Replay the moves to fix any ambiguous PDN move."""
         if self.moves and type(self.moves[0]) == str:
             return
@@ -231,7 +232,7 @@ class PDNWriter:
                 game.move(semi_move)
         self.moves = correct_moves
 
-    def _write(self):
+    def _write(self) -> None:
         """Write the PDN file."""
         pdn_text = ''
         if 'GameType' not in self.tags:
@@ -295,7 +296,7 @@ class PDNWriter:
             with open(self.filename, self.file_mode, encoding=self.file_encoding) as file:
                 file.write(self.pdn_text)
 
-    def _startpos_to_fen(self, fen):
+    def _startpos_to_fen(self, fen: str) -> str:
         """Get the starting fen."""
         if fen != 'startpos':
             return fen

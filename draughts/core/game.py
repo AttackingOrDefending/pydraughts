@@ -1,7 +1,9 @@
+from __future__ import annotations
 from draughts.core.board import Board
 from draughts.core.move import Move
 import pickle
 from draughts.convert import _algebraic_to_numeric_square, _get_squares
+from typing import List, Union, Tuple, Optional
 
 WHITE = 2
 BLACK = 1
@@ -9,7 +11,7 @@ BLACK = 1
 
 class Game:
 
-    def __init__(self, variant='standard', fen='startpos'):
+    def __init__(self, variant: str = 'standard', fen: str = 'startpos') -> None:
         self.variant = variant
         if self.variant == 'from position':
             self.variant = 'standard'
@@ -29,51 +31,51 @@ class Game:
         self.last_non_reversible_fen = self.initial_fen
 
         # moves has every move of a multi-capture as a separate move.
-        self.moves = []
+        self.moves: List[List[int]] = []
 
         # move_stack contains the moves played but a multi-capture is only considered as one move.
         # move_stack is preferred to moves.
-        self.move_stack = []
-        self.capture_stack = []
+        self.move_stack: List[Move] = []
+        self.capture_stack: List[List[Optional[int]]] = []
 
         # _not_added_move and _not_added_capture contain the moves that are part of a multi-capture.
         # that hasn't been completed yet.
-        self._not_added_move = []
-        self._not_added_capture = []
+        self._not_added_move: List[List[int]] = []
+        self._not_added_capture: List[int] = []
 
         # non_reversible_moves contains the moves since the last capture or move of a man.
         # (so it only contains non-capture king moves).
-        self.non_reversible_moves = []
+        self.non_reversible_moves: List[Move] = []
 
         # fens stores the Hub fen of each position to detect threefold repetition.
-        self.fens = []
+        self.fens: List[str] = []
         self.moves_since_last_capture = 0
         self.consecutive_noncapture_king_moves = 0
 
-    def copy(self):
+    def copy(self) -> Game:
         """Copy the board (transfers all data)."""
         # At least 6 times faster than deepcopy.
         return pickle.loads(pickle.dumps(self, -1))
 
-    def copy_fast(self):
+    def copy_fast(self) -> Game:
         """Copy the board (doesn't transfer all the data but is faster)."""
         # More than 10x faster than .copy() but it doesn't transfer all the data.
         return Game(self.variant, self.get_fen())
 
-    def move(self, move, return_captured=False):
+    def move(self, move: List[int], return_captured: bool = False) -> Union[Game, Tuple[Game, int]]:
         """Make a move."""
         if move not in self.get_possible_moves():
             raise ValueError('The provided move is not possible')
         turn = self.whose_turn()
 
-        self.board, enemy_position = self.board.push_move(move, len(self.move_stack) + 1, self._not_added_capture, return_captured=True)
+        self.board, enemy_position = self.board.push_move(move, len(self.move_stack) + 1, self._not_added_capture)
         self.moves.append(move)
 
         if self.whose_turn() == turn:
             self._not_added_move.append(move)
             self._not_added_capture.append(enemy_position)
         else:
-            captures = self._not_added_capture + [enemy_position]
+            captures: List[Optional[int]] = self._not_added_capture + [enemy_position]
             if captures[0] is None:
                 captures = []
             move_to_add_board = self._not_added_move + [move]
@@ -100,7 +102,7 @@ class Game:
         else:
             return self
 
-    def has_player_won(self, player=WHITE):
+    def has_player_won(self, player: int = WHITE) -> bool:
         """Get if a given player has won."""
         turn = self.whose_turn()
         opponent_color = WHITE if player == BLACK else BLACK
@@ -122,11 +124,11 @@ class Game:
                 return True
         return False
 
-    def is_threefold(self):
+    def is_threefold(self) -> bool:
         """Get if the current position has occurred at least three times."""
         return self.fens and self.fens.count(self.fens[-1]) >= 3
 
-    def is_draw(self):
+    def is_draw(self) -> bool:
         """Get if the game is a draw."""
         # long_diagonal contains all the squares in the long diagonal of an 8x8 board.
         long_diagonal = [4, 8, 11, 15, 18, 22, 25, 29]
@@ -246,11 +248,11 @@ class Game:
             return self.is_threefold()
         return False
 
-    def is_over(self):
+    def is_over(self) -> bool:
         """Get if the game is over."""
         return self.has_player_won(WHITE) or self.has_player_won(BLACK) or self.is_draw()
 
-    def get_winner(self):
+    def get_winner(self) -> Optional[int]:
         """
         Get the player who won.
         :returns: WHITE if white won, BLACK if black won, 0 if it is a draw, and None if the game hasn't ended.
@@ -263,18 +265,18 @@ class Game:
             return 0
         return None
 
-    def get_possible_moves(self):
+    def get_possible_moves(self) -> List[List[int]]:
         """
         Get all possible moves. Doesn't return the whole capture sequence.
         It only returns the first move of a multi-capture, so the moves are pseudo-legal.
         """
         return self.board.get_possible_moves(self._not_added_capture)
 
-    def whose_turn(self):
+    def whose_turn(self) -> int:
         """Get whose turn it is."""
         return self.board.player_turn
 
-    def get_fen(self):
+    def get_fen(self) -> str:
         """Get the Hub fen of the position."""
         playing = 'W' if self.board.player_turn == WHITE else 'B'
         fen = ''
@@ -294,7 +296,7 @@ class Game:
         final_fen = playing + fen
         return final_fen
 
-    def get_li_fen(self):
+    def get_li_fen(self) -> str:
         """Get the fen of the position."""
         playing = 'W' if self.board.player_turn == WHITE else 'B'
         white_pieces = []
@@ -314,7 +316,7 @@ class Game:
         final_fen = f"{playing}:W{','.join(white_pieces)}:B{','.join(black_pieces)}"
         return final_fen
 
-    def get_dxp_fen(self):
+    def get_dxp_fen(self) -> str:
         """Get the DXP fen of the position."""
         fen = ''
 
@@ -332,7 +334,7 @@ class Game:
 
         return fen
 
-    def get_moves(self):
+    def get_moves(self) -> Tuple[List[List[List[int]]], List[List[Optional[int]]]]:
         """
         Get the moves for a position. It returns the whole multi-capture,
         but it doesn't check the rules of each variant for which multi-capture to choose, so the moves are pseudo-legal.
@@ -356,7 +358,7 @@ class Game:
                 captured_pieces.append([captures])
         return moves, captured_pieces
 
-    def legal_moves(self):
+    def legal_moves(self) -> Tuple[List[List[List[int]]], List[List[Optional[int]]]]:
         """Get the legal moves for a position."""
         if self.variant in ['frisian', 'frysk!']:
             # Kings are worth 1.5 and men 1. The kings here are worth 1.501 because if we have a choice between 3 men or 2 kings (both are worth 3) we must capture the kings.
@@ -528,21 +530,21 @@ class Game:
                     captures_legal.append(capture)
         return moves_legal, captures_legal
 
-    def make_len_2(self, move):
+    def make_len_2(self, move: Union[str, int]) -> str:
         """
         Add a 0 in the front of the square if it is only 1 digit.
         e.g. The move 5 will be turned to 05 but the move 23 will be left the same.
         """
         return f'0{move}' if len(str(move)) == 1 else str(move)
 
-    def push_move(self, move):
+    def push_move(self, move: str) -> None:
         """
         Make a move, given a string.
         e.g. 0523 will mean move the piece at square 5 to square 23.
         """
         self.move([int(move[:2]), int(move[2:4])])
 
-    def sort_captures(self, captures):
+    def sort_captures(self, captures: List[int]) -> str:
         """
         Sort the captures from the smallest number to the highest.
         e.g. [10, 30, 19] will change to '101930'.
@@ -554,7 +556,7 @@ class Game:
         captures = ''.join(captures)
         return captures
 
-    def li_fen_to_hub_fen(self, li_fen):
+    def li_fen_to_hub_fen(self, li_fen: str) -> str:
         """Convert a fen to a Hub fen."""
         _, _, squares_per_letter, every_other_square = _get_squares(self.variant)
         fen = ''
@@ -604,7 +606,7 @@ class Game:
                 fen += 'e'
         return fen
 
-    def startpos_to_fen(self, fen):
+    def startpos_to_fen(self, fen: str) -> str:
         """Get the starting fen."""
         if fen != 'startpos':
             return fen

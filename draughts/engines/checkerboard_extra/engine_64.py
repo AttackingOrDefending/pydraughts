@@ -3,16 +3,17 @@ from ctypes import wintypes
 import os
 import draughts
 from draughts.engines.checkerboard_extra.get_checker_board import get_board, from_board
+from typing import Optional, Union, Tuple, Dict, Any
 
 
 class Engine64:
-    def __init__(self, command, cwd=None):
+    def __init__(self, command: str, cwd: Optional[str] = None) -> None:
         if cwd is None:
             cwd = os.path.realpath(os.path.expanduser("."))
         os.add_dll_directory(cwd)
         self.engine = ctypes.windll.LoadLibrary(command)
 
-    def kill_process(self):
+    def kill_process(self) -> None:
         """Kill the engine process."""
         handle = self.engine._handle
         try:
@@ -21,13 +22,13 @@ class Engine64:
         except Exception:
             self.engine.dlcose(handle)
 
-    def enginecommand(self, command):
+    def enginecommand(self, command: str) -> Tuple[bytes, int]:
         """Send an enginecommand to the engine."""
         output = ctypes.create_string_buffer(b'', 1024)
         result = self.engine.enginecommand(ctypes.create_string_buffer(bytes(command.encode('ascii')), 256), output)
         return output.value, result
 
-    def getmove(self, game, maxtime=None, time=None, increment=None, movetime=None):
+    def getmove(self, game: draughts.Game, maxtime: Optional[Union[int, float]] = None, time: Optional[Union[int, float]] = None, increment: Optional[Union[int, float]] = None, movetime: Optional[Union[int, float]] = None) -> Tuple[Optional[str], bytes, Dict[str, Any], int]:
         """Send a getmove to the engine."""
         assert maxtime is not None or time is not None or movetime is not None
 

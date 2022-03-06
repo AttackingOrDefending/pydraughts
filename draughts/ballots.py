@@ -2,10 +2,11 @@
 import random
 import json
 import os
+from typing import Tuple, List, Dict
 
 
 class Ballots:
-    def __init__(self, variant, moves=3, eleven_pieces=False, basic_positions=False, include_lost_games=False):
+    def __init__(self, variant: str, moves: int = 3, eleven_pieces: bool = False, basic_positions: bool = False, include_lost_games: bool = False) -> None:
         self.variant = variant
         self.moves = moves
         self.eleven_pieces = eleven_pieces
@@ -15,7 +16,7 @@ class Ballots:
         self.positions, self.keys = self.open_file()
         self.keys_to_use = self.keys.copy()
 
-    def _find_file(self):
+    def _find_file(self) -> str:
         """Get the filename of the ballots."""
         if self.variant == 'italian':
             return '11_italian.json'
@@ -36,7 +37,7 @@ class Ballots:
             return 'brazilian.json'
         return '3move_english.json'
 
-    def open_file(self):
+    def open_file(self) -> Tuple[Dict[str, str], List[str]]:
         """Open the ballot file."""
         filepath = os.path.join(os.path.dirname(__file__), 'ballot_files', self.filename)
         with open(filepath) as file:
@@ -44,7 +45,7 @@ class Ballots:
         keys = data['standard'] + (data.get('lost', []) if self.include_lost_games else [])
         return data['all'], keys
 
-    def get_ballot(self):
+    def get_ballot(self) -> str:
         """Get one ballot."""
         if not self.keys_to_use:
             self.keys_to_use = self.keys.copy()

@@ -9,12 +9,13 @@ import draughts
 import draughts.engine
 import re
 import math
+from typing import Union, Optional, List, Tuple, Any, Dict, Set
 
 logger = logging.getLogger(__name__)
 
 
 class HubEngine:
-    def __init__(self, command, cwd=None, ENGINE=5):
+    def __init__(self, command: Union[List[str], str], cwd: str = None, ENGINE: int = 5) -> None:
         self.ENGINE = ENGINE
         self.info = {}
         self.id = {}
@@ -32,7 +33,7 @@ class HubEngine:
         self._last_sent = ""
         self.hub()
 
-    def _open_process(self, command, cwd=None, shell=True, _popen_lock=threading.Lock()):
+    def _open_process(self, command: str, cwd: Optional[str] = None, shell: Optional[bool] = True, _popen_lock: Any = threading.Lock()) -> subprocess.Popen:
         """Open the engine process."""
         kwargs = {
             "shell": shell,
@@ -57,7 +58,7 @@ class HubEngine:
         with _popen_lock:  # Work around Python 2 Popen race condition
             return subprocess.Popen(command, **kwargs)
 
-    def kill_process(self):
+    def kill_process(self) -> None:
         """Kill the engine process."""
         try:
             # Windows
@@ -68,7 +69,7 @@ class HubEngine:
 
         self.p.communicate()
 
-    def send(self, line):
+    def send(self, line: str) -> None:
         """Send a command to the engine."""
         if line == "ponder-hit":
             while self._last_sent != "go ponder":
@@ -79,7 +80,7 @@ class HubEngine:
         self.p.stdin.flush()
         self._last_sent = line
 
-    def recv(self):
+    def recv(self) -> str:
         """Receive a line from the engine."""
         while True:
             line = self.p.stdout.readline()
@@ -93,7 +94,7 @@ class HubEngine:
             if line:
                 return line
 
-    def recv_hub(self):
+    def recv_hub(self) -> Union[Tuple[str, str], List[str, str]]:
         """Receive a line from the engine and split at the first space."""
         command_and_args = self.recv().split(None, 1)
         if len(command_and_args) == 1:
@@ -101,7 +102,7 @@ class HubEngine:
         elif len(command_and_args) == 2:
             return command_and_args
 
-    def hub(self):
+    def hub(self) -> Tuple[Dict[str, str], Set[str], Set[str]]:
         """Send the hub command to an engine."""
         self.send("hub")
 
@@ -139,7 +140,7 @@ class HubEngine:
             self.variants = variants
             self.id = engine_info
 
-    def init(self):
+    def init(self) -> None:
         """Initialize the engine."""
         self.send("init")
         while True:
@@ -151,7 +152,7 @@ class HubEngine:
             else:
                 logger.warning("Unexpected engine response to init: %s %s", command, arg)
 
-    def ping(self):
+    def ping(self) -> None:
         """Send the engine ping. They should reply with pong."""
         self.send("ping")
         while True:
@@ -161,7 +162,7 @@ class HubEngine:
             else:
                 logger.warning("Unexpected engine response to ping: %s %s", command, arg)
 
-    def setoption(self, name, value):
+    def setoption(self, name: str, value: Union[str, bool]) -> None:
         """Set an engine option."""
         if value is True:
             value = "true"
@@ -173,7 +174,7 @@ class HubEngine:
         if name == 'variant' and self.variants or name != 'variant':
             self.send("set-param name=%s value=%s" % (name, value))
 
-    def go(self, fen, moves=None, my_time=None, inc=None, moves_left=None, movetime=None, depth=None, nodes=None, ponder=False):
+    def go(self, fen: str, moves: Optional[str] = None, my_time: Optional[Union[int, float]] = None, inc: Optional[Union[int, float]] = None, moves_left: Optional[int] = None, movetime: Optional[Union[int, float]] = None, depth: Optional[int] = None, nodes: Optional[int] = None, ponder: Optional[bool] = False) -> Tuple[str, Optional[str]]:
         """Send the engine a go command."""
         if moves:
             self.send(f'pos pos={fen} moves="{moves}"')
@@ -236,19 +237,19 @@ class HubEngine:
             else:
                 logger.warning("Unexpected engine response to go: %s %s", command, arg)
 
-    def stop(self):
+    def stop(self) -> None:
         """Stop the engine from searching."""
         self.send("stop")
 
-    def ponderhit(self):
+    def ponderhit(self) -> None:
         """Send ponder-hit to the engine."""
         self.send("ponder-hit")
 
-    def quit(self):
+    def quit(self) -> None:
         """Quit the engine."""
         self.send("quit")
 
-    def play(self, board, time_limit, ponder):
+    def play(self, board: draughts.Game, time_limit: draughts.engine.Limit, ponder: bool) -> draughts.engine.PlayResult:
         """Engine search."""
         time = time_limit.time
         inc = time_limit.inc
@@ -260,8 +261,6 @@ class HubEngine:
         bestmove, pondermove = self.go(board.initial_hub_fen, moves=' '.join(hub_moves), my_time=time, inc=inc, depth=depth, nodes=nodes, movetime=movetime, ponder=ponder)
 
         ponder_move = None
-        if bestmove is None:
-            return None, None
         ponder_board = board.copy()
         best_move = draughts.Move(ponder_board, hub_move=bestmove)
         if pondermove:

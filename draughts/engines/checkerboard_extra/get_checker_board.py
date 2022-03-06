@@ -3,7 +3,7 @@ import draughts
 from math import ceil
 
 
-def get_board(board):
+def get_board(board: draughts.Game) -> ((ctypes.c_int * 8) * 8):
     """Get a CheckerBoard board (for use in CheckerBoard engines) from a Game() object."""
 
     row = (ctypes.c_int * 8)
@@ -57,7 +57,7 @@ def get_board(board):
     return checkerboard_board
 
 
-def from_board(checker_board, old_board):
+def from_board(checker_board: ((ctypes.c_int * 8) * 8), old_board: draughts.Game) -> str:
     """Get the Hub fen from a CheckerBoard board."""
 
     # board_numbers = [[square for square in column] for column in checker_board]

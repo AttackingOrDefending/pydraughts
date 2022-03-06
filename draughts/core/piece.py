@@ -1,4 +1,6 @@
+from __future__ import annotations
 from math import ceil
+from typing import List, Dict, Union, Any, Optional
 
 WHITE = 2
 BLACK = 1
@@ -6,23 +8,26 @@ BLACK = 1
 
 class Piece:
 
-    def __init__(self, variant='standard'):
-        self.player = None
+    def __init__(self, variant: str = 'standard') -> None:
+        self.player: Any = None
         self.king = False
         self.captured = False
-        self.position = None
-        self.board = None
+        self.position: Any = None
+        self.board: Any = None
         self.became_king = -100
-        self.capture_move_enemies = {}
+        self.capture_move_enemies: Dict[Union[int, None], Piece] = {}
         self.variant = variant
         self.reset_for_new_board()
 
         self.diagonal_moves = self.variant not in ['turkish']
         self.orthogonal_moves = self.variant in ['turkish']
         self.orthogonal_captures = self.variant in ['frisian', 'frysk!', 'turkish']
-        self.half_of_the_squares_are_playable = self.variant not in ['turkish']  # In most draughts variants only the dark squares are playable.
-        self.bottom_left_square_is_playable = self.variant in ['italian']  # The bottom left square isn't a playing square in italian draughts.
-        self.man_can_capture_king = self.variant not in ['italian']  # Men can't capture kings in italian draughts.
+        # In most draughts variants only the dark squares are playable.
+        self.half_of_the_squares_are_playable = self.variant not in ['turkish']
+        # The bottom left square isn't a playing square in italian draughts.
+        self.bottom_left_square_is_playable = self.variant in ['italian']
+        # Men can't capture kings in italian draughts.
+        self.man_can_capture_king = self.variant not in ['italian']
         # There are three possible values for squares_per_row (4, 5, 8), which is why two lines are needed.
         self.squares_per_row = 4 if self.variant in ['russian', 'brazilian', 'english', 'italian'] else 5
         self.squares_per_row = 8 if self.variant in ['turkish'] else self.squares_per_row
@@ -31,25 +36,25 @@ class Piece:
         self.kings_can_jump_over_an_already_captured_piece = self.variant in ['turkish']
         self.kings_can_turn_180_degrees_in_multicapture = False  # No variant supports it for now.
 
-    def reset_for_new_board(self):
+    def reset_for_new_board(self) -> None:
         """Reset possible moves to None."""
-        self.possible_capture_moves = None
-        self.possible_positional_moves = None
+        self.possible_capture_moves: Any = None
+        self.possible_positional_moves: Any = None
 
-    def get_square(self, row, column):
+    def get_square(self, row: int, column: int) -> int:
         """Get the square given the row and column."""
         return self.board.position_layout.get(row, {}).get(column)
 
-    def is_movable(self, captures):
+    def is_movable(self, captures: List[int]) -> bool:
         """Get if the piece can move."""
-        return (self.get_possible_capture_moves(captures) or self.get_possible_positional_moves()) and not self.captured
+        return bool((self.get_possible_capture_moves(captures) or self.get_possible_positional_moves()) and not self.captured)
 
-    def capture(self):
+    def capture(self) -> None:
         """Flag the piece as captured."""
         self.captured = True
         self.position = None
 
-    def move(self, new_position, move_number):
+    def move(self, new_position: int, move_number: int) -> None:
         """Move the piece to a new position."""
         self.position = new_position
         was_king = self.king
@@ -57,14 +62,14 @@ class Piece:
         if self.king != was_king:
             self.became_king = move_number
 
-    def get_possible_capture_moves(self, captures):
+    def get_possible_capture_moves(self, captures: List[int]) -> List[List[int]]:
         """Get all possible capture moves (not positional moves) for this piece."""
         if self.possible_capture_moves is None:
             self.possible_capture_moves = self.build_possible_capture_moves(captures)
 
         return self.possible_capture_moves
 
-    def build_possible_capture_moves(self, captures):
+    def build_possible_capture_moves(self, captures: List[int]) -> List[List[int]]:
         """Build all possible capture moves (not positional moves) for this piece."""
         adjacent_enemy_positions = list(filter((lambda position: position in self.board.searcher.get_positions_by_player(self.other_player)), self.get_adjacent_positions(capture=True)))
         capture_move_positions = []
@@ -84,7 +89,7 @@ class Piece:
 
         return self.create_moves_from_new_positions(capture_move_positions)
 
-    def get_diagonal_one_square_behind_enemy(self, enemy_piece):
+    def get_diagonal_one_square_behind_enemy(self, enemy_piece: Piece) -> List[int]:
         """
         Get the diagonal square directly behind the enemy piece if the piece can move only one square
         (usually men, but in some variants kings can also only move one square).
@@ -105,7 +110,7 @@ class Piece:
 
         return [self.get_square(row_behind_enemy, column_behind_enemy)]
 
-    def get_orthogonal_one_square_behind_enemy(self, enemy_piece):
+    def get_orthogonal_one_square_behind_enemy(self, enemy_piece: Piece) -> List[int]:
         """
         Get the orthogonal square directly behind the enemy piece if the piece can move only one square
         (usually men, but in some variants kings can also only move one square).
@@ -123,13 +128,14 @@ class Piece:
 
         # If half_of_the_squares_are_playable the square in the front is not playable
         # (e.g. a1 is playable but a2 isn't, so the square directly in front of it is a3)
-        if (column_difference == 0 or row_difference == 0) and (row_difference % 2 == 0 if self.half_of_the_squares_are_playable else True):
+        if (column_difference == 0 or row_difference == 0) and (
+        row_difference % 2 == 0 if self.half_of_the_squares_are_playable else True):
             next_row = enemy_row - row_difference
             next_column = enemy_column - column_difference
             return [self.get_square(next_row, next_column)]
         return []
 
-    def get_diagonal_multiple_squares_behind_enemy(self, enemy_piece, captures):
+    def get_diagonal_multiple_squares_behind_enemy(self, enemy_piece: Piece, captures: List[int]) -> List[int]:
         """Get the diagonal squares behind the enemy piece if the piece can move more than one square (kings)."""
         positions = []
         current_row = self.get_row()
@@ -217,7 +223,7 @@ class Piece:
             break
         return positions
 
-    def get_orthogonal_multiple_squares_behind_enemy(self, enemy_piece, captures):
+    def get_orthogonal_multiple_squares_behind_enemy(self, enemy_piece: Piece, captures: List[int]) -> List[int]:
         """Get the orthogonal squares behind the enemy piece if the piece can move more than one square (kings)."""
         positions = []
         current_row = self.get_row()
@@ -268,7 +274,7 @@ class Piece:
                 captures = []
             elif self.kings_can_jump_over_an_already_captured_piece and captures:
                 captures = [captures[-1]]
-            
+
             new_positions = []
             for index, position in enumerate(positions_to_check):
                 enemy_piece_found = False
@@ -295,7 +301,7 @@ class Piece:
 
         return positions
 
-    def get_position_behind_enemy(self, enemy_piece, captures):
+    def get_position_behind_enemy(self, enemy_piece: Piece, captures: List[int]) -> List[int]:
         """
         Gets the positions the piece can land after capturing the enemy piece.
         :param captures: it contains all the positions of the pieces that this piece has captured during this multi-capture,
@@ -320,46 +326,46 @@ class Piece:
                     positions += self.get_diagonal_one_square_behind_enemy(enemy_piece)
         return positions
 
-    def get_possible_positional_moves(self):
+    def get_possible_positional_moves(self) -> List[List[int]]:
         """Get all possible positional moves (not capture moves) for this piece."""
         if self.possible_positional_moves is None:
             self.possible_positional_moves = self.build_possible_positional_moves()
 
         return self.possible_positional_moves
 
-    def build_possible_positional_moves(self):
+    def build_possible_positional_moves(self) -> List[List[int]]:
         """Build all possible positional moves (not capture moves) for this piece."""
         new_positions = list(filter((lambda position: self.board.position_is_open(position)), self.get_adjacent_positions()))
 
         return self.create_moves_from_new_positions(new_positions)
 
-    def create_moves_from_new_positions(self, new_positions):
+    def create_moves_from_new_positions(self, new_positions: List[int]) -> List[List[int]]:
         """Create moves ([[cur_pos, end_pos1], [cur_pos, end_pos2]]) given the ending square ([end_pos1, end_pos2])."""
         return [[self.position, new_position] for new_position in new_positions]
 
-    def get_adjacent_positions(self, capture=False):
+    def get_adjacent_positions(self, capture: bool = False) -> List[int]:
         """Get all adjacent positions of the piece."""
         # In some variants men can't capture backwards
         criteria = bool(capture or self.king) if self.men_can_capture_backwards else bool(self.king)
         return self.get_directional_adjacent_positions(forward=True, capture=capture) + (self.get_directional_adjacent_positions(forward=False, capture=capture) if criteria else [])
 
-    def get_column(self):
+    def get_column(self) -> int:
         """Get the piece's column."""
         return (self.position - 1) % self.board.width
 
-    def get_row(self):
+    def get_row(self) -> int:
         """Get the piece's row."""
         return self.get_row_from_position(self.position)
 
-    def is_on_enemy_home_row(self):
+    def is_on_enemy_home_row(self) -> bool:
         """Get if the piece is on the enemy's home row (used for promotions)."""
         return self.get_row() == self.get_row_from_position(1 if self.other_player == BLACK else self.board.position_count)
 
-    def get_row_from_position(self, position):
+    def get_row_from_position(self, position: int) -> int:
         """Get the piece's row, given its square."""
         return ceil(position / self.board.width) - 1
 
-    def get_directional_diagonal_one_square_adjacent_positions(self, forward):
+    def get_directional_diagonal_one_square_adjacent_positions(self, forward: bool) -> List[int]:
         """
         Get the diagonal directional adjacent positions if the piece can move only one square
         (usually men, but in some variants kings can also only move one square).
@@ -374,7 +380,7 @@ class Piece:
 
         return [self.board.position_layout[next_row][column_index] for column_index in next_column_indexes]
 
-    def get_directional_orthogonal_one_square_adjacent_positions(self, forward, capture):
+    def get_directional_orthogonal_one_square_adjacent_positions(self, forward: bool, capture: bool) -> List[int]:
         """
         Get the orthogonal directional adjacent positions if the piece can move only one square
         (usually men, but in some variants kings can also only move one square).
@@ -382,11 +388,11 @@ class Piece:
         positions = []
         current_row = self.get_row()
         current_column = self.get_column()
-        
+
         # If only half_of_the_squares_are_playable, the first square directly in front is 2 rows away,
         # while if all the squares are playable, it is only 1 row away.
         row_in_front = 2 if self.half_of_the_squares_are_playable else 1
-        
+
         if self.orthogonal_moves or self.orthogonal_captures and self.men_can_capture_backwards and capture:
             # If self.orthogonal_moves is False:
             # With forward=True we will calculate left and up and with forward=False we will calculate right and down.
@@ -400,8 +406,9 @@ class Piece:
             # forward=False will return the same as forward=True because it is not meant to be used when
             # self.orthogonal_moves is True.
             # This is used for example in turkish.
-            
-            next_row = current_row + ((row_in_front if self.player == BLACK else -row_in_front) * (1 if forward else -1))
+
+            next_row = current_row + (
+                        (row_in_front if self.player == BLACK else -row_in_front) * (1 if forward else -1))
             next_column = current_column + ((1 if self.player == BLACK else -1) * (1 if forward else -1))
 
             if next_row in self.board.position_layout:
@@ -416,19 +423,18 @@ class Piece:
 
         return positions
 
-    def get_directional_diagonal_multiple_squares_adjacent_positions(self, forward, capture):
+    def get_directional_diagonal_multiple_squares_adjacent_positions(self, forward: bool, capture: bool) -> List[int]:
         """Get the diagonal directional adjacent positions if the piece can move more than one square (kings)."""
-        positions = []
+        positions: List[int] = []
         current_row = self.get_row()
         current_column = self.get_column()
-        
+
         positions_diagonal_1 = []
         positions_diagonal_2 = []
         for i in range(1, self.board.height):
             next_row = current_row + ((i if self.player == BLACK else -i) * (1 if forward else -1))
 
             if next_row not in self.board.position_layout:
-                positions += []
                 continue
 
             next_column_indexes = self.get_next_column_indexes(current_row, current_column, i, True)
@@ -461,7 +467,7 @@ class Piece:
 
         return positions
 
-    def get_directional_orthogonal_multiple_squares_adjacent_positions(self, forward, captures):
+    def get_directional_orthogonal_multiple_squares_adjacent_positions(self, forward: bool, captures: bool) -> List[int]:
         """Get the orthogonal directional adjacent positions if the piece can move more than one square (kings)."""
         if not (self.orthogonal_moves or self.orthogonal_captures and captures):
             return []
@@ -469,20 +475,21 @@ class Piece:
         current_row = self.get_row()
         current_column = self.get_column()
         row_in_front = 2 if self.half_of_the_squares_are_playable else 1
-        
+
         for multiplier in range(1, self.board.height):
-            next_row = current_row + multiplier * (row_in_front if self.player == BLACK else -row_in_front) * (1 if forward else -1)
+            next_row = current_row + multiplier * (row_in_front if self.player == BLACK else -row_in_front) * (
+                1 if forward else -1)
             if next_row in self.board.position_layout:
                 positions.append(self.board.position_layout[next_row][current_column])
-        
+
         for multiplier in range(1, self.board.width):
             next_column = current_column + multiplier * (1 if self.player == BLACK else -1) * (1 if forward else -1)
             if next_column in self.board.position_layout[current_row]:
                 positions.append(self.board.position_layout[current_row][next_column])
-        
+
         return positions
 
-    def get_directional_adjacent_positions(self, forward, capture=False):
+    def get_directional_adjacent_positions(self, forward: bool, capture: bool = False) -> List[int]:
         """Get the adjacent positions, either forwards or backwards."""
         positions = []
         if not self.king:
@@ -503,7 +510,7 @@ class Piece:
                     positions += self.get_directional_orthogonal_one_square_adjacent_positions(forward, capture)
         return positions
 
-    def get_next_column_indexes(self, current_row, current_column, i=1, unfiltered=False):
+    def get_next_column_indexes(self, current_row: int, current_column: int, i: int = 1, unfiltered: bool = False) -> List[int]:
         """
         Get the index of the next column.
         It isn't as simple as finding the next row (where we only add or subtract 1) but the column index only changes
@@ -525,8 +532,8 @@ class Piece:
         if unfiltered:
             return column_indexes
         else:
-            return filter((lambda column_index: 0 <= column_index < self.board.width), column_indexes)
+            return list(filter((lambda column_index: 0 <= column_index < self.board.width), column_indexes))
 
     @property
-    def other_player(self):
+    def other_player(self) -> int:
         return BLACK if self.player == WHITE else WHITE
