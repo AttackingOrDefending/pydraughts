@@ -1,15 +1,10 @@
 from draughts import Game, Move
 from draughts.convert import move_from_variant
-import cProfile
-import pstats
-import io
 
 
 def play_game(moves, variant):
     game = Game(variant)
     for move in moves:
-        # print(move, game.get_li_fen())
-        # print(game.legal_moves())
         for semi_move in Move(pdn_move=move_from_variant(move, variant=variant), board=game).board_move:
             game.move(semi_move)
     return game
@@ -47,14 +42,3 @@ def test_variants():
     # Turkish
     turkish_moves = ['e3-e4', 'f6-f5', 'b3-b4', 'f5-g5', 'f3-f4', 'a6-a5', 'a3-a4', 'a5xa1', 'b4-a4', 'a1xa6', 'e4-e5', 'e6xg4', 'c3-b3', 'a6-a3', 'd3-d4', 'a3xe1', 'd2-d3', 'e1-f1', 'd4-e4']
     play_game(turkish_moves, 'turkish')
-
-
-pr = cProfile.Profile()
-pr.enable()
-test_variants()
-pr.disable()
-s = io.StringIO()
-sortby = pstats.SortKey.TIME
-ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-ps.print_stats()
-print(s.getvalue())
