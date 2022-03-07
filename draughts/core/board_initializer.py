@@ -1,4 +1,5 @@
 from draughts.core.piece import Piece
+from typing import Any
 
 WHITE = 2
 BLACK = 1
@@ -6,16 +7,16 @@ BLACK = 1
 
 class BoardInitializer:
 
-    def __init__(self, board, fen='startpos'):
+    def __init__(self, board: Any, fen: str = 'startpos') -> None:
         self.board = board
         self.fen = fen
 
-    def initialize(self):
+    def initialize(self) -> None:
         """Initialize the board."""
         self.build_position_layout()
         self.set_starting_pieces()
 
-    def build_position_layout(self):
+    def build_position_layout(self) -> None:
         """Build the position layout."""
         self.board.position_layout = {}
         position = 1
@@ -27,7 +28,7 @@ class BoardInitializer:
                 self.board.position_layout[row][column] = position
                 position += 1
 
-    def set_starting_pieces(self):
+    def set_starting_pieces(self) -> None:
         """Create the pieces."""
         pieces = []
         if self.fen != 'startpos':  # Hub fen
@@ -60,7 +61,7 @@ class BoardInitializer:
 
         self.board.pieces = pieces
 
-    def create_piece(self, player_number, position):
+    def create_piece(self, player_number: int, position: int) -> Piece:
         """Create a piece."""
         piece = Piece(variant=self.board.variant)
         piece.player = player_number

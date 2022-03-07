@@ -3,10 +3,11 @@ from draughts.engines.checkerboard_extra.engine_client import Engine32
 import os
 import draughts
 import draughts.engine
+from typing import Union, List, Any
 
 
 class CheckerBoardEngine:
-    def __init__(self, command, divide_time_by=40, checkerboard_timing=False, ENGINE=5):
+    def __init__(self, command: Union[List[str], str], divide_time_by: int = 40, checkerboard_timing: bool = False, ENGINE: int = 5) -> None:
         self.cwd = os.path.realpath(os.path.expanduser("."))
         if type(command) == str:
             command = [command]
@@ -24,7 +25,7 @@ class CheckerBoardEngine:
         self.bits = self._open_engine()
         self.id["name"] = self.engine.enginecommand('name')[0].decode()
 
-    def _open_engine(self):
+    def _open_engine(self) -> int:
         """Open the engine process."""
         try:
             self.engine = Engine64(self.command, self.cwd)
@@ -33,21 +34,21 @@ class CheckerBoardEngine:
             self.engine = Engine32(self.command)
             return 32
 
-    def setoption(self, name, value):
+    def setoption(self, name: str, value: Union[str, int]) -> None:
         """Set an engine option."""
         if name == 'divide-time-by':
             self.divide_time_by = value
         else:
             self.engine.enginecommand(f"set {name} {value}")
 
-    def kill_process(self):
+    def kill_process(self) -> None:
         """Kill the engine process."""
         if self.bits == 32:
             self.engine.shutdown_server32()
         else:
             self.engine.kill_process()
 
-    def play(self, board, time_limit):
+    def play(self, board: draughts.Game, time_limit: Any) -> Any:
         """Engine search."""
         time = time_limit.time
         inc = time_limit.inc
@@ -118,7 +119,7 @@ class CheckerBoardEngine:
         self.result = result
         return draughts.engine.PlayResult(bestmove, None, {'info': self.info, 'result': self.result})
 
-    def _row_col_to_num(self, board, row, col):
+    def _row_col_to_num(self, board: draughts.Game, row: int, col: int) -> int:
         """Get the square from the row and column."""
         if row % 2 == 0:
             col = ((col + 2) / 2) - 1

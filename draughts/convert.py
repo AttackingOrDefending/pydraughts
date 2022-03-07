@@ -1,9 +1,10 @@
 from math import ceil
 import string
 import re
+from typing import Tuple, Optional, List
 
 
-def _get_squares(variant):
+def _get_squares(variant: Optional[str]) -> Tuple[int, int, int, bool]:
     """Returns the total squares, squares per row, squares per column and if every other square is playable."""
     # The default values are for International draughts.
     total_squares = 50
@@ -22,7 +23,7 @@ def _get_squares(variant):
     return total_squares, squares_per_row, squares_per_column, every_other_square
 
 
-def _rotate_move(internal_move, notation=None, variant=None):
+def _rotate_move(internal_move: str, notation: Optional[int] = None, variant: Optional[str] = None) -> str:
     """Rotate the move."""
     separators = ['-', 'x', ':']
     splitted_move = None
@@ -34,11 +35,10 @@ def _rotate_move(internal_move, notation=None, variant=None):
             break
     splitted_move = list(map(int, splitted_move))
     variant_to_notation = {'standard': 2, 'english': 1, 'italian': 2, 'russian': 0, 'brazilian': 0, 'turkish': 0, 'frisian': 2, 'frysk!': 2, 'antidraughts': 2, 'breakthrough': 2}
-    value = variant_to_notation.get(variant, 2)
     if notation is None:
-        notation = value
+        notation = variant_to_notation.get(variant, 2)
 
-    def reverse_column(splitted_int_move):
+    def reverse_column(splitted_int_move: List[int]) -> List[int]:
         per_row = _get_squares(variant)[1]
         for index, square in enumerate(splitted_int_move):
             square_in_row = square % per_row
@@ -47,12 +47,12 @@ def _rotate_move(internal_move, notation=None, variant=None):
             splitted_int_move[index] = ((square - 1) // per_row) * per_row + (per_row - (square_in_row - 1))
         return splitted_int_move
 
-    def reverse_row_and_column(splitted_int_move):
+    def reverse_row_and_column(splitted_int_move: List[int]) -> List[int]:
         squares = _get_squares(variant)[0]
         splitted_int_move = list(map(lambda square: squares + 1 - square, splitted_int_move))
         return splitted_int_move
 
-    def reverse_row(splitted_int_move):
+    def reverse_row(splitted_int_move: List[int]) -> List[int]:
         return reverse_column(reverse_row_and_column(splitted_int_move))
 
     rotated_move = None
@@ -69,7 +69,7 @@ def _rotate_move(internal_move, notation=None, variant=None):
     return correct_seperator.join(rotated_move)
 
 
-def _algebraic_to_number(algebraic_move, squares_per_letter=None, variant=None, every_other_square=None):
+def _algebraic_to_number(algebraic_move: str, squares_per_letter: Optional[int] = None, variant: Optional[str] = None, every_other_square: Optional[bool] = None) -> str:
     """Convert an algebraic move to a numeric move."""
     if every_other_square is None:
         if variant == 'turkish':
@@ -107,17 +107,17 @@ def _algebraic_to_number(algebraic_move, squares_per_letter=None, variant=None, 
     return correct_seperator.join(numeric_move)
 
 
-def _algebraic_to_numeric_square(square, squares_per_letter, every_other_square=True):
+def _algebraic_to_numeric_square(square: str, squares_per_letter: int, every_other_square: bool = True) -> int:
     """Convert an algebraic square to a numeric square."""
     algebraic_notation = square[0] in string.ascii_letters
     if not algebraic_notation:
-        return square
+        return int(square)
     if not every_other_square:
         return (int(square[1]) - 1) * squares_per_letter + string.ascii_lowercase.index(square[0]) + 1
     return (int(square[1]) - 1) * squares_per_letter + ceil(string.ascii_lowercase.index(square[0]) // 2) + 1
 
 
-def _number_to_algebraic(number_move, width=None, variant=None, every_other_square=None):
+def _number_to_algebraic(number_move: str, width: Optional[int] = None, variant: Optional[str] = None, every_other_square: Optional[bool] = None) -> str:
     """Convert a numeric move to an algebraic move."""
     if every_other_square is None:
         if variant == 'turkish':
@@ -150,11 +150,10 @@ def _number_to_algebraic(number_move, width=None, variant=None, every_other_squa
     algebraic_move = []
     for move in splitted_move:
         algebraic_move.append(_numeric_to_algebraic_square(move, width, every_other_square=every_other_square))
-    algebraic_move = list(map(str, algebraic_move))
     return correct_seperator.join(algebraic_move)
 
 
-def _numeric_to_algebraic_square(square, width, every_other_square=True):
+def _numeric_to_algebraic_square(square: str, width: int, every_other_square: Optional[bool] = True) -> str:
     """Convert a numeric square to an algebraic square."""
     algebraic_notation = square[0] in string.ascii_letters
     if algebraic_notation:
@@ -168,7 +167,7 @@ def _numeric_to_algebraic_square(square, width, every_other_square=True):
     return string.ascii_lowercase[column] + str(row + 1)
 
 
-def _change_fen_from_variant(li_fen, notation=None, squares_per_letter=5, every_other_square=True, variant=None):
+def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, squares_per_letter: int = 5, every_other_square: bool = True, variant: Optional[str] = None) -> str:
     """Convert an internal fen to the correct fen for the variant."""
     if variant:
         _, _, squares_per_letter, every_other_square = _get_squares(variant)
@@ -182,7 +181,7 @@ def _change_fen_from_variant(li_fen, notation=None, squares_per_letter=5, every_
     for white_piece in white_pieces:
         if '-' in white_piece:
             start_end = white_piece.split('-')
-            start, end = int(_algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square)), int(_algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square))
+            start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
             for number in range(start, end + 1):
                 white_pieces_remove_hyphen.append(_rotate_move(str(number), notation=notation, variant=variant))
         else:
@@ -192,7 +191,7 @@ def _change_fen_from_variant(li_fen, notation=None, squares_per_letter=5, every_
     for black_piece in black_pieces:
         if '-' in black_piece:
             start_end = black_piece.split('-')
-            start, end = int(_algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square)), int(_algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square))
+            start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
             for number in range(start, end + 1):
                 black_pieces_remove_hyphen.append(_rotate_move(str(number), notation=notation, variant=variant))
         else:
@@ -206,8 +205,6 @@ def _change_fen_from_variant(li_fen, notation=None, squares_per_letter=5, every_
 
     white_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, white_pieces_remove_hyphen))
     black_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, black_pieces_remove_hyphen))
-    white_pieces_remove_hyphen = list(map(int, white_pieces_remove_hyphen))
-    black_pieces_remove_hyphen = list(map(int, black_pieces_remove_hyphen))
     white_pieces_remove_hyphen.sort()
     black_pieces_remove_hyphen.sort()
     white_pieces_remove_hyphen = list(map(str, white_pieces_remove_hyphen))

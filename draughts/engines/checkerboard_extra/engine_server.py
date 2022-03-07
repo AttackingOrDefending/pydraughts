@@ -2,6 +2,7 @@ import ctypes
 import draughts
 from draughts.engines.checkerboard_extra.get_checker_board import get_board, from_board
 import os
+from typing import Tuple, Optional, Union, Dict, Any
 
 from msl.loadlib import Server32
 
@@ -11,16 +12,16 @@ with open(os.path.join(os.path.dirname(__file__), 'engine_name.txt')) as file:
 
 class Engine32Server(Server32):
 
-    def __init__(self, host, port, **kwargs):
+    def __init__(self, host: str, port: int, **kwargs: Any) -> None:
         super(Engine32Server, self).__init__(DLL_name, 'windll', host, port)
 
-    def enginecommand(self, command):
+    def enginecommand(self, command: str) -> Tuple[bytes, int]:
         """Send an enginecommand to the engine."""
         output = ctypes.create_string_buffer(b'', 1024)
         result = self.lib.enginecommand(ctypes.create_string_buffer(bytes(command.encode('ascii')), 256), output)
         return output.value, result
 
-    def getmove(self, game, maxtime, time, increment, movetime):
+    def getmove(self, game: draughts.Game, maxtime: Union[int, float, None] = None, time: Union[int, float, None] = None, increment: Union[int, float, None] = None, movetime: Union[int, float, None] = None) -> Tuple[Optional[str], bytes, Dict[str, Any], int]:
         """Send a getmove to the engine."""
 
         # From CheckerBoard API:

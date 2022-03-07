@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 
 class ConsoleHandler:
-    def __init__(self):
+    def __init__(self) -> None:
         self.isRunning = False  # not used
 
-    def run_command(self, comm):
+    def run_command(self, comm: str) -> None:
         """Send a command to the DXP engine."""
 
         global current, mySock, lock
@@ -186,11 +186,11 @@ class ConsoleHandler:
 class ReceiveHandler(threading.Thread):
     # Subslass of Thread to handle incoming messages from client.
 
-    def __init__(self):
+    def __init__(self) -> None:
         threading.Thread.__init__(self)
         self.isListening = False
 
-    def run(self):
+    def run(self) -> None:
         """Start the receiver. It receives the moves from the DXP engine."""
         # Handling incoming messages from server.
         # Excutes when thread started. Overriding python threading.Thread.run()
