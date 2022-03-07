@@ -11,3 +11,6 @@ def test_game():
     correct_moves.sort()
     correct_captures = [[None]] * 12
     assert moves == correct_moves and captures == correct_captures
+
+
+test_game()

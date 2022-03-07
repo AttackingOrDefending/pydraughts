@@ -33,6 +33,7 @@ class DXPEngine:
         self.receiver = dxp.tReceiveHandler
         self.game_started = False
         self._last_move = None
+        self.exit = False
 
         for name, value in options.items():
             self.setoption(name, value)
@@ -97,6 +98,7 @@ class DXPEngine:
     def kill_process(self) -> None:
         """Kill the engine process."""
         if not self.engine_opened:
+            self.exit = True
             try:
                 # Windows
                 self.p.send_signal(signal.CTRL_BREAK_EVENT)
@@ -131,12 +133,18 @@ class DXPEngine:
         """Receive a line from the engine, if the engine is opened by pydraughts."""
         # The engine doesn't work otherwise.
         while True:
-            line = self.p.stdout.readline()
+            try:
+                line = self.p.stdout.readline()
 
-            line = line.rstrip()
+                line = line.rstrip()
 
-            if line:
-                logging.debug(f"{self.ENGINE} %s >> %s {self.p.pid} {line}")
+                if line:
+                    logging.debug(f"{self.ENGINE} %s >> %s {self.p.pid} {line}")
+            except ValueError as err:
+                if self.exit:
+                    break
+                else:
+                    raise err
 
     def _recv_accept(self) -> bool:
         """Get if the game was accepted."""

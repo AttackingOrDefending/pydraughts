@@ -113,6 +113,25 @@ def test_hub_engines():
     logger.info('Quited hub 1')
     hub.kill_process()
     logger.info('Killed hub 1')
+    
+    hub = HubEngine([f'scan{file_extension}', 'hub'])
+    hub.init()
+    limit = Limit(10)
+    game = draughts.Game()
+    logger.info('Starting game 2')
+    while not game.is_over() and len(game.move_stack) < 100:
+        logger.info(f'move2: {len(game.move_stack)}')
+        best_move = hub.play(game, limit, False)
+        if best_move.move:
+            for move in best_move.move.board_move:
+                game.move(move)
+        else:
+            break
+    logger.info('Finished playing 2')
+    hub.quit()
+    logger.info('Quited hub 2')
+    hub.kill_process()
+    logger.info('Killed hub 2')
 
 
 @pytest.mark.timeout(150, method="thread")
@@ -139,13 +158,40 @@ def test_hub_dxp_engines():
             break
     logger.info('Finished playing 1')
     dxp.quit()
-    logger.info('Quitted dxp 1')
+    logger.info('Quited dxp 1')
     dxp.kill_process()
     logger.info('Killed dxp 1')
     hub.quit()
     logger.info('Quited hub 1')
     hub.kill_process()
     logger.info('Killed hub 1')
+
+    hub = HubEngine('kr_hub.exe')
+    hub.init()
+    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    limit = Limit(10)
+    game = draughts.Game()
+    logger.info('Starting game 2')
+    while not game.is_over() and len(game.move_stack) < 100:
+        logger.info(f'move2: {len(game.move_stack)}')
+        if len(game.move_stack) % 2 == 0:
+            best_move = dxp.play(game)
+        else:
+            best_move = hub.play(game, limit, False)
+        if best_move.move:
+            for move in best_move.move.board_move:
+                game.move(move)
+        else:
+            break
+    logger.info('Finished playing 2')
+    dxp.quit()
+    logger.info('Quited dxp 2')
+    dxp.kill_process()
+    logger.info('Killed dxp 2')
+    hub.quit()
+    logger.info('Quited hub 2')
+    hub.kill_process()
+    logger.info('Killed hub 2')
 
 
 @pytest.mark.timeout(150, method="thread")
@@ -168,6 +214,21 @@ def test_checkerboard_engines():
     logger.info('Finished playing 1')
     checkerboard.kill_process()
 
+    checkerboard = CheckerBoardEngine('cake_189f.dll')
+    limit = Limit(10, 2)
+    game = draughts.Game(variant='english')
+    logger.info('Starting game 2')
+    while not game.is_over() and len(game.move_stack) < 100:
+        logger.info(f'move2: {len(game.move_stack)}')
+        best_move = checkerboard.play(game, limit)
+        if best_move.move:
+            for move in best_move.move.board_move:
+                game.move(move)
+        else:
+            break
+    logger.info('Finished playing 2')
+    checkerboard.kill_process()
+
 
 @pytest.mark.timeout(150, method="thread")
 def test_russian_checkerboard_engines():
@@ -187,4 +248,19 @@ def test_russian_checkerboard_engines():
         else:
             break
     logger.info('Finished playing 1')
+    checkerboard.kill_process()
+
+    checkerboard = CheckerBoardEngine('kestog.dll')
+    limit = Limit(10, 2)
+    game = draughts.Game(variant='russian')
+    logger.info('Starting game 2')
+    while not game.is_over() and len(game.move_stack) < 100:
+        logger.info(f'move2: {len(game.move_stack)}')
+        best_move = checkerboard.play(game, limit)
+        if best_move.move:
+            for move in best_move.move.board_move:
+                game.move(move)
+        else:
+            break
+    logger.info('Finished playing 2')
     checkerboard.kill_process()
