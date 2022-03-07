@@ -1,8 +1,9 @@
 from draughts.convert import move_from_variant
+from typing import List, Optional, Any
 
 
 class Move:
-    def __init__(self, board=None, board_move=None, hub_move=None, hub_position_move=None, pdn_move=None, pdn_position_move=None, steps_move=None, li_api_move=None, li_one_move=None, has_captures=None, possible_moves=None, possible_captures=None, hub_to_pdn_pseudolegal=False, variant=None, notation=2, squares_per_letter=4):
+    def __init__(self, board: Any = None, board_move: List[List[int]] = None, hub_move: str = None, hub_position_move: str = None, pdn_move: str = None, pdn_position_move: str = None, steps_move: List[int] = None, li_api_move: str = None, li_one_move: str = None, has_captures: Optional[bool] = None, possible_moves: List[List[List[int]]] = None, possible_captures: List[List[Optional[int]]] = None, hub_to_pdn_pseudolegal: bool = False, variant: Optional[str] = None, notation: int = 2, squares_per_letter: int = 4) -> None:
         self.board_move = board_move
         self.hub_move = hub_move
         self.hub_position_move = hub_position_move
@@ -55,7 +56,7 @@ class Move:
         captures = ''.join(captures)
         return captures
 
-    def _to_board(self):
+    def _to_board(self) -> None:
         """Convert the move to all other move types. Requires a Game() object to make the conversions."""
 
         # Hub related move
@@ -135,7 +136,7 @@ class Move:
                 board_move.append([steps[index - 1], steps[index]])
             self.board_move = board_move
 
-    def _from_board(self):
+    def _from_board(self) -> None:
         """Convert the move to a board_move. Requires a Game() object to make the conversions."""
 
         # Board related move
@@ -200,7 +201,7 @@ class Move:
             # li_one_move
             self.li_one_move = "".join(list(map(self._make_len_2, self.steps_move)))
 
-    def _no_board(self):
+    def _no_board(self) -> None:
         """Makes as many conversions as possible if the board was not given."""
 
         # Board related moves
