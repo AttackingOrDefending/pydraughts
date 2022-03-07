@@ -173,12 +173,49 @@ class Move:
 
             # PDN position move
 
-            starts_endings = []
-            for possible_move in self.possible_moves:
-                starts_endings.append(self._make_len_2(possible_move[0][0]) + self._make_len_2(possible_move[-1][1]))
-            self.ambiguous = starts_endings.count(self._make_len_2(self.board_move[0][0]) + self._make_len_2(self.board_move[-1][1])) >= 2
+            start_end = self._make_len_2(self.board_move[0][0]) + self._make_len_2(self.board_move[-1][1])
+            same_start_ends = 0
+            moves_with_same_start_end_and_captures = []
+            for possible_move, possible_captures in zip(self.possible_moves, self.possible_captures):
+                possible_start_end = self._make_len_2(possible_move[0][0]) + self._make_len_2(possible_move[-1][1])
+                if possible_start_end == start_end:
+                    same_start_ends += 1
+                    possible_steps_move = [possible_move[0][0]]
+                    for semi_move in possible_move:
+                        possible_steps_move.append(semi_move[1])
+                    moves_with_same_start_end_and_captures.append(possible_steps_move)
+            self.ambiguous = same_start_ends >= 2
             if self.ambiguous:
-                self.pdn_position_move = "".join(list(map(self._make_len_2, self.steps_move)))
+                # From FMJD (https://pdn.fmjd.org/grammar.html#pdn-3-0-grammar):
+                # Disambiguated capture sequences have to specify a complete sequence of intermediate squares
+                # along the path of the capture. If there is a change in direction, an intermediate square is
+                # the square where a turn in direction was made. If there was not a change in direction,
+                # the intermediate square is the square immediately behind a captured piece.
+                #
+                # This means that if we continue going in the same direction,
+                # the intermediate square is the square immediately behind the captured piece.
+                # pydraughts supports providing a square not immediately behind the captured piece, but when we
+                # convert it to a PDN move, we have to change it to the square immediately behind the captured piece.
+                correct_start_ends = []
+                for index in range(1, len(self.steps_move) - 1):
+                    closest_distance = 1000
+
+                    for steps_move in moves_with_same_start_end_and_captures:
+                        distance = abs(steps_move[index - 1] - steps_move[index])
+
+                        # New closest square
+                        if distance < closest_distance:
+                            closest_distance = distance
+                            correct_start_ends = [steps_move]
+                        # The same intermediate square.
+                        # This means that the difference is in a later intermediate square.
+                        elif distance == closest_distance:
+                            correct_start_ends.append(steps_move)
+                        moves_with_same_start_end_and_captures = correct_start_ends
+
+                correct_move = correct_start_ends[0]
+
+                self.pdn_position_move = "".join(list(map(self._make_len_2, correct_move)))
             else:
                 self.pdn_position_move = self._make_len_2(self.board_move[0][0]) + self._make_len_2(self.board_move[-1][1])
 

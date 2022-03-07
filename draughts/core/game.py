@@ -60,7 +60,10 @@ class Game:
     def copy_fast(self) -> Game:
         """Copy the board (doesn't transfer all the data but is faster)."""
         # More than 10x faster than .copy() but it doesn't transfer all the data.
-        return Game(self.variant, self.get_fen())
+        game = Game(self.variant, self.get_fen())
+        game._not_added_move = self._not_added_move.copy()
+        game._not_added_capture = self._not_added_capture.copy()
+        return game
 
     def move(self, move: List[int], return_captured: bool = False) -> Union[Game, Tuple[Game, int]]:
         """Make a move."""
