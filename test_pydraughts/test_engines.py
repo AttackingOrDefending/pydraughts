@@ -90,7 +90,7 @@ download_saltare()
 download_kestog()
 
 
-@pytest.mark.timeout(150, method="thread")
+@pytest.mark.timeout(300, method="thread")
 def test_hub_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
@@ -134,7 +134,7 @@ def test_hub_engines():
     logger.info('Killed hub 2')
 
 
-@pytest.mark.timeout(150, method="thread")
+@pytest.mark.timeout(300, method="thread")
 def test_hub_dxp_engines():
     if platform != 'win32':
         assert True
@@ -194,7 +194,7 @@ def test_hub_dxp_engines():
     logger.info('Killed hub 2')
 
 
-@pytest.mark.timeout(150, method="thread")
+@pytest.mark.timeout(300, method="thread")
 def test_checkerboard_engines():
     if platform != 'win32':
         assert True
@@ -230,7 +230,7 @@ def test_checkerboard_engines():
     checkerboard.kill_process()
 
 
-@pytest.mark.timeout(150, method="thread")
+@pytest.mark.timeout(300, method="thread")
 def test_russian_checkerboard_engines():
     if platform != 'win32':
         assert True
