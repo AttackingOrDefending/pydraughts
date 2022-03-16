@@ -37,7 +37,8 @@ def download_scan():
 
 
 def download_kr():
-    response = requests.get('http://edgilbert.org/InternationalDraughts/downloads/kr_hub_163.zip', allow_redirects=True)
+    headers = {'User-Agent': 'User Agent', 'From': 'mail@mail.com'}
+    response = requests.get('http://edgilbert.org/InternationalDraughts/downloads/kr_hub_163.zip', headers=headers, allow_redirects=True)
     with open('./TEMP/kr_zip.zip', 'wb') as file:
         file.write(response.content)
     with zipfile.ZipFile('./TEMP/kr_zip.zip', 'r') as zip_ref:
