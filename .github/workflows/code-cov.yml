@@ -1,0 +1,26 @@
+name: CodeCov
+on: [push, pull_request]
+jobs:
+  run:
+    runs-on: windows-latest
+    env:
+      OS: windows-latest
+      PYTHON: '3.10'
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: ‘2’
+
+    - name: Setup Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.10"
+    - name: Generate Report
+      run: |
+        pip install msl-loadlib pytest pytest-timeout pytest-cov requests
+        pytest --cov=draughts --cov-report=xml
+        coverage report
+    - name: Upload Coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        threshold: "10%"
