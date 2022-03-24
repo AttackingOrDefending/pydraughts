@@ -1,6 +1,7 @@
 name: CodeCov
 
 on: [push, pull_request]
+
 jobs:
   run:
     runs-on: windows-latest
@@ -23,6 +24,3 @@ jobs:
         coverage report
     - name: Upload Coverage to Codecov
       uses: codecov/codecov-action@v2
-      with:
-        target: auto
-        threshold: 10%
