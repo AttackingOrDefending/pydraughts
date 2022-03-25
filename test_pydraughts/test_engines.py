@@ -117,6 +117,8 @@ def test_hub_engines():
     
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
+    hub.ping()
+    hub.setoption('book', False)
     limit = Limit(10)
     game = draughts.Game()
     logger.info('Starting game 2')
@@ -216,7 +218,7 @@ def test_checkerboard_engines():
     checkerboard.kill_process()
 
     checkerboard = CheckerBoardEngine('cake_189f.dll')
-    limit = Limit(10, 2)
+    limit = Limit(10)
     game = draughts.Game(variant='english')
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
@@ -229,6 +231,12 @@ def test_checkerboard_engines():
             break
     logger.info('Finished playing 2')
     checkerboard.kill_process()
+
+    # Test movetime
+    checkerboard = CheckerBoardEngine('cake_189f.dll')
+    limit = Limit(movetime=2)
+    game = draughts.Game(variant='english')
+    best_move = checkerboard.play(game, limit)
 
 
 @pytest.mark.timeout(300, method="thread")
@@ -252,7 +260,7 @@ def test_russian_checkerboard_engines():
     checkerboard.kill_process()
 
     checkerboard = CheckerBoardEngine('kestog.dll')
-    limit = Limit(10, 2)
+    limit = Limit(10)
     game = draughts.Game(variant='russian')
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
