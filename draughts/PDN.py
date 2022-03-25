@@ -46,7 +46,7 @@ class _PDNGame:
         last_move_line = -1
         move_lines = []
         for index, line in enumerate(lines[last_tag_line + 1:]):
-            splitted_line = re.split(r'\s(1-0|1/2-1/2|0-1|2-0|1-1|0-2|0-0|\*)\s', ' ' + line + ' ', maxsplit=1)
+            splitted_line = re.split(r'[\s|\]](1-0|1/2-1/2|0-1|2-0|1-1|0-2|0-0|\*)[\s|\[]', ' ' + line + ' ', maxsplit=1)
             if len(splitted_line) == 3:
                 move_lines.append(splitted_line[0])
                 last_move_line = index

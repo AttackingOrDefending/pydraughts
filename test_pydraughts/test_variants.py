@@ -1,3 +1,4 @@
+import draughts
 from draughts import Game, Move
 from draughts.convert import move_from_variant
 
@@ -5,8 +6,10 @@ from draughts.convert import move_from_variant
 def play_game(moves, variant):
     game = Game(variant)
     for move in moves:
+        assert game.get_winner() is None
         for semi_move in Move(pdn_move=move_from_variant(move, variant=variant), board=game).board_move:
             game.move(semi_move)
+    game.get_winner()
     return game
 
 
@@ -23,7 +26,8 @@ def test_variants():
     play_game(frysk_moves, 'frysk!')
     # Antidraughts
     antidraughts_moves = '35-30 16-21 31-27 20-24 27x16 24x35 36-31 15-20 31-26 20-25 41-36 17-21 16x27 10-15 33-28 18-22 27x18 13x33 38x29 12-18 29-24 19x30 32-27 18-22 27x18 5-10 43-38 8-12 18-13 9x18 36-31 18-22 49-43 22-27 31x22 12-18 22x13 14-19 13x24 30x19 34-29 11-17 26-21 17x26 29-24 19x30 37-32 6-11 46-41 7-12 38-33 30-34 40x29 12-17 45-40 2-8 50-45 15-20 41-36 1-7 36-31 26x28 33x22 17x28 39-33 28x50 42-37 35x44 37-31 8-12 29-24 20x29 45-40 44x35 43-39 50x36 47-41 36x47 48-42 47x33'.split()
-    play_game(antidraughts_moves, 'antidraughts')
+    game = play_game(antidraughts_moves, 'antidraughts')
+    assert game.get_winner() == draughts.WHITE
     # Breakthrough
     breakthrough_moves = '32-28 19-24 37-32 17-21 34-29 21-26 39-34 26x37 42x31 18-22 28x17 11x22 44-39 12-18 47-42 14-19 50-44 10-14 41-37 7-12 34-30 4-10 46-41 1-7 30-25 19-23 40-34 14-19 25x14 9x20 32-28 23x32 37x17 12x21 34-30 21-26 41-37 20-25 29x20 25x34 39x30 15x24 45-40 16-21 38-32 6-11 43-38 11-16 49-43 7-12 40-34 3-9 43-39 10-14 33-29 24x33 38x29 2-7 30-24 19x30 35x24 5-10 42-38 18-22 34-30 21-27 32x21 16x27 29-23 10-15 30-25 27-32 38x18 13x22 48-42 22-28 23x32 8-13 39-33 14-19 33-28 19x30 25x34 7-11 31-27 9-14 34-29 14-20 29-23 20-25 27-22 12-17 22-18 13x33 23-19 26-31 37x26 33-39 44x33 17-22 19-13 25-30 13-9 22-27 32x21 11-17 21x12 15-20 9-4'.split()
     play_game(breakthrough_moves, 'breakthrough')

@@ -1,4 +1,4 @@
-from draughts.convert import fen_from_variant, fen_to_variant, move_from_variant, move_to_variant
+from draughts.convert import fen_from_variant, fen_to_variant, move_from_variant, move_to_variant, _rotate_move
 
 
 def test_convert():
@@ -8,3 +8,4 @@ def test_convert():
 
     assert move_from_variant('g3-h4', variant='russian') == '24-20'
     assert move_to_variant('24-20', variant='russian') == 'g3-h4'
+    assert _rotate_move('50-45', 3) == '46-41'

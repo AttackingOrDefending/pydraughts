@@ -21,13 +21,20 @@ def download_games():
         zip_ref.extractall('./games/')
 
 
-if os.path.exists('TEMP'):
-    shutil.rmtree('TEMP')
-os.mkdir('TEMP')
-download_games()
+#if os.path.exists('TEMP'):
+#    shutil.rmtree('TEMP')
+#os.mkdir('TEMP')
+#download_games()
 
 
-def test_pdn():
+def test_pdn_reading():
+    files = os.listdir('games/succeed')
+    for file in files:
+        filepath = os.path.realpath(f'games/succeed/{file}')
+        games = PDNReader(filename=filepath)
+
+
+def test_pdn_writing():
     filepath = os.path.realpath('games/succeed/mrcd2000kval.pdn')
     games = PDNReader(filename=filepath)
     one_game = games.games[1]
