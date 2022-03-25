@@ -21,10 +21,10 @@ def download_games():
         zip_ref.extractall('./games/')
 
 
-if os.path.exists('TEMP'):
-    shutil.rmtree('TEMP')
-os.mkdir('TEMP')
-download_games()
+#if os.path.exists('TEMP'):
+#    shutil.rmtree('TEMP')
+#os.mkdir('TEMP')
+#download_games()
 
 
 def test_pdn_reading():
