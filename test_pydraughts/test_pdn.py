@@ -14,23 +14,24 @@ logger = logging.getLogger(__name__)
 
 
 def download_games():
-    response = requests.get('https://pdn.fmjd.org/_downloads/games.zip', allow_redirects=True)
+    headers = {'User-Agent': 'User Agent', 'From': 'mail@mail.com'}
+    response = requests.get('https://pdn.fmjd.org/_downloads/games.zip', headers=headers, allow_redirects=True)
     with open('./TEMP/games.zip', 'wb') as file:
         file.write(response.content)
     with zipfile.ZipFile('./TEMP/games.zip', 'r') as zip_ref:
         zip_ref.extractall('./games/')
 
 
-#if os.path.exists('TEMP'):
-#    shutil.rmtree('TEMP')
-#os.mkdir('TEMP')
-#download_games()
+if os.path.exists('TEMP'):
+    shutil.rmtree('TEMP')
+os.mkdir('TEMP')
+download_games()
 
 
 def test_pdn_reading():
-    files = os.listdir('games/succeed')
+    files = os.listdir('./games/succeed')
     for file in files:
-        filepath = os.path.realpath(f'games/succeed/{file}')
+        filepath = os.path.realpath(f'./games/succeed/{file}')
         games = PDNReader(filename=filepath)
 
 
