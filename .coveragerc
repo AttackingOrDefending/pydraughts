@@ -1,0 +1,4 @@
+[run]
+omit = 
+    # It is run through msl-loadlib, so coverage doesn't detect it.
+    draughts/engines/checkerboard_extra/engine_server.py
