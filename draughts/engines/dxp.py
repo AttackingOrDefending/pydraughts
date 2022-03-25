@@ -98,6 +98,7 @@ class DXPEngine:
     def kill_process(self) -> None:
         """Kill the engine process."""
         if not self.engine_opened:
+            self.exit = True
             try:
                 # Windows
                 self.p.send_signal(signal.CTRL_BREAK_EVENT)
@@ -106,7 +107,6 @@ class DXPEngine:
                 os.killpg(self.p.pid, signal.SIGKILL)
 
             self.p.communicate()
-            self.exit = True
 
     def _connect(self) -> None:
         """Connect to the engine."""
