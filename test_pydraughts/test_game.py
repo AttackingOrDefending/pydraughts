@@ -26,5 +26,5 @@ def test_game():
     game = Game()
     game.push_move('3530')
     game = Game(fen='W:W1-40:B41-50')
-    assert game.get_fen() == f'W{"b" * 10}{"w" * 40}'
+    assert game.get_fen() == f'W{"w" * 40}{"b" * 10}'
     assert game.board.pieces[0].get_diagonal_one_square_behind_enemy(game.board.pieces[10]) == []
