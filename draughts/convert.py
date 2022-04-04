@@ -131,7 +131,6 @@ def _number_to_algebraic(number_move: str, width: Optional[int] = None, variant:
         width = _get_squares(variant)[1]
 
     separators = ['-', 'x', ':']
-    special_seperators = [r'([a-zA-z]+\d+)']
     splitted_move = None
     correct_seperator = ''
     for separator in separators:
@@ -139,13 +138,6 @@ def _number_to_algebraic(number_move: str, width: Optional[int] = None, variant:
         if splitted_move[0] != number_move:
             correct_seperator = separator
             break
-
-    if not correct_seperator:
-        for separator in special_seperators:
-            splitted_move = list(filter(bool, re.split(separator, number_move)))
-            if splitted_move[0] != number_move:
-                correct_seperator = '-'
-                break
 
     algebraic_move = []
     for move in splitted_move:
@@ -181,21 +173,37 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
     for white_piece in white_pieces:
         if '-' in white_piece:
             start_end = white_piece.split('-')
+            add_for_king = ''
+            if start_end[0][0] == 'K':
+                add_for_king = 'K'
+                start_end[0] = start_end[0][1:]
             start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
             for number in range(start, end + 1):
-                white_pieces_remove_hyphen.append(_rotate_move(str(number), notation=notation, variant=variant))
+                white_pieces_remove_hyphen.append(add_for_king + _rotate_move(str(number), notation=notation, variant=variant))
         else:
-            white_pieces_remove_hyphen.append(_rotate_move(white_piece, notation=notation, variant=variant))
+            add_for_king = ''
+            if white_piece[0] == 'K':
+                add_for_king = 'K'
+                white_piece = white_piece[1:]
+            white_pieces_remove_hyphen.append(add_for_king + _rotate_move(str(_algebraic_to_numeric_square(white_piece, squares_per_letter, every_other_square)), notation=notation, variant=variant))
 
     black_pieces_remove_hyphen = []
     for black_piece in black_pieces:
         if '-' in black_piece:
             start_end = black_piece.split('-')
+            add_for_king = ''
+            if start_end[0][0] == 'K':
+                add_for_king = 'K'
+                start_end[0] = start_end[0][1:]
             start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
             for number in range(start, end + 1):
-                black_pieces_remove_hyphen.append(_rotate_move(str(number), notation=notation, variant=variant))
+                black_pieces_remove_hyphen.append(add_for_king + _rotate_move(str(number), notation=notation, variant=variant))
         else:
-            black_pieces_remove_hyphen.append(_rotate_move(black_piece, notation=notation, variant=variant))
+            add_for_king = ''
+            if black_piece[0] == 'K':
+                add_for_king = 'K'
+                black_piece = black_piece[1:]
+            black_pieces_remove_hyphen.append(add_for_king + _rotate_move(str(_algebraic_to_numeric_square(black_piece, squares_per_letter, every_other_square)), notation=notation, variant=variant))
 
     # Because in english black starts.
     white_starts = variant not in ['english']
@@ -205,10 +213,10 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
 
     white_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, white_pieces_remove_hyphen))
     black_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, black_pieces_remove_hyphen))
-    white_pieces_remove_hyphen.sort()
-    black_pieces_remove_hyphen.sort()
     white_pieces_remove_hyphen = list(map(str, white_pieces_remove_hyphen))
     black_pieces_remove_hyphen = list(map(str, black_pieces_remove_hyphen))
+    white_pieces_remove_hyphen.sort()
+    black_pieces_remove_hyphen.sort()
     return f'{starts}:W{",".join(white_pieces_remove_hyphen)}:B{",".join(black_pieces_remove_hyphen)}'
 
 
