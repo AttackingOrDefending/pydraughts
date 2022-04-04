@@ -574,9 +574,13 @@ class Game:
         for white_piece in white_pieces:
             if '-' in white_piece:
                 start_end = white_piece.split('-')
+                add_for_king = ''
+                if start_end[0][0] == 'K':
+                    add_for_king = 'K'
+                    start_end[0] = start_end[0][1:]
                 start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
                 for number in range(start, end + 1):
-                    white_pieces_remove_hyphen.append(str(number))
+                    white_pieces_remove_hyphen.append(add_for_king + str(number))
             else:
                 white_pieces_remove_hyphen.append(white_piece)
 
@@ -584,9 +588,13 @@ class Game:
         for black_piece in black_pieces:
             if '-' in black_piece:
                 start_end = black_piece.split('-')
+                add_for_king = ''
+                if start_end[0][0] == 'K':
+                    add_for_king = 'K'
+                    start_end[0] = start_end[0][1:]
                 start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
                 for number in range(start, end + 1):
-                    black_pieces_remove_hyphen.append(str(number))
+                    black_pieces_remove_hyphen.append(add_for_king + str(number))
             else:
                 black_pieces_remove_hyphen.append(black_piece)
 
