@@ -13,5 +13,6 @@ def test_move():
 
     assert Move(hub_position_move='3530').hub_move == '35-30'
     assert Move(hub_move='42x33x22').hub_position_move == '423322'
+    assert Move(hub_move='35-30').hub_position_move == '3530'
 
     assert Move(pdn_position_move='3530').pdn_move == '35-30'
