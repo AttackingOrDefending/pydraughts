@@ -7,7 +7,7 @@ def test_convert():
     assert fen_from_variant('W:WK12-14:BK28-31', variant='standard') == 'W:WK12,K13,K14:BK28,K29,K30,K31'
     assert fen_to_variant('W:W21,22,23,24,26,27-29,30,31,32:B1,10,11,12,14,2-4,6,7,8', variant='english') == 'B:W19,21,22,23,25,26,27,29,30,31,32:B1,10,11,12,2,3,4,5,6,7,9'
     assert fen_to_variant('B:W17,22,23,24,25,26,27-29,30,31,32:B1,2,3-5,6,7,8,9,10,11,12', variant='russian') == 'B:Wa1,c3,e3,g3,b4,c1,e1,g1,b2,d2,f2,h2:Bb6,d6,f6,h6,a7,c7,e7,g7,b8,d8,f8,h8'
-    assert fen_to_variant('W:WK12-14:BK28-31', variant='standard') == 'W:WK12,K13,K14:BK28,K29,K30,K31'
+    assert fen_to_variant('W:WK12-14:BK28-31', variant='russian') == 'W:WKa5,Kc5,Kh6:BKa1,Kc1,Ke1,Kh2'
 
     assert move_from_variant('g3-h4', variant='russian') == '24-20'
     assert move_to_variant('24-20', variant='russian') == 'g3-h4'
