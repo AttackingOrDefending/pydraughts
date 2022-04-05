@@ -28,3 +28,93 @@ def test_game():
     game = Game(fen='W:W1-40:B41-50')
     assert game.get_fen() == f'W{"w" * 40}{"b" * 10}'
     assert game.board.pieces[0].get_diagonal_one_square_behind_enemy(game.board.pieces[10]) == []
+
+
+def fifty_square_draw_board(game, repeat_time=12, half_time=True):
+    for _ in range(repeat_time):
+        game.move([28, 33])
+        game.move([1, 7])
+        game.move([33, 28])
+        game.move([7, 1])
+    if half_time:
+        game.move([28, 33])
+        game.move([1, 7])
+    return game
+
+
+def thirtytwo_square_draw_board(game, repeat_time=7, half_time=True):
+    for _ in range(repeat_time):
+        game.move([32, 27])
+        game.move([1, 6])
+        game.move([27, 32])
+        game.move([6, 1])
+    if half_time:
+        game.move([32, 27])
+        game.move([1, 6])
+    return game
+
+
+def test_drawing_conditions():
+    # 25 consecutive non-capture king moves.
+    game = Game(fen='W:WK28:BK1')
+    game = fifty_square_draw_board(game)
+    assert game.is_draw()
+    game = Game(fen='B:WK1:BK28')
+    game = fifty_square_draw_board(game)
+    assert game.is_draw()
+
+    # 1 king vs 3 pieces (with at least 1 king) and 16 moves made.
+    game = Game(fen='W:WK28:BK1,2,3')
+    game = fifty_square_draw_board(game, 8, False)
+    assert game.is_draw()
+    game = Game(fen='B:WK1,K2,K3:BK28')
+    game = fifty_square_draw_board(game, 8, False)
+    assert game.is_draw()
+
+    # 1 king vs 2 or fewer pieces (with at least 1 king) and 5 moves made.
+    game = Game(fen='W:WK28:BK1,2')
+    game = fifty_square_draw_board(game, 2)
+    assert game.is_draw()
+    game = Game(fen='B:WK1,K2:BK28')
+    game = fifty_square_draw_board(game, 2)
+    assert game.is_draw()
+
+    # 2 kings vs 1 king and 7 moves made.
+    game = Game('frisian', 'W:WK28:BK1,K2')
+    game = fifty_square_draw_board(game, 3)
+    assert game.is_draw()
+    game = Game('frisian', 'B:WK1,K2:BK28')
+    game = fifty_square_draw_board(game, 3)
+    assert game.is_draw()
+
+    # 3 or more kings vs 1 king and 15 moves made.
+    game = Game('russian', 'W:WK32:BK1,K2,K3')
+    game = thirtytwo_square_draw_board(game)
+    assert game.is_draw()
+    game = Game('russian', 'B:WK1,K2,K3:BK32')
+    game = thirtytwo_square_draw_board(game)
+    assert game.is_draw()
+
+    # 15 consecutive non-capture king moves.
+    game = Game('russian', 'W:WK32:BK1')
+    game = thirtytwo_square_draw_board(game)
+    assert game.is_draw()
+    game = Game('russian', 'B:WK1:BK32')
+    game = thirtytwo_square_draw_board(game)
+    assert game.is_draw()
+
+    # Same number of kings, same number of pieces, 4 or 5 pieces per side and 30 moves made.
+    game = Game('russian', 'W:WK29-32:BK1-4')
+    game = thirtytwo_square_draw_board(game)
+    assert game.is_draw()
+    game = Game('russian', 'B:WK1-4:BK29-32')
+    game = thirtytwo_square_draw_board(game)
+    assert game.is_draw()
+
+    # Same number of kings, same number of pieces, 6 or 7 pieces per side and 60 moves made.
+    game = Game('russian', 'W:WK25-26,K29-32:BK1-4,K7-8')
+    game = thirtytwo_square_draw_board(game, 15, False)
+    assert game.is_draw()
+    game = Game('russian', 'B:WK1-4,K7-8:BK25-26,K29-32')
+    game = thirtytwo_square_draw_board(game, 15, False)
+    assert game.is_draw()
