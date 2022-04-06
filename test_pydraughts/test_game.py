@@ -99,23 +99,14 @@ def test_drawing_conditions():
     game = Game('russian', 'W:WK32:BK1')
     game = thirtytwo_square_draw_board(game)
     assert game.is_draw()
-    game = Game('russian', 'B:WK1:BK32')
-    game = thirtytwo_square_draw_board(game)
-    assert game.is_draw()
 
     # Same number of kings, same number of pieces, 4 or 5 pieces per side and 30 moves made.
     game = Game('russian', 'W:W29-31,K32:BK1,2-4')
     game.moves_since_last_capture = 60
     assert game.is_draw()
-    game = Game('russian', 'B:WK1-2,29-30:BK31-32,3-4')
-    game.moves_since_last_capture = 60
-    assert game.is_draw()
 
     # Same number of kings, same number of pieces, 6 or 7 pieces per side and 60 moves made.
     game = Game('russian', 'W:W25-26,29-31,K32:BK1,2-4,7-8')
-    game.moves_since_last_capture = 120
-    assert game.is_draw()
-    game = Game('russian', 'B:WK1-4,K7-8:BK25-26,K29-32')
     game.moves_since_last_capture = 120
     assert game.is_draw()
 
@@ -146,3 +137,13 @@ def test_drawing_conditions():
     game = Game('russian', 'B:WK1,29:BK32')
     game = thirtytwo_square_draw_board(game, 2)
     assert game.is_draw()
+
+    game = Game('english', 'W:WK32:BK1')
+    game = thirtytwo_square_draw_board(game, 20, False)
+    assert game.is_draw()
+
+    game = Game('turkish', 'W:WK32:B10')
+    assert game.is_draw()
+
+    game = Game(fen='W:W6:B1')
+    assert game.legal_moves() == ([], [])
