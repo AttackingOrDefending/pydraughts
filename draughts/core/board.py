@@ -97,10 +97,12 @@ class Board:
         return self, enemy_position
 
     def perform_capture_move(self, move: List[int], move_number: int, captures: List[int]) -> Optional[int]:
+        print(move, captures)
         """Make a capture move."""
         self.previous_move_was_capture = True
         piece = self.searcher.get_piece_by_position(move[0])
         originally_was_king = piece.king
+        print(piece.capture_move_enemies)
         enemy_piece = piece.capture_move_enemies[move[1]]
         enemy_position = enemy_piece.position
         enemy_piece.capture()

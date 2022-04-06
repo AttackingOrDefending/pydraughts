@@ -104,17 +104,45 @@ def test_drawing_conditions():
     assert game.is_draw()
 
     # Same number of kings, same number of pieces, 4 or 5 pieces per side and 30 moves made.
-    game = Game('russian', 'W:WK29-32:BK1-4')
-    game = thirtytwo_square_draw_board(game)
+    game = Game('russian', 'W:W29-31,K32:BK1,2-4')
+    game.moves_since_last_capture = 60
     assert game.is_draw()
-    game = Game('russian', 'B:WK1-4:BK29-32')
-    game = thirtytwo_square_draw_board(game)
+    game = Game('russian', 'B:WK1-2,29-30:BK31-32,3-4')
+    game.moves_since_last_capture = 60
     assert game.is_draw()
 
     # Same number of kings, same number of pieces, 6 or 7 pieces per side and 60 moves made.
-    game = Game('russian', 'W:WK25-26,K29-32:BK1-4,K7-8')
-    game = thirtytwo_square_draw_board(game, 15, False)
+    game = Game('russian', 'W:W25-26,29-31,K32:BK1,2-4,7-8')
+    game.moves_since_last_capture = 120
     assert game.is_draw()
     game = Game('russian', 'B:WK1-4,K7-8:BK25-26,K29-32')
-    game = thirtytwo_square_draw_board(game, 15, False)
+    game.moves_since_last_capture = 120
+    assert game.is_draw()
+
+    # 3 pieces (with at least 1 king) vs 1 king on the long diagonal.
+    game = Game('russian', 'W:WK5,17,19:BK29')
+    for _ in range(2):
+        game.move([5, 9])
+        game.move([29, 4])
+        game.move([9, 5])
+        game.move([4, 29])
+    game.move([5, 9])
+    game.move([29, 4])
+    assert game.is_draw()
+    game = Game('russian', 'B:WK29:BK5,17,19')
+    for _ in range(2):
+        game.move([5, 9])
+        game.move([29, 4])
+        game.move([9, 5])
+        game.move([4, 29])
+    game.move([5, 9])
+    game.move([29, 4])
+    assert game.is_draw()
+
+    # 2 pieces (with at least 1 king) vs 1 king and 5 moves made.
+    game = Game('russian', 'W:WK32:BK1,4')
+    game = thirtytwo_square_draw_board(game, 2)
+    assert game.is_draw()
+    game = Game('russian', 'B:WK1,29:BK32')
+    game = thirtytwo_square_draw_board(game, 2)
     assert game.is_draw()

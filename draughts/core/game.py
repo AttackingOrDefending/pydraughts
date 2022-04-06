@@ -202,12 +202,12 @@ class Game:
             # Same number of kings, same number of pieces, 6 or 7 pieces per side and 60 moves made.
             if white_kings == black_kings >= 1 and white_pieces == black_pieces and white_pieces in [6, 7] and self.moves_since_last_capture >= 120:
                 return True
-            # 3 pieces (with at least 1 king) vs 1 king on the long diagonal.
-            if white_pieces == 3 and white_kings >= 1 and black_pieces == black_kings == 1 and not white_piece_in_long_diagonal and black_piece_in_long_diagonal:
+            # 3 pieces (with at least 1 king) vs 1 king on the long diagonal and 5 moves made.
+            if white_pieces == 3 and white_kings >= 1 and black_pieces == black_kings == 1 and not white_piece_in_long_diagonal and black_piece_in_long_diagonal and self.moves_since_last_capture >= 10:
                 return True
-            if white_pieces == white_kings == 1 and black_pieces == 3 and black_kings >= 1 and white_piece_in_long_diagonal and not black_piece_in_long_diagonal:
+            if white_pieces == white_kings == 1 and black_pieces == 3 and black_kings >= 1 and white_piece_in_long_diagonal and not black_piece_in_long_diagonal and self.moves_since_last_capture >= 10:
                 return True
-            # 2 pieces (with at least 1 king) vs 1 king and 10 moves made.
+            # 2 pieces (with at least 1 king) vs 1 king and 5 moves made.
             if white_pieces == 2 and white_kings >= 1 and black_pieces == black_kings == 1 and self.moves_since_last_capture >= 10:
                 return True
             if white_pieces == white_kings == 1 and black_pieces == 2 and black_kings >= 1 and self.moves_since_last_capture >= 10:

@@ -152,7 +152,7 @@ class DXPEngine:
             if dxp.accepted is not None:
                 return dxp.accepted
 
-    def _recv_move(self) -> Optional[str]:
+    def _recv_move(self) -> Optional[List[List[int]]]:
         """Receive the engine move."""
         while True:
             if not dxp.tReceiveHandler.isListening:
