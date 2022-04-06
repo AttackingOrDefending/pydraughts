@@ -29,6 +29,13 @@ def test_game():
     assert game.get_fen() == f'W{"w" * 40}{"b" * 10}'
     assert game.board.pieces[0].get_diagonal_one_square_behind_enemy(game.board.pieces[10]) == []
 
+    game = Game(fen='W:WK12-14:BK28-31')
+    assert game.get_li_fen() == 'W:WK12,K13,K14:BK28,K29,K30,K31'
+
+    # Test all legal move conditions for italian
+    game = Game('italian', 'W:WK25,32,31:BK7,K5,12,K14,13,20,21,28')
+    assert game.legal_moves() == ([[[25, 18], [18, 11], [11, 4]]], [[21, 14, 7]])
+
 
 def fifty_square_draw_board(game, repeat_time=12, half_time=True):
     for _ in range(repeat_time):

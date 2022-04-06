@@ -8,7 +8,6 @@ from typing import List, Optional, Dict, Union
 
 class _PDNGame:
     def __init__(self, pdn_text: str) -> None:
-        self._tag_value_to_int = ["WhiteRating", "BlackRating"]
         self.values_to_variant = {20: "standard", 21: "english", 22: "italian", 23: "american pool", 24: "spanish", 25: "russian", 26: "brazilian", 27: "canadian", 28: "portuguese", 29: "czech", 30: "turkish", 31: "thai", 40: "frisian", 41: "spantsiretti"}
         self.tags = {}
         self.moves = []
@@ -38,8 +37,6 @@ class _PDNGame:
             quote_index = line.index('"')
             name = line[:quote_index - 1]
             value = line[quote_index + 1:-1]
-            if name in self._tag_value_to_int:
-                value = int(value)
             self.tags[name] = value
 
         rest_of_games = []
@@ -119,9 +116,9 @@ class _PDNGame:
             board_10 = ['31', '32', '33', '34', '35', '16', '17', '18', '19', '20']
             board_8 = ['21', '22', '23', '24', '9', '09', '10', '11', '12']
             first_move = moves[0]
-            if list(filter(lambda move: move.startswith(first_move), board_10)):
+            if list(filter(lambda move: first_move.startswith(move), board_10)):
                 self.variant = "standard"
-            elif list(filter(lambda move: move.startswith(first_move), board_8)):
+            elif list(filter(lambda move: first_move.startswith(move), board_8)):
                 self.variant = "english"
             elif first_move[0] in string.ascii_letters:
                 self.variant = "russian"

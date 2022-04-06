@@ -39,6 +39,10 @@ def test_pdn_writing():
     filepath = os.path.realpath('games/succeed/mrcd2000kval.pdn')
     games = PDNReader(filename=filepath)
     one_game = games.games[1]
+    assert one_game.get_titles() == ["", ""]
+    assert one_game.get_ratings() == ["", ""]
+    assert one_game.get_na() == ["", ""]
+    assert one_game.get_types() == ["", ""]
     moves = one_game.moves
     game = Game(variant='russian')
     for move in moves:
