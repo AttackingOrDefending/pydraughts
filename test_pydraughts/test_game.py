@@ -33,7 +33,13 @@ def test_game():
     assert game.get_li_fen() == 'W:WK12,K13,K14:BK28,K29,K30,K31'
 
     # Test all legal move conditions for italian
-    game = Game('italian', 'W:WK25,32,31:BK7,K5,12,K14,13,20,21,28')
+
+    # All rules except for 2 are tested by both fens, so the specific rule each fen tests is mentioned in a comment.
+    # This fen tests the rule "The capture sequence that captures the most kings has to be played."
+    game = Game('italian', 'W:WK25,32,31:BK7,5,12,K14,K13,20,21,28')
+    assert game.legal_moves() == ([[[25, 18], [18, 11], [11, 4]]], [[21, 14, 7]])
+    # This fen tests the rule "The capture sequence where the king occurs first has to be played."
+    game = Game('italian', 'W:WK25,32,31:B7,K5,12,K14,13,20,21,28')
     assert game.legal_moves() == ([[[25, 18], [18, 11], [11, 4]]], [[21, 14, 7]])
 
 

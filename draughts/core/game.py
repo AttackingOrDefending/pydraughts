@@ -469,18 +469,14 @@ class Game:
             captures_pseudo_legal_4 = []
             if king_in_capture_sequence:
                 for move, capture in zip(moves_pseudo_legal_3, captures_pseudo_legal_3):
-                    if capture[0] is not None:
-                        for index, piece_loc in enumerate(capture):
-                            if index > earliest_king:
-                                break
-                            elif self.board.searcher.get_piece_by_position(piece_loc).king:
-                                if index == earliest_king:
-                                    moves_pseudo_legal_4.append(move)
-                                    captures_pseudo_legal_4.append(capture)
-                                break
-                    else:
-                        moves_pseudo_legal_4.append(move)
-                        captures_pseudo_legal_4.append(capture)
+                    for index, piece_loc in enumerate(capture):
+                        if index > earliest_king:
+                            break
+                        elif self.board.searcher.get_piece_by_position(piece_loc).king:
+                            if index == earliest_king:
+                                moves_pseudo_legal_4.append(move)
+                                captures_pseudo_legal_4.append(capture)
+                            break
             else:
                 moves_pseudo_legal_4 = moves_pseudo_legal_3
                 captures_pseudo_legal_4 = captures_pseudo_legal_3
