@@ -149,11 +149,11 @@ class _PDNGame:
 
 class PDNReader:
     def __init__(self, pdn_text: Optional[str] = None, filename: Optional[str] = None, encodings: Union[List[str], str, None] = None) -> None:
+        assert pdn_text or filename
         if encodings is None:
             encodings = ['utf8', 'ISO 8859/1']
         if type(encodings) == str:
             encodings = [encodings]
-        assert pdn_text or filename
         if not pdn_text:
             pdn_text = ''
             for encoding in encodings:
@@ -186,7 +186,7 @@ class PDNWriter:
         and doesn't account for ambiguous moves. If replay_moves_from_board is enabled, it will replay all the moves to
         find the correct representation of them.
         """
-        assert board or moves
+        assert board or moves is not None
         self.pdn_text = ''
         self.notation_type = None
         self.notation = None
@@ -263,12 +263,10 @@ class PDNWriter:
 
             standard_moves.append(standard_move)
 
-        if not standard_moves:
-            pass
-        elif len(standard_moves) == 1 and self.starting_fen[0] == 'W':
+        if len(standard_moves) == 1 and self.starting_fen[0] == 'W':
             pdn_text += f'1. {standard_moves[0]}'
             standard_moves = []
-        else:
+        elif standard_moves:
             if self.starting_fen[0] == 'W':
                 pdn_text += f'1. {standard_moves[0]} {standard_moves[1]}'
                 standard_moves = standard_moves[2:]
