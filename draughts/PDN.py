@@ -204,7 +204,7 @@ class PDNWriter:
             self.variant = variant or 'standard'
             if starting_fen:
                 self.convert_fen = False
-            self.starting_fen = starting_fen or self._startpos_to_fen('startpos')
+            self.starting_fen = starting_fen or self._startpos_to_fen()
             self.tags = tags or {}
             self.to_standard_notation = False
         self.game_ending = game_ending
@@ -291,10 +291,8 @@ class PDNWriter:
             with open(self.filename, self.file_mode, encoding=self.file_encoding) as file:
                 file.write(self.pdn_text)
 
-    def _startpos_to_fen(self, fen: str) -> str:
+    def _startpos_to_fen(self) -> str:
         """Get the starting fen."""
-        if fen != 'startpos':
-            return fen
         if self.variant == 'frysk!':
             return 'W:W46,47,48,49,50:B1,2,3,4,5'
         elif self.variant == 'turkish':
