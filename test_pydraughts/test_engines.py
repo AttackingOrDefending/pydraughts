@@ -270,6 +270,31 @@ def test_russian_checkerboard_engines():
 
 
 def test_engines():
+    # Test ping and setoption
+    hub = HubEngine([f'scan{file_extension}', 'hub'])
+    hub.init()
+    hub.ping()
+    hub.setoption('book', True)
+    hub.setoption('book', False)
+
+    # Test searching and pondering
+    thr = threading.Thread(target=hub.play, args=(draughts.Game(), Limit(time=1), True))
+    thr.start()
+    hub.ponderhit()
+    thr.join()
+
+    hub.go('startpos', '35-30', my_time=30, inc=2, moves_left=40)
+    hub.go('startpos', '35-30', my_time=30, moves_left=40)
+    hub.play(draughts.Game(fen='W:W22:B9,18'), Limit(depth=15, nodes=10000, movetime=10), False)
+    time.sleep(0.01)
+    hub.stop()
+    hub.play(draughts.Game(fen='B:W22:B18'), Limit(depth=15, nodes=10000, movetime=10), False)
+    hub.kill_process()
+    
+    if platform != 'win32':
+        assert True
+        return
+    
     # Test movetime
     checkerboard = CheckerBoardEngine('cake_189f.dll')
     limit = Limit(movetime=2)
@@ -322,24 +347,3 @@ def test_engines():
     game = draughts.Game(variant=variant)
     checkerboard.play(game, limit)
     checkerboard.kill_process()
-
-    # Test ping and setoption
-    hub = HubEngine([f'scan{file_extension}', 'hub'])
-    hub.init()
-    hub.ping()
-    hub.setoption('book', True)
-    hub.setoption('book', False)
-
-    # Test searching and pondering
-    thr = threading.Thread(target=hub.play, args=(draughts.Game(), Limit(time=1), True))
-    thr.start()
-    hub.ponderhit()
-    thr.join()
-
-    hub.go('startpos', '35-30', my_time=30, inc=2, moves_left=40)
-    hub.go('startpos', '35-30', my_time=30, moves_left=40)
-    hub.play(draughts.Game(fen='W:W22:B9,18'), Limit(depth=15, nodes=10000, movetime=10), False)
-    time.sleep(0.01)
-    hub.stop()
-    hub.play(draughts.Game(fen='B:W22:B18'), Limit(depth=15, nodes=10000, movetime=10), False)
-    hub.kill_process()
