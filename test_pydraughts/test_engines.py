@@ -8,6 +8,8 @@ import shutil
 import os
 import stat
 import sys
+import threading
+import time
 import logging
 platform = sys.platform
 file_extension = '.exe' if platform == 'win32' else ''
@@ -272,7 +274,7 @@ def test_engines():
     checkerboard = CheckerBoardEngine('cake_189f.dll')
     limit = Limit(movetime=2)
     game = draughts.Game(variant='english')
-    best_move = checkerboard.play(game, limit)
+    checkerboard.play(game, limit)
 
     # Test setoption
     checkerboard.setoption('divide-time-by', 20)
@@ -283,33 +285,55 @@ def test_engines():
         checkerboard = CheckerBoardEngine('cake_189f.dll')
         limit = Limit(movetime=2)
         game = draughts.Game(variant=variant)
-        best_move = checkerboard.play(game, limit)
+        checkerboard.play(game, limit)
 
     # Test time handling
     checkerboard = CheckerBoardEngine('cake_189f.dll')
     limit = Limit(time=-1, inc=-1)
     game = draughts.Game(variant=variant)
-    best_move = checkerboard.play(game, limit)
+    checkerboard.play(game, limit)
     limit = Limit(time=-1, inc=2)
     game = draughts.Game(variant=variant)
-    best_move = checkerboard.play(game, limit)
+    checkerboard.play(game, limit)
     limit = Limit(time=2, inc=-1)
     game = draughts.Game(variant=variant)
-    best_move = checkerboard.play(game, limit)
+    checkerboard.play(game, limit)
+    limit = Limit(time=328)
+    game = draughts.Game(variant=variant)
+    checkerboard.play(game, limit)
+    limit = Limit(time=1, inc=33)
+    game = draughts.Game(variant=variant)
+    checkerboard.play(game, limit)
+    limit = Limit(time=3277, inc=3277)
+    game = draughts.Game(variant=variant)
+    checkerboard.play(game, limit)
 
     checkerboard = CheckerBoardEngine('./cake_189f.dll', checkerboard_timing=True)
     limit = Limit(time=0.1, inc=1)
     game = draughts.Game(variant=variant)
-    best_move = checkerboard.play(game, limit)
+    checkerboard.play(game, limit)
     limit = Limit(time=0.9, inc=1)
     game = draughts.Game(variant=variant)
-    best_move = checkerboard.play(game, limit)
+    checkerboard.play(game, limit)
     limit = Limit(time=2, inc=1)
     game = draughts.Game(variant=variant)
-    best_move = checkerboard.play(game, limit)
+    checkerboard.play(game, limit)
 
     # Test ping and setoption
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
     hub.ping()
+    hub.setoption('book', True)
     hub.setoption('book', False)
+
+    # Test searching and pondering
+    thr = threading.Thread(target=hub.play, args=(draughts.Game(), Limit(time=1), True))
+    thr.start()
+    hub.ponderhit()
+    time.sleep(2)
+    hub.stop()
+
+    hub.go('startpos', '35-30', my_time=30, inc=2, moves_left=40)
+    hub.go('startpos', '35-30', my_time=30, moves_left=40)
+    hub.play(draughts.Game(fen='W:W22:B9,18'), Limit(depth=15, nodes=10000, movetime=10), False)
+    hub.play(draughts.Game(fen='B:W22:B18'), Limit(depth=15, nodes=10000, movetime=10), False)
