@@ -7,10 +7,8 @@ from typing import Optional, Union, Tuple, Dict, Any
 
 
 class Engine64:
-    def __init__(self, command: str, cwd: Optional[str] = None) -> None:
-        if cwd is None:
-            cwd = os.path.realpath(os.path.expanduser("."))
-        os.add_dll_directory(cwd)
+    def __init__(self, command: str) -> None:
+        os.add_dll_directory(os.path.realpath(os.path.expanduser(os.path.dirname(command))))
         self.engine = ctypes.windll.LoadLibrary(command)
 
     def kill_process(self) -> None:

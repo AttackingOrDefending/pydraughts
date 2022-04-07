@@ -74,7 +74,7 @@ def test_pdn_writing():
         pdn_writer = PDNWriter('pdn_writer_minor_test.pdn', variant=variant, moves=[])
         # We use [1:] in the fen, so we exclude the starting color, because internally white always starts, so Game will
         # always return a fen with white starting, even in english.
-        assert pdn_writer._startpos_to_fen()[1:] == Game(variant).get_li_fen()[1:]
+        assert pdn_writer._startpos_to_fen('startpos')[1:] == Game(variant).get_li_fen()[1:]
 
     PDNWriter('pdn_writer_minor_test_2.pdn', moves=["35-30"])
     with open('pdn_writer_minor_test_2.pdn') as file:

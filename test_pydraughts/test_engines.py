@@ -117,8 +117,6 @@ def test_hub_engines():
     
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
-    hub.ping()
-    hub.setoption('book', False)
     limit = Limit(10)
     game = draughts.Game()
     logger.info('Starting game 2')
@@ -232,12 +230,6 @@ def test_checkerboard_engines():
     logger.info('Finished playing 2')
     checkerboard.kill_process()
 
-    # Test movetime
-    checkerboard = CheckerBoardEngine('cake_189f.dll')
-    limit = Limit(movetime=2)
-    game = draughts.Game(variant='english')
-    best_move = checkerboard.play(game, limit)
-
 
 @pytest.mark.timeout(300, method="thread")
 def test_russian_checkerboard_engines():
@@ -273,3 +265,51 @@ def test_russian_checkerboard_engines():
             break
     logger.info('Finished playing 2')
     checkerboard.kill_process()
+
+
+def test_engines():
+    # Test movetime
+    checkerboard = CheckerBoardEngine('cake_189f.dll')
+    limit = Limit(movetime=2)
+    game = draughts.Game(variant='english')
+    best_move = checkerboard.play(game, limit)
+
+    # Test setoption
+    checkerboard.setoption('divide-time-by', 20)
+    checkerboard.setoption('book', 2)
+
+    # Test send variant
+    for variant in ('russian', 'brazilian', 'italian', 'english'):
+        checkerboard = CheckerBoardEngine('cake_189f.dll')
+        limit = Limit(movetime=2)
+        game = draughts.Game(variant=variant)
+        best_move = checkerboard.play(game, limit)
+
+    # Test time handling
+    checkerboard = CheckerBoardEngine('cake_189f.dll')
+    limit = Limit(time=-1, inc=-1)
+    game = draughts.Game(variant=variant)
+    best_move = checkerboard.play(game, limit)
+    limit = Limit(time=-1, inc=2)
+    game = draughts.Game(variant=variant)
+    best_move = checkerboard.play(game, limit)
+    limit = Limit(time=2, inc=-1)
+    game = draughts.Game(variant=variant)
+    best_move = checkerboard.play(game, limit)
+
+    checkerboard = CheckerBoardEngine('./cake_189f.dll', checkerboard_timing=True)
+    limit = Limit(time=0.1, inc=1)
+    game = draughts.Game(variant=variant)
+    best_move = checkerboard.play(game, limit)
+    limit = Limit(time=0.9, inc=1)
+    game = draughts.Game(variant=variant)
+    best_move = checkerboard.play(game, limit)
+    limit = Limit(time=2, inc=1)
+    game = draughts.Game(variant=variant)
+    best_move = checkerboard.play(game, limit)
+
+    # Test ping and setoption
+    hub = HubEngine([f'scan{file_extension}', 'hub'])
+    hub.init()
+    hub.ping()
+    hub.setoption('book', False)
