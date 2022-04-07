@@ -144,7 +144,7 @@ def test_hub_dxp_engines():
         return
     hub = HubEngine('kr_hub.exe')
     hub.init()
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait_to_open_time': 10, 'max-moves': 100, 'initial-time': 30})
     limit = Limit(10)
     game = draughts.Game()
     logger.info('Starting game 1')
@@ -279,6 +279,7 @@ def test_engines():
     # Test setoption
     checkerboard.setoption('divide-time-by', 20)
     checkerboard.setoption('book', 2)
+    checkerboard.kill_process()
 
     # Test send variant
     for variant in ('russian', 'brazilian', 'italian', 'english'):
@@ -286,6 +287,7 @@ def test_engines():
         limit = Limit(movetime=2)
         game = draughts.Game(variant=variant)
         checkerboard.play(game, limit)
+        checkerboard.kill_process()
 
     # Test time handling
     checkerboard = CheckerBoardEngine('cake_189f.dll')
@@ -307,6 +309,7 @@ def test_engines():
     limit = Limit(time=3277, inc=3277)
     game = draughts.Game(variant=variant)
     checkerboard.play(game, limit)
+    checkerboard.kill_process()
 
     checkerboard = CheckerBoardEngine('./cake_189f.dll', checkerboard_timing=True)
     limit = Limit(time=0.1, inc=1)
@@ -318,6 +321,7 @@ def test_engines():
     limit = Limit(time=2, inc=1)
     game = draughts.Game(variant=variant)
     checkerboard.play(game, limit)
+    checkerboard.kill_process()
 
     # Test ping and setoption
     hub = HubEngine([f'scan{file_extension}', 'hub'])
@@ -337,3 +341,4 @@ def test_engines():
     hub.go('startpos', '35-30', my_time=30, moves_left=40)
     hub.play(draughts.Game(fen='W:W22:B9,18'), Limit(depth=15, nodes=10000, movetime=10), False)
     hub.play(draughts.Game(fen='B:W22:B18'), Limit(depth=15, nodes=10000, movetime=10), False)
+    hub.kill_process()
