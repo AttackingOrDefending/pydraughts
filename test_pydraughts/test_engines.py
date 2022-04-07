@@ -333,9 +333,9 @@ def test_engines():
     # Test searching and pondering
     thr = threading.Thread(target=hub.play, args=(draughts.Game(), Limit(time=1), True))
     thr.start()
-    hub.ponderhit()
     time.sleep(2)
-    hub.stop()
+    hub.ponderhit()
+    thr.join()
 
     hub.go('startpos', '35-30', my_time=30, inc=2, moves_left=40)
     hub.go('startpos', '35-30', my_time=30, moves_left=40)
