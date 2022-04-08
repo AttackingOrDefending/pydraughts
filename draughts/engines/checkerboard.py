@@ -8,12 +8,15 @@ from typing import Union, List, Any
 
 class CheckerBoardEngine:
     def __init__(self, command: Union[List[str], str], divide_time_by: int = 40, checkerboard_timing: bool = False, ENGINE: int = 5) -> None:
-        self.cwd = os.path.realpath(os.path.expanduser("."))
         if type(command) == str:
             command = [command]
         command = list(filter(bool, command))
         command = " ".join(command)
-        self.command = os.path.join(self.cwd, command)
+        if "\\" not in command and "/" not in command:
+            self.cwd = os.path.realpath(os.path.expanduser("."))
+            self.command = os.path.join(self.cwd, command)
+        else:
+            self.command = command
         self.ENGINE = ENGINE
         self.engine = None
         self.info = None
@@ -28,7 +31,7 @@ class CheckerBoardEngine:
     def _open_engine(self) -> int:
         """Open the engine process."""
         try:
-            self.engine = Engine64(self.command, self.cwd)
+            self.engine = Engine64(self.command)
             return 64
         except Exception:
             self.engine = Engine32(self.command)

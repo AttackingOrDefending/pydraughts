@@ -8,6 +8,8 @@ import shutil
 import os
 import stat
 import sys
+import threading
+import time
 import logging
 platform = sys.platform
 file_extension = '.exe' if platform == 'win32' else ''
@@ -142,7 +144,7 @@ def test_hub_dxp_engines():
         return
     hub = HubEngine('kr_hub.exe')
     hub.init()
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait_to_open_time': 10, 'max-moves': 100, 'initial-time': 30})
     limit = Limit(10)
     game = draughts.Game()
     logger.info('Starting game 1')
@@ -216,7 +218,7 @@ def test_checkerboard_engines():
     checkerboard.kill_process()
 
     checkerboard = CheckerBoardEngine('cake_189f.dll')
-    limit = Limit(10, 2)
+    limit = Limit(10)
     game = draughts.Game(variant='english')
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
@@ -252,7 +254,7 @@ def test_russian_checkerboard_engines():
     checkerboard.kill_process()
 
     checkerboard = CheckerBoardEngine('kestog.dll')
-    limit = Limit(10, 2)
+    limit = Limit(10)
     game = draughts.Game(variant='russian')
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
@@ -264,4 +266,84 @@ def test_russian_checkerboard_engines():
         else:
             break
     logger.info('Finished playing 2')
+    checkerboard.kill_process()
+
+
+def test_engines():
+    # Test ping and setoption
+    hub = HubEngine([f'scan{file_extension}', 'hub'])
+    hub.init()
+    hub.ping()
+    hub.setoption('book', True)
+    hub.setoption('book', False)
+
+    # Test searching and pondering
+    thr = threading.Thread(target=hub.play, args=(draughts.Game(), Limit(time=1), True))
+    thr.start()
+    hub.ponderhit()
+    thr.join()
+
+    hub.go('startpos', '35-30', my_time=30, inc=2, moves_left=40)
+    hub.go('startpos', '35-30', my_time=30, moves_left=40)
+    hub.play(draughts.Game(fen='W:W22:B9,18'), Limit(depth=15, nodes=10000, movetime=10), False)
+    time.sleep(0.01)
+    hub.stop()
+    hub.play(draughts.Game(fen='B:W22:B18'), Limit(depth=15, nodes=10000, movetime=10), False)
+    hub.kill_process()
+    
+    if platform != 'win32':
+        assert True
+        return
+    
+    # Test movetime
+    checkerboard = CheckerBoardEngine('cake_189f.dll')
+    limit = Limit(movetime=2)
+    game = draughts.Game(variant='english')
+    checkerboard.play(game, limit)
+
+    # Test setoption
+    checkerboard.setoption('divide-time-by', 20)
+    checkerboard.setoption('book', 2)
+    checkerboard.kill_process()
+
+    # Test send variant
+    for variant in ('russian', 'brazilian', 'italian', 'english'):
+        checkerboard = CheckerBoardEngine('cake_189f.dll')
+        limit = Limit(movetime=2)
+        game = draughts.Game(variant=variant)
+        checkerboard.play(game, limit)
+        checkerboard.kill_process()
+
+    # Test time handling
+    checkerboard = CheckerBoardEngine('cake_189f.dll')
+    limit = Limit(time=-1, inc=-1)
+    game = draughts.Game(variant=variant)
+    checkerboard.play(game, limit)
+    limit = Limit(time=-1, inc=2)
+    game = draughts.Game(variant=variant)
+    checkerboard.play(game, limit)
+    limit = Limit(time=2, inc=-1)
+    game = draughts.Game(variant=variant)
+    checkerboard.play(game, limit)
+    limit = Limit(time=328)
+    game = draughts.Game(variant=variant)
+    checkerboard.play(game, limit)
+    limit = Limit(time=1, inc=33)
+    game = draughts.Game(variant=variant)
+    checkerboard.play(game, limit)
+    limit = Limit(time=3277, inc=3277)
+    game = draughts.Game(variant=variant)
+    checkerboard.play(game, limit)
+    checkerboard.kill_process()
+
+    checkerboard = CheckerBoardEngine('./cake_189f.dll', checkerboard_timing=True)
+    limit = Limit(time=0.1, inc=1)
+    game = draughts.Game(variant=variant)
+    checkerboard.play(game, limit)
+    limit = Limit(time=0.9, inc=1)
+    game = draughts.Game(variant=variant)
+    checkerboard.play(game, limit)
+    limit = Limit(time=2, inc=1)
+    game = draughts.Game(variant=variant)
+    checkerboard.play(game, limit)
     checkerboard.kill_process()

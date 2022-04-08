@@ -1,3 +1,4 @@
+import draughts
 from draughts import Game, Move
 from draughts.convert import move_from_variant
 
@@ -5,8 +6,10 @@ from draughts.convert import move_from_variant
 def play_game(moves, variant):
     game = Game(variant)
     for move in moves:
-        for semi_move in Move(pdn_move=move_from_variant(move, variant=variant), board=game).board_move:
+        assert game.get_winner() is None
+        for semi_move in Move(pdn_move=move_from_variant(move, variant=game.variant), board=game).board_move:
             game.move(semi_move)
+    game.get_winner()
     return game
 
 
@@ -20,10 +23,11 @@ def test_variants():
     assert game.legal_moves() == ([[[27, 21]], [[27, 22]]], [[None], [None]])
     # Frysk!
     frysk_moves = '48-43 1-7 43-39 7-11 46-41 11-17 41-37 17-21 37-31 21x41 47x36 5-10 36-31 3-8 49-44 10-14 44-40 8-12 40-35 14-20 39-33 20-24 50-45 4-9 33-28 2-8 28-22 12x32 31x33 8-12 35-30 24x35 45x25 9-14 33-28 12-17 28-23 17-21 23-18 21-27 18-12 27-31 12-7 31-37 7-1 37-42 1-18 42-47 18-4 47-36 4x34 36-41 25-20 41-10 20-15 10-19 34-12 19-28 12-34 28-19 15-10 19x5 34-18 5-14 18-22 14-10'.split()
-    play_game(frysk_moves, 'frysk!')
+    play_game(frysk_moves, 'frysk')
     # Antidraughts
     antidraughts_moves = '35-30 16-21 31-27 20-24 27x16 24x35 36-31 15-20 31-26 20-25 41-36 17-21 16x27 10-15 33-28 18-22 27x18 13x33 38x29 12-18 29-24 19x30 32-27 18-22 27x18 5-10 43-38 8-12 18-13 9x18 36-31 18-22 49-43 22-27 31x22 12-18 22x13 14-19 13x24 30x19 34-29 11-17 26-21 17x26 29-24 19x30 37-32 6-11 46-41 7-12 38-33 30-34 40x29 12-17 45-40 2-8 50-45 15-20 41-36 1-7 36-31 26x28 33x22 17x28 39-33 28x50 42-37 35x44 37-31 8-12 29-24 20x29 45-40 44x35 43-39 50x36 47-41 36x47 48-42 47x33'.split()
-    play_game(antidraughts_moves, 'antidraughts')
+    game = play_game(antidraughts_moves, 'antidraughts')
+    assert game.get_winner() == draughts.WHITE
     # Breakthrough
     breakthrough_moves = '32-28 19-24 37-32 17-21 34-29 21-26 39-34 26x37 42x31 18-22 28x17 11x22 44-39 12-18 47-42 14-19 50-44 10-14 41-37 7-12 34-30 4-10 46-41 1-7 30-25 19-23 40-34 14-19 25x14 9x20 32-28 23x32 37x17 12x21 34-30 21-26 41-37 20-25 29x20 25x34 39x30 15x24 45-40 16-21 38-32 6-11 43-38 11-16 49-43 7-12 40-34 3-9 43-39 10-14 33-29 24x33 38x29 2-7 30-24 19x30 35x24 5-10 42-38 18-22 34-30 21-27 32x21 16x27 29-23 10-15 30-25 27-32 38x18 13x22 48-42 22-28 23x32 8-13 39-33 14-19 33-28 19x30 25x34 7-11 31-27 9-14 34-29 14-20 29-23 20-25 27-22 12-17 22-18 13x33 23-19 26-31 37x26 33-39 44x33 17-22 19-13 25-30 13-9 22-27 32x21 11-17 21x12 15-20 9-4'.split()
     play_game(breakthrough_moves, 'breakthrough')
@@ -35,7 +39,7 @@ def test_variants():
     play_game(brazilian_moves, 'brazilian')
     # English/American
     english_moves = '11-15 23-18 8-11 27-23 4-8 23-19 10-14 19x10 14x23 26x19 7x14 24-20 6-10 22-17 9-13 30-26 13x22 25x9 5x14 29-25 14-18 26-23 18x27 32x23 11-15 28-24 2-6 21-17 8-11 25-22 6-9 23-18 1-5 17-13 9-14 18x9 5x14 13-9 14-18 22-17 18-23 9-6 15-18 6-2 18-22 2-6 3-8 6x15 11x18 19-15 22-26 31x22 18x25 24-19 23-27 20-16 27-31 16-11 31-27 11x4 27-23'.split()
-    play_game(english_moves, 'english')
+    play_game(english_moves, 'american')
     # Italian
     italian_moves = '21-17 12-15 23-19 11-14 19x12 8x15 28-23 14-18 22x13 9x18 23-20 10-14 20x11 6x15 17-13 3-6 13-9 5-10 32-28 1-5 26-21 7-12 21-17 12-16 30-26 6-11 26-21 4-7 29-26 14-19 21x14 11x18 26-21 16-20 21x14 19-22 27x18 10x19 31-27 19-22 28-23 22x31 23x16 31-27 18-14 27-23 25-21 23-20 17-13 15-19 21-18 19-22 13-10 22-26 10x1 26-30 1-5 30-27 5-10 27-22 10-13 22-19 14-10 19-15 10-5 20-23 5-1 23-20 1-5 7-11 5-10 15-12 10-6 11-15 6-11'.split()
     play_game(italian_moves, 'italian')

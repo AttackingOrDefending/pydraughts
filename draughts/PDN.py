@@ -8,7 +8,6 @@ from typing import List, Optional, Dict, Union
 
 class _PDNGame:
     def __init__(self, pdn_text: str) -> None:
-        self._tag_value_to_int = ["WhiteRating", "BlackRating"]
         self.values_to_variant = {20: "standard", 21: "english", 22: "italian", 23: "american pool", 24: "spanish", 25: "russian", 26: "brazilian", 27: "canadian", 28: "portuguese", 29: "czech", 30: "turkish", 31: "thai", 40: "frisian", 41: "spantsiretti"}
         self.tags = {}
         self.moves = []
@@ -38,15 +37,13 @@ class _PDNGame:
             quote_index = line.index('"')
             name = line[:quote_index - 1]
             value = line[quote_index + 1:-1]
-            if name in self._tag_value_to_int:
-                value = int(value)
             self.tags[name] = value
 
         rest_of_games = []
         last_move_line = -1
         move_lines = []
         for index, line in enumerate(lines[last_tag_line + 1:]):
-            splitted_line = re.split(r'\s(1-0|1/2-1/2|0-1|2-0|1-1|0-2|0-0|\*)\s', ' ' + line + ' ', maxsplit=1)
+            splitted_line = re.split(r'[\s|\]](1-0|1/2-1/2|0-1|2-0|1-1|0-2|0-0|\*)[\s|\[]', ' ' + line + ' ', maxsplit=1)
             if len(splitted_line) == 3:
                 move_lines.append(splitted_line[0])
                 last_move_line = index
@@ -119,9 +116,9 @@ class _PDNGame:
             board_10 = ['31', '32', '33', '34', '35', '16', '17', '18', '19', '20']
             board_8 = ['21', '22', '23', '24', '9', '09', '10', '11', '12']
             first_move = moves[0]
-            if list(filter(lambda move: move.startswith(first_move), board_10)):
+            if list(filter(lambda move: first_move.startswith(move), board_10)):
                 self.variant = "standard"
-            elif list(filter(lambda move: move.startswith(first_move), board_8)):
+            elif list(filter(lambda move: first_move.startswith(move), board_8)):
                 self.variant = "english"
             elif first_move[0] in string.ascii_letters:
                 self.variant = "russian"
@@ -152,11 +149,11 @@ class _PDNGame:
 
 class PDNReader:
     def __init__(self, pdn_text: Optional[str] = None, filename: Optional[str] = None, encodings: Union[List[str], str, None] = None) -> None:
+        assert pdn_text or filename
         if encodings is None:
             encodings = ['utf8', 'ISO 8859/1']
         if type(encodings) == str:
             encodings = [encodings]
-        assert pdn_text or filename
         if not pdn_text:
             pdn_text = ''
             for encoding in encodings:
@@ -189,7 +186,7 @@ class PDNWriter:
         and doesn't account for ambiguous moves. If replay_moves_from_board is enabled, it will replay all the moves to
         find the correct representation of them.
         """
-        assert board or moves
+        assert board or moves is not None
         self.pdn_text = ''
         self.notation_type = None
         self.notation = None
@@ -207,7 +204,7 @@ class PDNWriter:
             self.variant = variant or 'standard'
             if starting_fen:
                 self.convert_fen = False
-            self.starting_fen = starting_fen or self._startpos_to_fen('startpos')
+            self.starting_fen = starting_fen or self._startpos_to_fen()
             self.tags = tags or {}
             self.to_standard_notation = False
         self.game_ending = game_ending
@@ -266,12 +263,10 @@ class PDNWriter:
 
             standard_moves.append(standard_move)
 
-        if not standard_moves:
-            pass
-        elif len(standard_moves) == 1 and self.starting_fen[0] == 'W':
+        if len(standard_moves) == 1 and self.starting_fen[0] == 'W':
             pdn_text += f'1. {standard_moves[0]}'
             standard_moves = []
-        else:
+        elif standard_moves:
             if self.starting_fen[0] == 'W':
                 pdn_text += f'1. {standard_moves[0]} {standard_moves[1]}'
                 standard_moves = standard_moves[2:]
@@ -296,10 +291,8 @@ class PDNWriter:
             with open(self.filename, self.file_mode, encoding=self.file_encoding) as file:
                 file.write(self.pdn_text)
 
-    def _startpos_to_fen(self, fen: str) -> str:
+    def _startpos_to_fen(self) -> str:
         """Get the starting fen."""
-        if fen != 'startpos':
-            return fen
         if self.variant == 'frysk!':
             return 'W:W46,47,48,49,50:B1,2,3,4,5'
         elif self.variant == 'turkish':

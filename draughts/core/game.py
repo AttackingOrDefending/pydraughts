@@ -187,7 +187,7 @@ class Game:
         elif self.variant == 'breakthrough':
             # There is no draw.
             return False
-        elif self.variant == 'russian':
+        elif self.variant in ['russian', 'brazilian']:
             # 3 or more kings vs 1 king and 15 moves made.
             if white_pieces == white_kings == 1 and black_pieces == black_kings >= 3 and self.moves_since_last_capture >= 30:
                 return True
@@ -202,38 +202,12 @@ class Game:
             # Same number of kings, same number of pieces, 6 or 7 pieces per side and 60 moves made.
             if white_kings == black_kings >= 1 and white_pieces == black_pieces and white_pieces in [6, 7] and self.moves_since_last_capture >= 120:
                 return True
-            # 3 pieces (with at least 1 king) vs 1 king on the long diagonal.
-            if white_pieces == 3 and white_kings >= 1 and black_pieces == black_kings == 1 and not white_piece_in_long_diagonal and black_piece_in_long_diagonal:
+            # 3 pieces (with at least 1 king) vs 1 king on the long diagonal and 5 moves made.
+            if white_pieces == 3 and white_kings >= 1 and black_pieces == black_kings == 1 and not white_piece_in_long_diagonal and black_piece_in_long_diagonal and self.moves_since_last_capture >= 10:
                 return True
-            if white_pieces == white_kings == 1 and black_pieces == 3 and black_kings >= 1 and white_piece_in_long_diagonal and not black_piece_in_long_diagonal:
+            if white_pieces == white_kings == 1 and black_pieces == 3 and black_kings >= 1 and white_piece_in_long_diagonal and not black_piece_in_long_diagonal and self.moves_since_last_capture >= 10:
                 return True
-            # 2 pieces (with at least 1 king) vs 1 king and 10 moves made.
-            if white_pieces == 2 and white_kings >= 1 and black_pieces == black_kings == 1 and self.moves_since_last_capture >= 10:
-                return True
-            if white_pieces == white_kings == 1 and black_pieces == 2 and black_kings >= 1 and self.moves_since_last_capture >= 10:
-                return True
-            return self.is_threefold()
-        elif self.variant == 'brazilian':
-            # 3 or more kings vs 1 king and 15 moves made.
-            if white_pieces == white_kings == 1 and black_pieces == black_kings >= 3 and self.moves_since_last_capture >= 30:
-                return True
-            if white_pieces == white_kings >= 3 and black_pieces == black_kings == 1 and self.moves_since_last_capture >= 30:
-                return True
-            # 15 consecutive non-capture king moves.
-            if self.consecutive_noncapture_king_moves >= 30:
-                return True
-            # Same number of kings, same number of pieces, 4 or 5 pieces per side and 30 moves made.
-            if white_kings == black_kings >= 1 and white_pieces == black_pieces and white_pieces in [4, 5] and self.moves_since_last_capture >= 60:
-                return True
-            # Same number of kings, same number of pieces, 6 or 7 pieces per side and 60 moves made.
-            if white_kings == black_kings >= 1 and white_pieces == black_pieces and white_pieces in [6, 7] and self.moves_since_last_capture >= 120:
-                return True
-            # 3 pieces (with at least 1 king) vs 1 king on the long diagonal.
-            if white_pieces == 3 and white_kings >= 1 and black_pieces == black_kings == 1 and not white_piece_in_long_diagonal and black_piece_in_long_diagonal:
-                return True
-            if white_pieces == white_kings == 1 and black_pieces == 3 and black_kings >= 1 and white_piece_in_long_diagonal and not black_piece_in_long_diagonal:
-                return True
-            # 2 pieces (with at least 1 king) vs 1 king and 10 moves made.
+            # 2 pieces (with at least 1 king) vs 1 king and 5 moves made.
             if white_pieces == 2 and white_kings >= 1 and black_pieces == black_kings == 1 and self.moves_since_last_capture >= 10:
                 return True
             if white_pieces == white_kings == 1 and black_pieces == 2 and black_kings >= 1 and self.moves_since_last_capture >= 10:
@@ -363,15 +337,18 @@ class Game:
 
     def legal_moves(self) -> Tuple[List[List[List[int]]], List[List[Optional[int]]]]:
         """Get the legal moves for a position."""
+
+        moves, captures = self.get_moves()
+        if not moves:
+            return moves, captures
+
         if self.variant in ['frisian', 'frysk!']:
             # Kings are worth 1.5 and men 1. The kings here are worth 1.501 because if we have a choice between 3 men or 2 kings (both are worth 3) we must capture the kings.
 
             # We have to choose the path that is worth the most.
             king_value = 1.501
             man_value = 1
-            moves, captures = self.get_moves()
-            if not moves:
-                return moves, captures
+
             values = []
             for capture in captures:
                 value = 0
@@ -435,11 +412,8 @@ class Game:
             else:
                 moves_legal = moves_pseudo_legal_2
                 captures_legal = captures_pseudo_legal_2
-        elif self.variant == 'italian':
-            moves, captures = self.get_moves()
-            if not moves:
-                return moves, captures
 
+        elif self.variant == 'italian':
             # The move that captures the most pieces has to be played.
             max_len_key = max(list(map(len, moves)))
             moves_pseudo_legal = []
@@ -495,18 +469,14 @@ class Game:
             captures_pseudo_legal_4 = []
             if king_in_capture_sequence:
                 for move, capture in zip(moves_pseudo_legal_3, captures_pseudo_legal_3):
-                    if capture[0] is not None:
-                        for index, piece_loc in enumerate(capture):
-                            if index > earliest_king:
-                                break
-                            elif self.board.searcher.get_piece_by_position(piece_loc).king:
-                                if index == earliest_king:
-                                    moves_pseudo_legal_4.append(move)
-                                    captures_pseudo_legal_4.append(capture)
-                                break
-                    else:
-                        moves_pseudo_legal_4.append(move)
-                        captures_pseudo_legal_4.append(capture)
+                    for index, piece_loc in enumerate(capture):
+                        if index > earliest_king:
+                            break
+                        elif self.board.searcher.get_piece_by_position(piece_loc).king:
+                            if index == earliest_king:
+                                moves_pseudo_legal_4.append(move)
+                                captures_pseudo_legal_4.append(capture)
+                            break
             else:
                 moves_pseudo_legal_4 = moves_pseudo_legal_3
                 captures_pseudo_legal_4 = captures_pseudo_legal_3
@@ -516,12 +486,9 @@ class Game:
         elif self.variant in ['russian', 'english']:
             # No restriction. The player can choose, whichever move they prefer.
             # They only have to complete the multi-capture.
-            return self.get_moves()
+            return moves, captures
         else:
             # Turkish also goes in this category (together with international etc.) because the rule that prohibits a piece from turning 180 degrees is accounted for in get_position_behind_enemy.
-            moves, captures = self.get_moves()
-            if not moves:
-                return moves, captures
 
             # The move that captures the most pieces has to be played.
             max_len_key = max(list(map(len, moves)))
@@ -574,9 +541,13 @@ class Game:
         for white_piece in white_pieces:
             if '-' in white_piece:
                 start_end = white_piece.split('-')
+                add_for_king = ''
+                if start_end[0][0] == 'K':
+                    add_for_king = 'K'
+                    start_end[0] = start_end[0][1:]
                 start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
                 for number in range(start, end + 1):
-                    white_pieces_remove_hyphen.append(str(number))
+                    white_pieces_remove_hyphen.append(add_for_king + str(number))
             else:
                 white_pieces_remove_hyphen.append(white_piece)
 
@@ -584,9 +555,13 @@ class Game:
         for black_piece in black_pieces:
             if '-' in black_piece:
                 start_end = black_piece.split('-')
+                add_for_king = ''
+                if start_end[0][0] == 'K':
+                    add_for_king = 'K'
+                    start_end[0] = start_end[0][1:]
                 start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
                 for number in range(start, end + 1):
-                    black_pieces_remove_hyphen.append(str(number))
+                    black_pieces_remove_hyphen.append(add_for_king + str(number))
             else:
                 black_pieces_remove_hyphen.append(black_piece)
 

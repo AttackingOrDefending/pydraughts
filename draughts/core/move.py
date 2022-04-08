@@ -3,7 +3,7 @@ from typing import List, Optional, Any
 
 
 class Move:
-    def __init__(self, board: Any = None, board_move: List[List[int]] = None, hub_move: str = None, hub_position_move: str = None, pdn_move: str = None, pdn_position_move: str = None, steps_move: List[int] = None, li_api_move: str = None, li_one_move: str = None, has_captures: Optional[bool] = None, possible_moves: List[List[List[int]]] = None, possible_captures: List[List[Optional[int]]] = None, hub_to_pdn_pseudolegal: bool = False, variant: Optional[str] = None, notation: int = 2, squares_per_letter: int = 4) -> None:
+    def __init__(self, board: Any = None, board_move: List[List[int]] = None, hub_move: str = None, hub_position_move: str = None, pdn_move: str = None, pdn_position_move: str = None, steps_move: List[int] = None, li_api_move: List[str] = None, li_one_move: str = None, has_captures: Optional[bool] = None, possible_moves: List[List[List[int]]] = None, possible_captures: List[List[Optional[int]]] = None, hub_to_pdn_pseudolegal: bool = False, variant: Optional[str] = None, notation: int = 2, squares_per_letter: int = 4) -> None:
         self.board_move = board_move
         self.hub_move = hub_move
         self.hub_position_move = hub_position_move

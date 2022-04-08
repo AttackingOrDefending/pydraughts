@@ -7,10 +7,8 @@ from typing import Optional, Union, Tuple, Dict, Any
 
 
 class Engine64:
-    def __init__(self, command: str, cwd: Optional[str] = None) -> None:
-        if cwd is None:
-            cwd = os.path.realpath(os.path.expanduser("."))
-        os.add_dll_directory(cwd)
+    def __init__(self, command: str) -> None:
+        os.add_dll_directory(os.path.realpath(os.path.expanduser(os.path.dirname(command))))
         self.engine = ctypes.windll.LoadLibrary(command)
 
     def kill_process(self) -> None:
@@ -101,10 +99,9 @@ class Engine64:
                 end_pos = index
             elif old_fen[index] in opponents_pieces and new_fen[index] == 'e':
                 captures.append(index)
+        hub_pos_move = None
         if start_pos and end_pos:
             hub_pos_move = game.make_len_2(start_pos) + game.make_len_2(end_pos) + game.sort_captures(captures)
-        else:
-            hub_pos_move = None
 
         cbmove_output_2 = {}
         cbmove_output_2['jumps'] = cbmove.jumps
