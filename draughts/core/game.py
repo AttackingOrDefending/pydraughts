@@ -71,6 +71,8 @@ class Game:
         return game
 
     def pop(self) -> None:
+        """Undo the last move."""
+        # Removes the whole capture sequence in case of a multi-capture.
         if self.moves:
             if self._not_added_move:
                 self._not_added_move = []
