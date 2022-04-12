@@ -68,6 +68,11 @@ def test_game():
     game.pop()
     assert game._not_added_move == []
     assert game.get_fen() == 'WeeeeeeeebeeeeeeeebeeeeeeeeeeeeeebeeeeeeeeeeWeeeeee'
+    
+    game = Game(fen='W:WK43:BK9')
+    game.move([43, 49])
+    game.pop()
+    assert game.reversible_moves == []
 
 
 def fifty_square_draw_board(game, repeat_time=12, half_time=True):
