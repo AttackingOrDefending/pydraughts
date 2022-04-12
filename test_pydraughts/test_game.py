@@ -62,10 +62,12 @@ def test_game():
     game.move([19, 24])
     game.move([30, 19])
 
-    game = Game(fen='W:WK44:B18,33')
+    game = Game(fen='W:WK44:B9,18,33')
     game.move([44, 22])
+    game.move([22, 13])
     game.pop()
     assert game._not_added_move == []
+    assert game.get_fen() == 'WeeeeeeeebeeeeeeeebeeeeeeeeeeeeeebeeeeeeeeeeWeeeeee'
 
 
 def fifty_square_draw_board(game, repeat_time=12, half_time=True):
