@@ -2,7 +2,7 @@ from __future__ import annotations
 from draughts.core.board import Board
 from draughts.core.move import Move
 import pickle
-from draughts.convert import _algebraic_to_numeric_square, _get_squares
+from draughts.convert import _algebraic_to_numeric_square, _get_squares, fen_to_variant
 from typing import List, Union, Tuple, Optional
 
 WHITE = 2
@@ -28,7 +28,7 @@ class Game:
             self.board = Board(self.variant, self.initial_hub_fen)
             self.initial_fen = self.get_li_fen()
         self.initial_dxp_fen = self.get_dxp_fen()
-        self.last_non_reversible_fen = self.initial_fen
+        self.last_non_reversible_fen = fen_to_variant(self.initial_fen, self.variant)
 
         # moves has every move of a multi-capture as a separate move.
         self.moves = []
@@ -43,14 +43,19 @@ class Game:
         self._not_added_move = []
         self._not_added_capture = []
 
-        # non_reversible_moves contains the moves since the last capture or move of a man.
+        # reversible_moves contains the moves since the last capture or move of a man.
         # (so it only contains non-capture king moves).
-        self.non_reversible_moves = []
+        self.reversible_moves = []
 
         # fens stores the Hub fen of each position to detect threefold repetition.
-        self.fens = []
+        self.fens = [self.initial_hub_fen]
         self.moves_since_last_capture = 0
         self.consecutive_noncapture_king_moves = 0
+
+        # save data for pop()
+        self.last_non_reversible_fen_history = [self.last_non_reversible_fen]
+        self.moves_since_last_capture_history = [self.moves_since_last_capture]
+        self.consecutive_noncapture_king_moves_history = [self.consecutive_noncapture_king_moves]
 
     def copy(self) -> Game:
         """Copy the board (transfers all data)."""
@@ -64,6 +69,29 @@ class Game:
         game._not_added_move = self._not_added_move.copy()
         game._not_added_capture = self._not_added_capture.copy()
         return game
+
+    def pop(self) -> None:
+        """Undo the last move."""
+        # Removes the whole capture sequence in case of a multi-capture.
+        if self.moves:
+            if self._not_added_move:
+                self._not_added_move = []
+                self._not_added_capture = []
+            else:
+                # The fen and other data is only added after the whole capture sequence is complete.
+                self.fens.pop()
+                self.move_stack.pop()
+                last_captures = self.capture_stack.pop()
+                if self.reversible_moves:
+                    self.reversible_moves.pop()
+                for _ in range(max(1, len(last_captures))):
+                    self.moves.pop()
+
+                self.last_non_reversible_fen_history.pop()
+                self.moves_since_last_capture_history.pop()
+                self.consecutive_noncapture_king_moves_history.pop()
+
+            self.board = Board(self.variant, self.fens[-1])
 
     def move(self, move: List[int], return_captured: bool = False) -> Union[Game, Tuple[Game, int]]:
         """Make a move."""
@@ -92,12 +120,15 @@ class Game:
             piece = self.board.searcher.get_piece_by_position(move[1])
             self.moves_since_last_capture = 0 if self.board.previous_move_was_capture else self.moves_since_last_capture + 1
             if piece.king and not captures:
-                self.non_reversible_moves.append(move_to_add)
+                self.reversible_moves.append(move_to_add)
                 self.consecutive_noncapture_king_moves += 1
             else:
-                self.last_non_reversible_fen = self.get_li_fen()
-                self.non_reversible_moves = []
+                self.last_non_reversible_fen = fen_to_variant(self.get_li_fen(), self.variant)
+                self.reversible_moves = []
                 self.consecutive_noncapture_king_moves = 0
+            self.last_non_reversible_fen_history.append(self.last_non_reversible_fen)
+            self.moves_since_last_capture_history.append(self.moves_since_last_capture)
+            self.consecutive_noncapture_king_moves_history.append(self.consecutive_noncapture_king_moves)
             self.fens.append(self.get_fen())
 
         if return_captured:
@@ -534,6 +565,8 @@ class Game:
         fen += li_fen[0]
         white_pieces = li_fen[1][1:].split(',')
         black_pieces = li_fen[2][1:].split(',')
+        white_pieces = list(filter(bool, white_pieces))
+        black_pieces = list(filter(bool, black_pieces))
 
         # Fens sometimes contain hyphens to denote that the player has pieces from one square until another.
         # e.g. 5-10 is the same as 5,6,7,8,9,10.

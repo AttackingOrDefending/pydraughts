@@ -74,7 +74,7 @@ class CheckerBoardEngine:
             self._sent_variant = True
 
         if board.move_stack:
-            gamehist = f'set gamehist {board.last_non_reversible_fen} {" ".join(list(map(lambda move: move.pdn_move, board.non_reversible_moves)))}'
+            gamehist = f'set gamehist {board.last_non_reversible_fen} {" ".join(list(map(lambda move: move.pdn_move, board.reversible_moves)))}'
             if len(gamehist) > 256:
                 gamehist = " ".join(gamehist[:256].split()[:-1])
             self.engine.enginecommand(gamehist)
