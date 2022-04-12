@@ -73,8 +73,8 @@ class Game:
     def pop(self) -> None:
         if self.moves:
             if self._not_added_move:
-                self._not_added_move.pop()
-                self._not_added_capture.pop()
+                self._not_added_move = []
+                self._not_added_capture = []
             else:
                 # The fen and other data is only added after the whole capture sequence is complete.
                 self.fens.pop()
