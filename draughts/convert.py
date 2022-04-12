@@ -236,15 +236,17 @@ def fen_to_variant(fen, variant=None, notation=None, width=None, squares_per_let
     if to_algebraic or variant in ['russian', 'brazilian', 'turkish']:
         new_white_pieces = []
         new_black_pieces = []
-        white_pieces = fen.split(':')[1][1:]
-        black_pieces = fen.split(':')[2][1:]
-        for piece in white_pieces.split(','):
+        white_pieces = fen.split(':')[1][1:].split(',')
+        black_pieces = fen.split(':')[2][1:].split(',')
+        white_pieces = list(filter(bool, white_pieces))
+        black_pieces = list(filter(bool, black_pieces))
+        for piece in white_pieces:
             add = ''
             if piece.lower().startswith('k'):
                 add = 'K'
                 piece = piece[1:]
             new_white_pieces.append(add + _number_to_algebraic(piece, variant=variant, width=width, every_other_square=every_other_square))
-        for piece in black_pieces.split(','):
+        for piece in black_pieces:
             add = ''
             if piece.lower().startswith('k'):
                 add = 'K'

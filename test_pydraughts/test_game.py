@@ -42,6 +42,9 @@ def test_game():
     game = Game('italian', 'W:WK25,32,31:B7,K5,12,K14,13,20,21,28')
     assert game.legal_moves() == ([[[25, 18], [18, 11], [11, 4]]], [[21, 14, 7]])
 
+    game = Game(fen='W:W6:B1')
+    assert game.legal_moves() == ([], [])
+
     # Test pop()
     game = Game()
     game.pop()
@@ -58,6 +61,11 @@ def test_game():
     game.move([35, 30])
     game.move([19, 24])
     game.move([30, 19])
+
+    game = Game(fen='W:WK44:B18,33')
+    game.move([44, 22])
+    game.pop()
+    assert game._not_added_move == []
 
 
 def fifty_square_draw_board(game, repeat_time=12, half_time=True):
@@ -174,6 +182,3 @@ def test_drawing_conditions():
 
     game = Game('turkish', 'W:WK32:B10')
     assert game.is_draw()
-
-    game = Game(fen='W:W6:B1')
-    assert game.legal_moves() == ([], [])

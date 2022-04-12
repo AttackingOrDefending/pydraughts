@@ -72,21 +72,24 @@ class Game:
 
     def pop(self) -> None:
         if self.moves:
-            fen = self.fens.pop()
-            self.board = Board(self.variant, self.fens[-1])
-
-            self.move_stack.pop()
-            last_captures = self.capture_stack.pop()
             if self._not_added_move:
                 self._not_added_move.pop()
                 self._not_added_capture.pop()
-            if self.reversible_moves:
-                self.reversible_moves.pop()
-            for _ in range(max(1, len(last_captures))):
-                self.moves.pop()
-            self.last_non_reversible_fen_history.pop()
-            self.moves_since_last_capture_history.pop()
-            self.consecutive_noncapture_king_moves_history.pop()
+            else:
+                # The fen and other data is only added after the whole capture sequence is complete.
+                self.fens.pop()
+                self.move_stack.pop()
+                last_captures = self.capture_stack.pop()
+                if self.reversible_moves:
+                    self.reversible_moves.pop()
+                for _ in range(max(1, len(last_captures))):
+                    self.moves.pop()
+
+                self.last_non_reversible_fen_history.pop()
+                self.moves_since_last_capture_history.pop()
+                self.consecutive_noncapture_king_moves_history.pop()
+
+            self.board = Board(self.variant, self.fens[-1])
 
     def move(self, move: List[int], return_captured: bool = False) -> Union[Game, Tuple[Game, int]]:
         """Make a move."""
@@ -560,6 +563,8 @@ class Game:
         fen += li_fen[0]
         white_pieces = li_fen[1][1:].split(',')
         black_pieces = li_fen[2][1:].split(',')
+        white_pieces = list(filter(bool, white_pieces))
+        black_pieces = list(filter(bool, black_pieces))
 
         # Fens sometimes contain hyphens to denote that the player has pieces from one square until another.
         # e.g. 5-10 is the same as 5,6,7,8,9,10.
