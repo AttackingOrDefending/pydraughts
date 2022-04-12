@@ -168,6 +168,8 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
     starts = li_fen[0]
     white_pieces = li_fen[1][1:].split(',')
     black_pieces = li_fen[2][1:].split(',')
+    white_pieces = list(filter(bool, white_pieces))
+    black_pieces = list(filter(bool, black_pieces))
 
     white_pieces_remove_hyphen = []
     for white_piece in white_pieces:
