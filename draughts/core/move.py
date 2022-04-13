@@ -27,7 +27,7 @@ class Move:
         if self.is_null is None:
             self.is_null = self.board_move == [[0, 0]] or self.hub_move == '0-0' or self.hub_position_move == '0000' or self.pdn_move == '0-0' or self.pdn_position_move == '0000' or self.steps_move == [0, 0] or self.li_api_move == ['0000'] or self.li_one_move == '0000'
 
-        if board_move or hub_move or hub_position_move or pdn_move or pdn_position_move or steps_move or li_api_move or li_one_move and not self.is_null:
+        if (board_move or hub_move or hub_position_move or pdn_move or pdn_position_move or steps_move or li_api_move or li_one_move) and not self.is_null:
             if board or possible_moves and possible_captures:
                 if not possible_moves or not possible_captures:
                     self.possible_moves, self.possible_captures = board.legal_moves()

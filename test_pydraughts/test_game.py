@@ -74,9 +74,14 @@ def test_game():
     game.pop()
     assert game.reversible_moves == []
 
+    game = Game(fen='W:WK39:B23,33')
+    _, captures = game.push([[39, 28], [28, 19]], return_captured=True)
+    assert captures == [33, 23]
+
     game = Game()
     game.null()
     assert game.get_fen() == 'Bbbbbbbbbbbbbbbbbbbbbeeeeeeeeeewwwwwwwwwwwwwwwwwwww'
+    assert game.move_stack[0].pdn_move == '0-0'
 
 
 def fifty_square_draw_board(game, repeat_time=12, half_time=True):
