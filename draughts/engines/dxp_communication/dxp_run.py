@@ -62,15 +62,15 @@ class ConsoleHandler:
             if current.started and current.myColor == current.get_color():
                 timeSpend = 0  # time spend for this move (future)
 
-                board = []
+                board_move = []
                 for index in range(1, len(steps)):
-                    board.append([steps[index - 1], steps[index]])
+                    board_move.append([steps[index - 1], steps[index]])
                 all_moves, all_captures = current.pos.legal_moves()
-                captures = all_captures[all_moves.index(board)]
+                captures = all_captures[all_moves.index(board_move)]
                 if captures[0] is None:
                     captures = []
                 msg = dxp.msg_move(steps, captures, timeSpend)
-                logger.debug(f'MOVE: {board}')
+                logger.debug(f'MOVE: {board_move}')
 
                 try:
                     mySock.send(msg)
@@ -79,8 +79,7 @@ class ConsoleHandler:
                     logger.debug(f"Error sending move: {err}")
                     return
 
-                for move in board:
-                    current.pos.move(move)
+                current.pos.push(board_move)
             lock.release()  # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
 
         elif comm.startswith('conn'):
@@ -243,19 +242,18 @@ class ReceiveHandler(threading.Thread):
                 steps = [dxpData['from'], dxpData['to']]
                 nsteps = list(map(int, steps))
                 ntakes = list(map(int, dxpData['captures']))
-                board = None
+                board_move = None
                 all_moves, all_captures = current.pos.legal_moves()
                 if not ntakes:
                     ntakes = [None]
                 for move, capture in zip(all_moves, all_captures):
                     if move[0][0] == nsteps[0] and move[-1][1] == nsteps[-1] and sorted(ntakes) == sorted(capture):
-                        board = move
+                        board_move = move
 
-                if board is not None:
-                    last_move = board
-                    logger.debug(f"\nMove received: {board}")
-                    for move in board:
-                        current.pos.move(move)
+                if board_move is not None:
+                    last_move = board_move
+                    logger.debug(f"\nMove received: {board_move}")
+                    current.pos.push(board_move)
                 else:
                     logger.debug(f"Error: received move is illegal [{message}]")
 

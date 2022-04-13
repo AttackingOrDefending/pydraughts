@@ -225,8 +225,7 @@ class PDNWriter:
         for move in self.moves:
             correct_move = Move(game, board_move=move.board_move)
             correct_moves.append(correct_move)
-            for semi_move in move.board_move:
-                game.move(semi_move)
+            game.push(correct_move.board_move)
         self.moves = correct_moves
 
     def _write(self) -> None:

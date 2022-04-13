@@ -94,7 +94,7 @@ class Game:
             self.board = Board(self.variant, self.fens[-1])
 
     def move(self, move: List[int], return_captured: bool = False) -> Union[Game, Tuple[Game, int]]:
-        """Make a move."""
+        """Make a move. Plays only one jump in case of a multi-capture and not the whole sequence."""
         if move not in self.get_possible_moves():
             raise ValueError('The provided move is not possible')
         turn = self.whose_turn()
@@ -135,6 +135,22 @@ class Game:
             return self, enemy_position
         else:
             return self
+
+    def push(self, move: List[List[int]], return_captured: bool = False) -> Union[Game, Tuple[Game, List[int]]]:
+        """Make a move. Plays the whole move sequence in case of a capture."""
+        enemy_positions = []
+        for move_part in move:
+            enemy_positions.append(self.move(move_part, return_captured))
+        if return_captured:
+            enemy_positions = list(map(lambda game_enemy_position: game_enemy_position[1], enemy_positions))
+            return self, enemy_positions
+        else:
+            return self
+
+    def null(self) -> Game:
+        """Play a null move."""
+        self.move([0, 0])
+        return self
 
     def has_player_won(self, player: int = WHITE) -> bool:
         """Get if a given player has won."""
@@ -210,7 +226,7 @@ class Game:
                 return True
             # 1 king vs 1 king and 2 moves made (officially immediately if there can't be a forced capture).
             # but we don't detect if there is a forced capture.
-            if white_pieces == white_kings == black_pieces == black_kings == 1 and self.moves_since_last_capture == 4:
+            if white_pieces == white_kings == black_pieces == black_kings == 1 and self.moves_since_last_capture >= 4:
                 return True
         elif self.variant == 'antidraughts':
             # Only way to draw is threefold.
@@ -250,8 +266,9 @@ class Game:
                 return True
             return self.is_threefold()
         elif self.variant == 'turkish':
-            # 1 piece (king or not) vs 1 piece (king or not).
-            if white_pieces == black_pieces == 1:
+            # 1 piece (king or not) vs 1 piece (king or not) and 2 moves made (officially immediately if there can't be
+            # a forced capture) but we don't detect if there is a forced capture.
+            if white_pieces == black_pieces == 1 and self.moves_since_last_capture >= 4:
                 return True
             return self.is_threefold()
         return False
@@ -538,9 +555,9 @@ class Game:
         """
         return f'0{move}' if len(str(move)) == 1 else str(move)
 
-    def push_move(self, move: str) -> None:
+    def push_str_move(self, move: str) -> None:
         """
-        Make a move, given a string.
+        Make a move, given a string. Plays only one jump in case of a multi-capture and not the whole sequence.
         e.g. 0523 will mean move the piece at square 5 to square 23.
         """
         self.move([int(move[:2]), int(move[2:4])])
