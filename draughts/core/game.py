@@ -97,7 +97,7 @@ class Game:
         """Make a move. Plays only one jump in case of a multi-capture and not the whole sequence."""
         # [0, 0] is a null move.
         is_null_move = move == [0, 0]
-        if move not in self.get_possible_moves() or is_null_move:
+        if move not in self.get_possible_moves() and not is_null_move:
             raise ValueError('The provided move is not possible')
         turn = self.whose_turn()
 
