@@ -24,7 +24,7 @@ def test_game():
     game = Game(fen='W')
     assert game.legal_moves() == ([], [])
     game = Game()
-    game.push_move('3530')
+    game.push_str_move('3530')
     game = Game(fen='W:W1-40:B41-50')
     assert game.get_fen() == f'W{"w" * 40}{"b" * 10}'
     assert game.board.pieces[0].get_diagonal_one_square_behind_enemy(game.board.pieces[10]) == []
@@ -73,6 +73,10 @@ def test_game():
     game.move([43, 49])
     game.pop()
     assert game.reversible_moves == []
+
+    game = Game()
+    game.null()
+    assert game.get_fen() == 'Bbbbbbbbbbbbbbbbbbbbbeeeeeeeeeewwwwwwwwwwwwwwwwwwww'
 
 
 def fifty_square_draw_board(game, repeat_time=12, half_time=True):
@@ -188,4 +192,8 @@ def test_drawing_conditions():
     assert game.is_draw()
 
     game = Game('turkish', 'W:WK32:B10')
+    game.move([32, 31])
+    game.move([10, 9])
+    game.move([31, 31])
+    game.move([9, 10])
     assert game.is_draw()
