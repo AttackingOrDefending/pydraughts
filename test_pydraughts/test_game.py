@@ -16,7 +16,7 @@ def test_game():
     assert not game.board.is_valid_row_and_column(5, 8)
     assert game.board.is_valid_row_and_column(5, 4)
     try:
-        game.move([1, 46])
+        game.push([1, 46])
         assert False
     except ValueError:
         assert True
@@ -48,29 +48,29 @@ def test_game():
     # Test pop()
     game = Game()
     game.pop()
-    game.move([35, 30])
+    game.push([35, 30])
     game.pop()
-    game.move([35, 30])
-    game.move([19, 24])
+    game.push([35, 30])
+    game.push([19, 24])
     game.pop()
-    game.move([19, 24])
-    game.move([30, 19])
+    game.push([19, 24])
+    game.push([30, 19])
     game.pop()
     game.pop()
     game.pop()
-    game.move([35, 30])
-    game.move([19, 24])
-    game.move([30, 19])
+    game.push([35, 30])
+    game.push([19, 24])
+    game.push([30, 19])
 
     game = Game(fen='W:WK44:B9,18,33')
-    game.move([44, 22])
-    game.move([22, 13])
+    game.push([44, 22])
+    game.push([22, 13])
     game.pop()
     assert game._not_added_move == []
     assert game.get_fen() == 'WeeeeeeeebeeeeeeeebeeeeeeeeeeeeeebeeeeeeeeeeWeeeeee'
     
     game = Game(fen='W:WK43:BK9')
-    game.move([43, 49])
+    game.push([43, 49])
     game.pop()
     assert game.reversible_moves == []
 
@@ -86,25 +86,25 @@ def test_game():
 
 def fifty_square_draw_board(game, repeat_time=12, half_time=True):
     for _ in range(repeat_time):
-        game.move([28, 33])
-        game.move([1, 7])
-        game.move([33, 28])
-        game.move([7, 1])
+        game.push([28, 33])
+        game.push([1, 7])
+        game.push([33, 28])
+        game.push([7, 1])
     if half_time:
-        game.move([28, 33])
-        game.move([1, 7])
+        game.push([28, 33])
+        game.push([1, 7])
     return game
 
 
 def thirtytwo_square_draw_board(game, repeat_time=7, half_time=True):
     for _ in range(repeat_time):
-        game.move([32, 27])
-        game.move([1, 6])
-        game.move([27, 32])
-        game.move([6, 1])
+        game.push([32, 27])
+        game.push([1, 6])
+        game.push([27, 32])
+        game.push([6, 1])
     if half_time:
-        game.move([32, 27])
-        game.move([1, 6])
+        game.push([32, 27])
+        game.push([1, 6])
     return game
 
 
@@ -167,21 +167,21 @@ def test_drawing_conditions():
     # 3 pieces (with at least 1 king) vs 1 king on the long diagonal.
     game = Game('russian', 'W:WK5,17,19:BK29')
     for _ in range(2):
-        game.move([5, 9])
-        game.move([29, 4])
-        game.move([9, 5])
-        game.move([4, 29])
-    game.move([5, 9])
-    game.move([29, 4])
+        game.push([5, 9])
+        game.push([29, 4])
+        game.push([9, 5])
+        game.push([4, 29])
+    game.push([5, 9])
+    game.push([29, 4])
     assert game.is_draw()
     game = Game('russian', 'B:WK29:BK5,17,19')
     for _ in range(2):
-        game.move([5, 9])
-        game.move([29, 4])
-        game.move([9, 5])
-        game.move([4, 29])
-    game.move([5, 9])
-    game.move([29, 4])
+        game.push([5, 9])
+        game.push([29, 4])
+        game.push([9, 5])
+        game.push([4, 29])
+    game.push([5, 9])
+    game.push([29, 4])
     assert game.is_draw()
 
     # 2 pieces (with at least 1 king) vs 1 king and 5 moves made.
@@ -197,8 +197,8 @@ def test_drawing_conditions():
     assert game.is_draw()
 
     game = Game('turkish', 'W:WK32:B10')
-    game.move([32, 31])
-    game.move([10, 9])
-    game.move([31, 32])
-    game.move([9, 10])
+    game.push([32, 31])
+    game.push([10, 9])
+    game.push([31, 32])
+    game.push([9, 10])
     assert game.is_draw()

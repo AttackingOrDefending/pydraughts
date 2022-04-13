@@ -142,8 +142,10 @@ class Game:
         else:
             return self
 
-    def push(self, move: List[List[int]], return_captured: bool = False) -> Union[Game, Tuple[Game, List[int]]]:
+    def push(self, move: Union[List[List[int]], List[int]], return_captured: bool = False) -> Union[Game, Tuple[Game, List[int]]]:
         """Make a move. Plays the whole move sequence in case of a capture."""
+        if type(move[0]) == int:
+            move = [move]
         enemy_positions = []
         for move_part in move:
             enemy_positions.append(self.move(move_part, return_captured))
