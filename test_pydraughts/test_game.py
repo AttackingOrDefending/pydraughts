@@ -194,6 +194,6 @@ def test_drawing_conditions():
     game = Game('turkish', 'W:WK32:B10')
     game.move([32, 31])
     game.move([10, 9])
-    game.move([31, 31])
+    game.move([31, 32])
     game.move([9, 10])
     assert game.is_draw()
