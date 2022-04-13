@@ -95,11 +95,16 @@ class Game:
 
     def move(self, move: List[int], return_captured: bool = False) -> Union[Game, Tuple[Game, int]]:
         """Make a move. Plays only one jump in case of a multi-capture and not the whole sequence."""
+        # [0, 0] is a null move.
         if move not in self.get_possible_moves() + [[0, 0]]:
             raise ValueError('The provided move is not possible')
         turn = self.whose_turn()
 
-        self.board, enemy_position = self.board.push_move(move, len(self.move_stack) + 1, self._not_added_capture)
+        if move == [0, 0]:  # null move
+            self.board.switch_turn()
+            enemy_position = None
+        else:
+            self.board, enemy_position = self.board.push_move(move, len(self.move_stack) + 1, self._not_added_capture)
         self.moves.append(move)
 
         if self.whose_turn() == turn:
