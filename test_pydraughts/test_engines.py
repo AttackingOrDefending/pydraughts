@@ -1,5 +1,5 @@
 import draughts
-from draughts.engine import HubEngine, DXPEngine, CheckerBoardEngine, Limit
+from draughts.engine import HubEngine, DXPEngine, CheckerBoardEngine, Limit, PlayResult
 
 import pytest
 import requests
@@ -10,6 +10,7 @@ import stat
 import sys
 import threading
 import time
+import random
 import logging
 platform = sys.platform
 file_extension = '.exe' if platform == 'win32' else ''
@@ -136,13 +137,11 @@ def test_hub_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def test_hub_dxp_engines():
-    if platform != 'win32':
+def test_dxp_engines():
+    if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
-    hub = HubEngine('kr_hub.exe')
-    hub.init()
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait_to_open_time': 10, 'max-moves': 100, 'initial-time': 30})
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait_to_open_time': 10, 'max-moves': 100, 'initial-time': 30})
     limit = Limit(10)
     game = draughts.Game()
     logger.info('Starting game 1')
@@ -151,7 +150,7 @@ def test_hub_dxp_engines():
         if len(game.move_stack) % 2 == 0:
             best_move = dxp.play(game)
         else:
-            best_move = hub.play(game, limit, False)
+            best_move = PlayResult(move=draughts.Move(board_move=random.choice(game.legal_moves()[0])))
         if best_move.move:
             game.push(best_move.move.board_move)
         else:
@@ -161,13 +160,7 @@ def test_hub_dxp_engines():
     logger.info('Quited dxp 1')
     dxp.kill_process()
     logger.info('Killed dxp 1')
-    hub.quit()
-    logger.info('Quited hub 1')
-    hub.kill_process()
-    logger.info('Killed hub 1')
 
-    hub = HubEngine('kr_hub.exe')
-    hub.init()
     dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
     limit = Limit(10)
     game = draughts.Game()
@@ -177,7 +170,7 @@ def test_hub_dxp_engines():
         if len(game.move_stack) % 2 == 0:
             best_move = dxp.play(game)
         else:
-            best_move = hub.play(game, limit, False)
+            best_move = PlayResult(move=draughts.Move(board_move=random.choice(game.legal_moves()[0])))
         if best_move.move:
             game.push(best_move.move.board_move)
         else:
@@ -187,10 +180,6 @@ def test_hub_dxp_engines():
     logger.info('Quited dxp 2')
     dxp.kill_process()
     logger.info('Killed dxp 2')
-    hub.quit()
-    logger.info('Quited hub 2')
-    hub.kill_process()
-    logger.info('Killed hub 2')
 
 
 @pytest.mark.timeout(300, method="thread")
