@@ -43,7 +43,11 @@ game = Game(variant="standard", fen="startpos")
 ```
 * Make a move
 ```python
-game.move([34, 30])
+game.push([34, 30])
+
+# Multi-capture
+game2 = Game(fen="W:WK40:B19,29")
+game2.push([[40, 23], [23, 14]])
 ```
 * Get legal moves
 ```python

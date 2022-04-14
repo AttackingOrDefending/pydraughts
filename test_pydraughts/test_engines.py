@@ -107,8 +107,7 @@ def test_hub_engines():
         logger.info(f'move1: {len(game.move_stack)}')
         best_move = hub.play(game, limit, False)
         if best_move.move:
-            for move in best_move.move.board_move:
-                game.move(move)
+            game.push(best_move.move.board_move)
         else:
             break
     logger.info('Finished playing 1')
@@ -126,8 +125,7 @@ def test_hub_engines():
         logger.info(f'move2: {len(game.move_stack)}')
         best_move = hub.play(game, limit, False)
         if best_move.move:
-            for move in best_move.move.board_move:
-                game.move(move)
+            game.push(best_move.move.board_move)
         else:
             break
     logger.info('Finished playing 2')
@@ -155,8 +153,7 @@ def test_hub_dxp_engines():
         else:
             best_move = hub.play(game, limit, False)
         if best_move.move:
-            for move in best_move.move.board_move:
-                game.move(move)
+            game.push(best_move.move.board_move)
         else:
             break
     logger.info('Finished playing 1')
@@ -182,8 +179,7 @@ def test_hub_dxp_engines():
         else:
             best_move = hub.play(game, limit, False)
         if best_move.move:
-            for move in best_move.move.board_move:
-                game.move(move)
+            game.push(best_move.move.board_move)
         else:
             break
     logger.info('Finished playing 2')
@@ -210,8 +206,7 @@ def test_checkerboard_engines():
         logger.info(f'move1: {len(game.move_stack)}')
         best_move = checkerboard.play(game, limit)
         if best_move.move:
-            for move in best_move.move.board_move:
-                game.move(move)
+            game.push(best_move.move.board_move)
         else:
             break
     logger.info('Finished playing 1')
@@ -225,8 +220,7 @@ def test_checkerboard_engines():
         logger.info(f'move2: {len(game.move_stack)}')
         best_move = checkerboard.play(game, limit)
         if best_move.move:
-            for move in best_move.move.board_move:
-                game.move(move)
+            game.push(best_move.move.board_move)
         else:
             break
     logger.info('Finished playing 2')
@@ -246,8 +240,7 @@ def test_russian_checkerboard_engines():
         logger.info(f'move1: {len(game.move_stack)}')
         best_move = checkerboard.play(game, limit)
         if best_move.move:
-            for move in best_move.move.board_move:
-                game.move(move)
+            game.push(best_move.move.board_move)
         else:
             break
     logger.info('Finished playing 1')
@@ -261,8 +254,7 @@ def test_russian_checkerboard_engines():
         logger.info(f'move2: {len(game.move_stack)}')
         best_move = checkerboard.play(game, limit)
         if best_move.move:
-            for move in best_move.move.board_move:
-                game.move(move)
+            game.push(best_move.move.board_move)
         else:
             break
     logger.info('Finished playing 2')

@@ -7,8 +7,7 @@ def play_game(moves, variant):
     game = Game(variant)
     for move in moves:
         assert game.get_winner() is None
-        for semi_move in Move(pdn_move=move_from_variant(move, variant=game.variant), board=game).board_move:
-            game.move(semi_move)
+        game.push(Move(pdn_move=move_from_variant(move, variant=game.variant), board=game).board_move)
     game.get_winner()
     return game
 

@@ -7,7 +7,6 @@ game = Game()
 engine = HubEngine(["scan.exe", "hub"])
 engine.init()
 limit = Limit(time=10)
-engine_move = engine.play(game, limit, ponder=False)
 move = None
 def ponder_result(game, limit):
     global move
