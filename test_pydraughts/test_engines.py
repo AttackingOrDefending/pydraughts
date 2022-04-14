@@ -98,7 +98,7 @@ download_kestog()
 
 
 @pytest.mark.timeout(300, method="thread")
-def test_hub_engines():
+def est_hub_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
@@ -146,7 +146,6 @@ def _open_process(command: str, cwd: Optional[str] = None, shell: bool = True, _
         "stdout": subprocess.PIPE,
         "stderr": subprocess.STDOUT,
         "stdin": subprocess.PIPE,
-        "bufsize": 1,  # Line buffered
         "universal_newlines": True,
     }
     logger.debug(f'command: {command}, cwd: {cwd}')
