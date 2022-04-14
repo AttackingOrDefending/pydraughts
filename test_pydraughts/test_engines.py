@@ -190,7 +190,7 @@ def test_dxp_engines():
     dxp.kill_process()
     logger.info('Killed dxp 1')
 
-    engine = _open_process(f'scan{file_extension} dxp', os.getcwd())
+    engine = _open_process('"' + os.path.realpath(os.path.expanduser(f'scan{file_extension}')) + '" dxp', os.getcwd())
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': True}, initial_time=30)
     game = draughts.Game()
     logger.info('Starting game 2')
