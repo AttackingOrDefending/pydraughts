@@ -161,7 +161,7 @@ def test_dxp_engines():
     dxp.kill_process()
     logger.info('Killed dxp 1')
 
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     limit = Limit(10)
     game = draughts.Game()
     logger.info('Starting game 2')
