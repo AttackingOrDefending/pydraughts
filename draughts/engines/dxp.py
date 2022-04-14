@@ -10,7 +10,7 @@ import logging
 from importlib import reload
 from typing import Optional, Dict, Union, List, Any
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("pydraughts")
 
 
 class DXPEngine:
@@ -26,6 +26,7 @@ class DXPEngine:
         self.command = command
         self.engine_opened = True  # Whether the engine is already open or pydraughts should open it
         self.wait_to_open_time = 10
+        self.max_connect_attempts = 3
         self.ENGINE = ENGINE
         self.info = {}
         self.id = {}
@@ -108,7 +109,7 @@ class DXPEngine:
 
             self.p.communicate()
 
-    def _connect(self) -> None:
+    def _connect(self, connect_attempt: int = 0) -> None:
         """Connect to the engine."""
         if not self.engine_opened:
             wait_time = self.start_time / 1e9 + self.wait_to_open_time - time.perf_counter_ns() / 1e9

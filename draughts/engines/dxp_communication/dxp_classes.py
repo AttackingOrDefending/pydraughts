@@ -6,7 +6,7 @@ import logging
 import draughts
 from typing import Dict, Optional, List
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("pydraughts")
 
 DXP_WHITE = 0
 DXP_BLACK = 1

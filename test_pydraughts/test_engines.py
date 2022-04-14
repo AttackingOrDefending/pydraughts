@@ -8,14 +8,17 @@ import shutil
 import os
 import stat
 import sys
+import subprocess
 import threading
 import time
 import random
+from typing import Any, Optional
 import logging
 platform = sys.platform
 file_extension = '.exe' if platform == 'win32' else ''
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("pydraughts")
+logger.setLevel(logging.DEBUG)
 
 
 def download_scan():
@@ -136,13 +139,39 @@ def test_hub_engines():
     logger.info('Killed hub 2')
 
 
+def _open_process(command: str, cwd: Optional[str] = None, shell: bool = True, _popen_lock: Any = threading.Lock()) -> subprocess.Popen:
+    """Open the engine process."""
+    kwargs = {
+        "shell": shell,
+        "stdout": subprocess.PIPE,
+        "stderr": subprocess.STDOUT,
+        "stdin": subprocess.PIPE,
+        "bufsize": 1,  # Line buffered
+        "universal_newlines": True,
+    }
+    logger.debug(f'command: {command}, cwd: {cwd}')
+
+    if cwd is not None:
+        kwargs["cwd"] = cwd
+
+    # Prevent signal propagation from parent process
+    try:
+        # Windows
+        kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+    except AttributeError:
+        # Unix
+        kwargs["preexec_fn"] = os.setpgrp
+
+    with _popen_lock:  # Work around Python 2 Popen race condition
+        return subprocess.Popen(command, **kwargs)
+
+
 @pytest.mark.timeout(300, method="thread")
 def test_dxp_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait_to_open_time': 10, 'max-moves': 100, 'initial-time': 30})
-    limit = Limit(10)
     game = draughts.Game()
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
@@ -161,13 +190,13 @@ def test_dxp_engines():
     dxp.kill_process()
     logger.info('Killed dxp 1')
 
-    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    limit = Limit(10)
+    engine = _open_process(f'scan{file_extension} dxp', os.getcwd())
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': True}, initial_time=30)
     game = draughts.Game()
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
         logger.info(f'move2: {len(game.move_stack)}')
-        if len(game.move_stack) % 2 == 0:
+        if len(game.move_stack) % 2 == 1:
             best_move = dxp.play(game)
         else:
             best_move = PlayResult(move=draughts.Move(board_move=random.choice(game.legal_moves()[0])))

@@ -7,7 +7,7 @@ from draughts.engines.dxp_communication.dxp_classes import DamExchange, MySocket
 last_move = None
 accepted = None
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("pydraughts")
 
 
 class ConsoleHandler:
