@@ -98,7 +98,7 @@ download_kestog()
 
 
 @pytest.mark.timeout(300, method="thread")
-def est_hub_engines():
+def test_hub_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
