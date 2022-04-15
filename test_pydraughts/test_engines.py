@@ -36,7 +36,7 @@ def download_scan():
     shutil.copyfile('./TEMP/scan_31/scan.ini', 'scan.ini')
     with open('scan.ini') as file:
         options = file.read()
-    options = data.replace('book = true', 'book = false')
+    options = options.replace('book = true', 'book = false')
     with open('scan.ini', 'w') as file:
         file.write(options)
     if os.path.exists('data'):
