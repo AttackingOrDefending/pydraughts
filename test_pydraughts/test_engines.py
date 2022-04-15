@@ -158,7 +158,7 @@ def test_dxp_engines():
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
         logger.info(f'move1: {len(game.move_stack)}')
-        if len(game.move_stack) % 2 == 1:
+        if len(game.move_stack) % 2 == 0:
             best_move = dxp.play(game)
         else:
             best_move = random_move_engine(game)
