@@ -262,7 +262,7 @@ def test_russian_checkerboard_engines():
 
 def test_engines():
     # Test ping and setoption
-    hub = HubEngine(f'scan{file_extension} hub')
+    hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
     hub.ping()
     hub.setoption('book', True)
