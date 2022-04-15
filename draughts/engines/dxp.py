@@ -49,8 +49,8 @@ class DXPEngine:
             command = ' '.join(command)
             self.command = command
             self.p = self._open_process(command, cwd)
-            self.thr = threading.Thread(target=self._recv)
-            self.thr.start()
+            self.engine_receive_thread = threading.Thread(target=self._recv)
+            self.engine_receive_thread.start()
 
         self.start_time = time.perf_counter_ns()
 
@@ -107,6 +107,7 @@ class DXPEngine:
                 os.killpg(self.p.pid, signal.SIGKILL)
 
             self.p.communicate()
+            self.engine_receive_thread.join()
 
     def _connect(self) -> None:
         """Connect to the engine."""
