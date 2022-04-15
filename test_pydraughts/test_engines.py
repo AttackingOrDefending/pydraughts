@@ -148,6 +148,45 @@ def test_hub_engines():
     logger.info('Killed hub 2')
 
 
+def _open_process(command: str, cwd: Optional[str] = None, shell: bool = True, _popen_lock: Any = threading.Lock()) -> subprocess.Popen:
+    """Open the engine process."""
+    kwargs = {
+        "shell": shell,
+        "stdout": subprocess.PIPE,
+        "stderr": subprocess.STDOUT,
+        "stdin": subprocess.PIPE,
+        "bufsize": 1,  # Line buffered
+        "universal_newlines": True,
+    }
+    logger.debug(f'command: {command}, cwd: {cwd}')
+
+    if cwd is not None:
+        kwargs["cwd"] = cwd
+
+    # Prevent signal propagation from parent process
+    try:
+        # Windows
+        kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+    except AttributeError:
+        # Unix
+        kwargs["preexec_fn"] = os.setpgrp
+
+    with _popen_lock:  # Work around Python 2 Popen race condition
+        return subprocess.Popen(command, **kwargs)
+
+
+def _recv(engine) -> None:
+    """Receive a line from the engine, if the engine is opened by pydraughts."""
+    # The engine doesn't work otherwise.
+    while True:
+        line = engine.stdout.readline()
+
+        line = line.rstrip()
+
+        if line:
+            logger.debug(f"dxp engine %s >> %s {line}")
+
+
 @pytest.mark.timeout(300, method="thread")
 def test_dxp_engines():
     if platform not in ['win32', 'linux', 'darwin']:
@@ -172,7 +211,10 @@ def test_dxp_engines():
     dxp.kill_process()
     logger.info('Killed dxp 1')
 
-    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
+    engine = _open_process('"' + os.path.realpath(os.path.expanduser(f'scan{file_extension}')) + '" dxp', os.getcwd())
+    thr = threading.Thread(target=_recv, args=[engine])
+    thr.start()
+    dxp = DXPEngine(None, {'engine-opened': True}, initial_time=30)
     game = draughts.Game()
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
@@ -190,6 +232,7 @@ def test_dxp_engines():
     logger.info('Quited dxp 2')
     dxp.kill_process()
     logger.info('Killed dxp 2')
+    thr.join()
 
 
 @pytest.mark.timeout(300, method="thread")
