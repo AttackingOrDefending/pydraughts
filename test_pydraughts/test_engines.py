@@ -21,6 +21,10 @@ logger = logging.getLogger("pydraughts")
 logger.setLevel(logging.DEBUG)
 
 
+def random_move_engine(game):
+    return PlayResult(move=draughts.Move(board_move=random.choice(game.legal_moves()[0])))
+
+
 def download_scan():
     windows_linux_mac = ''
     if platform == 'linux':
@@ -157,7 +161,7 @@ def test_dxp_engines():
         if len(game.move_stack) % 2 == 1:
             best_move = dxp.play(game)
         else:
-            best_move = PlayResult(move=draughts.Move(board_move=random.choice(game.legal_moves()[0])))
+            best_move = random_move_engine(game)
         if best_move.move:
             game.push(best_move.move.board_move)
         else:
@@ -168,7 +172,7 @@ def test_dxp_engines():
     dxp.kill_process()
     logger.info('Killed dxp 1')
 
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     game = draughts.Game()
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
@@ -176,7 +180,7 @@ def test_dxp_engines():
         if len(game.move_stack) % 2 == 1:
             best_move = dxp.play(game)
         else:
-            best_move = PlayResult(move=draughts.Move(board_move=random.choice(game.legal_moves()[0])))
+            best_move = random_move_engine(game)
         if best_move.move:
             game.push(best_move.move.board_move)
         else:
