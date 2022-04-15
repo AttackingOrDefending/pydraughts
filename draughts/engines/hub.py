@@ -225,10 +225,10 @@ class HubEngine:
                     elif key == "score":
                         score = int(float(value) * 100)
                         mate = None
-                        if score > 9000:
-                            mate = 10000 - score
-                        elif score < -9000:
-                            mate = -10000 - score
+                        if score > 8000:
+                            mate = 9000 - score
+                        elif score < -000:
+                            mate = -9000 - score
                         if mate:
                             value = {"win": math.ceil(mate / 2)}
                         else:
