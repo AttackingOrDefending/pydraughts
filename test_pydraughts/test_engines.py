@@ -34,6 +34,11 @@ def download_scan():
         zip_ref.extractall('./TEMP/')
     shutil.copyfile(f'./TEMP/scan_31/scan{windows_linux_mac}{file_extension}', f'scan{file_extension}')
     shutil.copyfile('./TEMP/scan_31/scan.ini', 'scan.ini')
+    with open('scan.ini') as file:
+        options = file.read()
+    options = data.replace('book = true', 'book = false')
+    with open('scan.ini', 'w') as file:
+        file.write(options)
     if os.path.exists('data'):
         shutil.rmtree('data')
     shutil.copytree('./TEMP/scan_31/data', 'data')
