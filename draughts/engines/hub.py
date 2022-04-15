@@ -227,7 +227,7 @@ class HubEngine:
                         mate = None
                         if score > 8000:
                             mate = 9000 - score
-                        elif score < -000:
+                        elif score < -8000:
                             mate = -9000 - score
                         if mate:
                             value = {"win": math.ceil(mate / 2)}
