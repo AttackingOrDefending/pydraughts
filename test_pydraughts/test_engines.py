@@ -8,11 +8,9 @@ import shutil
 import os
 import stat
 import sys
-import subprocess
 import threading
 import time
 import random
-from typing import Any, Optional
 import logging
 platform = sys.platform
 file_extension = '.exe' if platform == 'win32' else ''
