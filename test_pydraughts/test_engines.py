@@ -111,7 +111,7 @@ def test_hub_engines():
         return
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
-    limit = Limit(10)
+    limit = Limit(10, 2)
     game = draughts.Game()
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
@@ -274,10 +274,13 @@ def test_engines():
 
     hub.go('Wbbbbbbbbbbbbbbbbbbbbeeeeeeeeeewwwwwwwwwwwwwwwwwwww', '35-30', my_time=30, inc=2, moves_left=40)
     hub.go('Wbbbbbbbbbbbbbbbbbbbbeeeeeeeeeewwwwwwwwwwwwwwwwwwww', '35-30', my_time=30, moves_left=40)
-    hub.play(draughts.Game(fen='W:W22:B9,18'), Limit(depth=15, nodes=10000, movetime=10), False)
+    hub.play(draughts.Game(fen='W:W22:B9,18'), Limit(movetime=10), False)
     time.sleep(0.01)
     hub.stop()
-    hub.play(draughts.Game(fen='B:W22:B18'), Limit(depth=15, nodes=10000, movetime=10), False)
+    hub.play(draughts.Game(fen='B:W22:B18'), Limit(nodes=10000), False)
+    time.sleep(0.01)
+    hub.stop()
+    hub.play(draughts.Game(fen='B:W22:B18'), Limit(depth=15), False)
     hub.kill_process()
     
     if platform != 'win32':
