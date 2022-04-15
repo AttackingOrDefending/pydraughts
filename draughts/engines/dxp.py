@@ -139,7 +139,7 @@ class DXPEngine:
                 line = line.rstrip()
 
                 if line:
-                    logging.debug(f"{self.ENGINE} %s >> %s {self.p.pid} {line}")
+                    logger.debug(f"{self.ENGINE} %s >> %s {self.p.pid} {line}")
             except ValueError as err:
                 if self.exit:
                     break
