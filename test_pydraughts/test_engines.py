@@ -263,7 +263,6 @@ def test_engines():
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
     hub.ping()
-    hub.setoption('book', None)
     hub.setoption('book', True)
     hub.setoption('book', False)
 
