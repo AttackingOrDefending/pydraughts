@@ -285,12 +285,6 @@ def test_engines():
     hub.quit()
     hub.kill_process()
 
-    # None as option value
-    hub = HubEngine([f'scan{file_extension}', 'hub'])
-    hub.setoption('book', None)
-    hub.init()
-    hub.kill_process()
-
     # Unexpected engine response to init
     with open('scan.ini') as file:
         options = file.read()
