@@ -293,7 +293,7 @@ def test_engines():
         assert True
     
     # Game already finished; gameend not allowed
-    dxp = DXPEngine([f'scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     game = draughts.Game()
     dxp.play(game)
     dxp.quit()
