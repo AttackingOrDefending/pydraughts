@@ -162,7 +162,7 @@ class HubEngine:
             else:
                 logger.warning("Unexpected engine response to ping: %s %s", command, arg)
 
-    def setoption(self, name: str, value: Union[str, bool]) -> None:
+    def setoption(self, name: str, value: Union[str, bool, None]) -> None:
         """Set an engine option."""
         if value is True:
             value = "true"

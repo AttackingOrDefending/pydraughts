@@ -3,6 +3,7 @@ from draughts.engines.checkerboard_extra.engine_client import Engine32
 import os
 import draughts
 import draughts.engine
+from draughts.convert import move_to_variant
 from typing import Union, List, Any
 
 
@@ -74,9 +75,9 @@ class CheckerBoardEngine:
             self._sent_variant = True
 
         if board.move_stack:
-            gamehist = f'set gamehist {board.last_non_reversible_fen} {" ".join(list(map(lambda move: move.pdn_move, board.reversible_moves)))}'
+            gamehist = f'set gamehist {board.last_non_reversible_fen} {" ".join(list(map(lambda move: move_to_variant(move.pdn_move, board.variant), board.reversible_moves)))}'
             if len(gamehist) > 256:
-                gamehist = " ".join(gamehist[:256].split()[:-1])
+                gamehist = " ".join(gamehist[-256:].split()[1:])
             self.engine.enginecommand(gamehist)
 
         time_to_use = None
@@ -132,8 +133,8 @@ class CheckerBoardEngine:
         # 1. In italian the bottom-left square isn't playable, so in CheckerBoard the board is flipped vertically.
         # 2. In most variants the bottom-left square for the starting side (usually white) is in column a,
         # while in english black starts, so the bottom-left square for the starting side (black) is in row h.
-        flip_board = board.variant not in ['english', 'italian']
-        if flip_board:
+        flip_column = board.variant not in ['english', 'italian']
+        if flip_column:
             col = board.board.width - 1 - col
         # Because in english black starts
         white_starts = board.variant not in ['english']

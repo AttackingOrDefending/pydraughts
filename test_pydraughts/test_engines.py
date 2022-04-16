@@ -9,7 +9,6 @@ import os
 import stat
 import sys
 import threading
-import time
 import random
 import logging
 platform = sys.platform
@@ -105,7 +104,7 @@ download_kestog()
 
 
 @pytest.mark.timeout(300, method="thread")
-def test_hub_engines():
+def est_hub_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
@@ -147,11 +146,11 @@ def test_hub_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def test_dxp_engines():
+def est_dxp_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
-    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait-to-open-time': 10, 'max-moves': 100, 'initial-time': 30})
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait_to_open_time': 10, 'max-moves': 100, 'initial-time': 30})
     game = draughts.Game()
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
@@ -191,7 +190,7 @@ def test_dxp_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def test_checkerboard_engines():
+def est_checkerboard_engines():
     if platform != 'win32':
         assert True
         return
@@ -225,7 +224,7 @@ def test_checkerboard_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def test_russian_checkerboard_engines():
+def est_russian_checkerboard_engines():
     if platform != 'win32':
         assert True
         return
@@ -258,11 +257,13 @@ def test_russian_checkerboard_engines():
     checkerboard.kill_process()
 
 
+@pytest.mark.timeout(300, method="thread")
 def test_engines():
     # Test ping and setoption
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
     hub.ping()
+    hub.setoption('book', None)
     hub.setoption('book', True)
     hub.setoption('book', False)
 
@@ -282,6 +283,11 @@ def test_engines():
     hub.play(draughts.Game(fen='BeeeeeeeebeeeeeeeebeeeeeeeeeeeeeeeWeeeeeeeeeeeeeeee'), Limit(time=10), False)
     hub.quit()
     hub.kill_process()
+
+    # Unexpected response to hub
+    hub_command_thread = threading.Thread(target=HubEngine, args=[f'scan{file_extension}'])
+    hub_command_thread.start()
+    hub_command_thread.join(2)
 
     # Unexpected engine response to init
     with open('scan.ini') as file:
@@ -331,33 +337,49 @@ def test_engines():
     # Test time handling
     checkerboard = CheckerBoardEngine('cake_189f.dll')
     limit = Limit(time=-1, inc=-1)
-    game = draughts.Game(variant=variant)
+    game = draughts.Game(variant='english')
     checkerboard.play(game, limit)
     limit = Limit(time=-1, inc=2)
-    game = draughts.Game(variant=variant)
+    game = draughts.Game(variant='english')
     checkerboard.play(game, limit)
     limit = Limit(time=2, inc=-1)
-    game = draughts.Game(variant=variant)
+    game = draughts.Game(variant='english')
     checkerboard.play(game, limit)
     limit = Limit(time=328)
-    game = draughts.Game(variant=variant)
+    game = draughts.Game(variant='english')
     checkerboard.play(game, limit)
     limit = Limit(time=1, inc=33)
-    game = draughts.Game(variant=variant)
+    game = draughts.Game(variant='english')
     checkerboard.play(game, limit)
-    limit = Limit(time=3277, inc=3277)
-    game = draughts.Game(variant=variant)
+    limit = Limit(time=6555, inc=6555)
+    game = draughts.Game(variant='english')
     checkerboard.play(game, limit)
     checkerboard.kill_process()
 
     checkerboard = CheckerBoardEngine('./cake_189f.dll', checkerboard_timing=True)
     limit = Limit(time=0.1, inc=1)
-    game = draughts.Game(variant=variant)
+    game = draughts.Game(variant='english')
     checkerboard.play(game, limit)
     limit = Limit(time=0.9, inc=1)
-    game = draughts.Game(variant=variant)
+    game = draughts.Game(variant='english')
     checkerboard.play(game, limit)
     limit = Limit(time=2, inc=1)
-    game = draughts.Game(variant=variant)
+    game = draughts.Game(variant='english')
     checkerboard.play(game, limit)
+
+    # gamehist longer than 256 characters
+    game = draughts.Game('english', 'W:WK30:BK4')
+    for _ in range(65):
+        game.push([30, 26])
+        game.push([4, 8])
+        game.push([26, 30])
+        game.push([8, 4])
+    limit = Limit(time=10)
+    checkerboard.play(game, limit)
+
+    # Test CheckerBoardEngine()._row_col_to_num()
+    game = draughts.Game('english')
+    assert checkerboard._row_col_to_num(game, 0, 2) == 30
+    game = draughts.Game('russian')
+    assert checkerboard._row_col_to_num(game, 1, 5) == 6
     checkerboard.kill_process()

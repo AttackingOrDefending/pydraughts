@@ -2,7 +2,7 @@ from __future__ import annotations
 from draughts.core.board import Board
 from draughts.core.move import Move
 import pickle
-from draughts.convert import _algebraic_to_numeric_square, _get_squares, fen_to_variant
+from draughts.convert import _algebraic_to_numeric_square, _get_squares, fen_to_variant, move_to_variant
 from typing import List, Union, Tuple, Optional
 
 WHITE = 2
