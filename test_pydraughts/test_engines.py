@@ -321,7 +321,7 @@ def test_engines():
     dxp.quit()
 
     # type(command) == str
-    dxp = DXPEngine(f'scan{file_extension} dxp', {'engine-opened': True}, initial_time=30)
+    dxp = DXPEngine(f'scan{file_extension} dxp', {'engine-opened': False}, initial_time=30)
     dxp.quit()
     dxp.kill_process()
     
