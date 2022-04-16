@@ -283,11 +283,6 @@ def test_engines():
     hub.quit()
     hub.kill_process()
 
-    # Unexpected response to hub
-    hub_command_thread = threading.Thread(target=HubEngine, args=[f'scan{file_extension}'])
-    hub_command_thread.start()
-    hub_command_thread.join(2)
-
     # Unexpected engine response to init
     with open('scan.ini') as file:
         options = file.read()
