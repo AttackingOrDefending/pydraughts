@@ -15,6 +15,7 @@ import logging
 platform = sys.platform
 file_extension = '.exe' if platform == 'win32' else ''
 
+logging.basicConfig()
 logger = logging.getLogger("pydraughts")
 logger.setLevel(logging.DEBUG)
 
