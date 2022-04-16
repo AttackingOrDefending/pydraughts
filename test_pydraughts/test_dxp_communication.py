@@ -4,7 +4,10 @@ from draughts.engine import DXPEngine
 from importlib import reload
 from draughts import Game
 import time
+import sys
 import logging
+platform = sys.platform
+file_extension = '.exe' if platform == 'win32' else ''
 
 logging.basicConfig()
 logger = logging.getLogger("pydraughts")
@@ -25,8 +28,11 @@ def test_console_handler():
 
 
 def test_console_handler_with_dxp_engine():
+    if platform not in ['win32', 'linux', 'darwin']:
+        assert True
+        return
     # BACKREQ Not yet supported
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     game = Game()
     dxp.play(game)
     dxp.console.run_command('backreq')
@@ -46,32 +52,32 @@ def test_console_handler_with_dxp_engine():
     dxp.kill_process()
 
     # terminate program (doesn't do anything) & setup (number of commands = 1)
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command('setup')
     dxp.console.run_command('q')
     dxp.quit()
     dxp.kill_process()
 
     # setup (number of commands = 2)
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command(f'setup {Game().get_dxp_fen()}')
     dxp.quit()
     dxp.kill_process()
 
     # setup (number of commands > 3)
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command(f'setup {Game().get_dxp_fen()} {Game().variant} extra')
     dxp.quit()
     dxp.kill_process()
 
     # conn (number of commands = 2)
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command('conn 127.0.0.1')
     dxp.quit()
     dxp.kill_process()
 
     # conn (number of commands = 1)
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command('conn')
     # chat (number of commands = 1)
     dxp.console.run_command('chat')
@@ -81,21 +87,21 @@ def test_console_handler_with_dxp_engine():
     dxp.kill_process()
 
     # gamereq (number of commands = 2)
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq W')
     dxp.quit()
     dxp.kill_process()
 
     # gamereq (number of commands = 3)
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq B 100')
     dxp.quit()
     dxp.kill_process()
 
     # gamereq (number of commands = 3)
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq W 100')
     # Game already finished; gameend not allowed
@@ -106,7 +112,7 @@ def test_console_handler_with_dxp_engine():
     dxp.kill_process()
 
     # Game not started; backreq not allowed
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command('backreq')
     # Command unknown
     dxp.console.run_command('random-command')
