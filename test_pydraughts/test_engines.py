@@ -104,7 +104,7 @@ download_kestog()
 
 
 @pytest.mark.timeout(300, method="thread")
-def est_hub_engines():
+def test_hub_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
@@ -146,11 +146,11 @@ def est_hub_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def est_dxp_engines():
+def test_dxp_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
-    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait_to_open_time': 10, 'max-moves': 100, 'initial-time': 30})
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait-to-open-time': 10, 'max-moves': 100, 'initial-time': 30})
     game = draughts.Game()
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
@@ -190,7 +190,7 @@ def est_dxp_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def est_checkerboard_engines():
+def test_checkerboard_engines():
     if platform != 'win32':
         assert True
         return
@@ -224,7 +224,7 @@ def est_checkerboard_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def est_russian_checkerboard_engines():
+def test_russian_checkerboard_engines():
     if platform != 'win32':
         assert True
         return
