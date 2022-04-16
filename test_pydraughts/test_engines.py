@@ -10,6 +10,7 @@ import stat
 import sys
 import threading
 import random
+import time
 import logging
 platform = sys.platform
 file_extension = '.exe' if platform == 'win32' else ''
