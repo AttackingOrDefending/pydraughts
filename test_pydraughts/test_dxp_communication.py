@@ -84,9 +84,6 @@ def test_console_handler_with_dxp_engine():
     dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq W')
-    # Game marked as started. First exit to start a new game.
-    time.sleep(2)
-    dxp.console.run_command('conn')
     dxp.quit()
     dxp.kill_process()
 
