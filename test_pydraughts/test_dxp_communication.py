@@ -25,10 +25,12 @@ def test_console_handler():
 
 
 def test_console_handler_with_dxp_engine():
-    # Game started; setup not allowed
+    # BACKREQ Not yet supported
     dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
     game = Game()
     dxp.play(game)
+    dxp.console.run_command('backreq')
+    # Game started; setup not allowed
     dxp.console.run_command('setup')
     # Game already started; gamereq not allowed
     dxp.console.run_command('gamereq')
@@ -82,6 +84,9 @@ def test_console_handler_with_dxp_engine():
     dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq W')
+    # Game marked as started. First exit to start a new game.
+    time.sleep(2)
+    dxp.console.run_command('conn')
     dxp.quit()
     dxp.kill_process()
 
@@ -89,8 +94,6 @@ def test_console_handler_with_dxp_engine():
     dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq B 100')
-    # Message gameend not allowed; wait until your turn
-    dxp.console.run_command('gameend')
     dxp.quit()
     dxp.kill_process()
 
