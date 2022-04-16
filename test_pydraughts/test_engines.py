@@ -279,7 +279,7 @@ def test_engines():
     hub.play(draughts.Game(fen='B:W22:B18'), Limit(depth=15), False)
     hub.stop()
     hub.play(draughts.Game(fen='WeeeeeeeebeeeeeeeebeeeeeeeeeeeeeeeWeeeeeeeeeeeeeeee'), Limit(time=10), False)
-    hub.play(draughts.Game(fen='BeeeeeeeeBeeeeeeeeweeeeeeeeeeeeeeeweeeeeeeeeeeeeeee'), Limit(time=10), False)
+    hub.play(draughts.Game(fen='BeeeeeeeebeeeeeeeebeeeeeeeeeeeeeeeWeeeeeeeeeeeeeeee'), Limit(time=10), False)
     hub.quit()
     hub.kill_process()
     
