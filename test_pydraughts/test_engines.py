@@ -111,7 +111,7 @@ def test_hub_engines():
         return
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
-    limit = Limit(10, 2)
+    limit = Limit(5, 0.2)
     game = draughts.Game()
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
@@ -129,7 +129,7 @@ def test_hub_engines():
     
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
-    limit = Limit(10)
+    limit = Limit(5)
     game = draughts.Game()
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
