@@ -305,6 +305,15 @@ def test_engines():
     except EOFError:
         assert True
     
+    # Game already finished; gameend not allowed
+    dxp = DXPEngine([f'scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
+    game = draughts.Game()
+    dxp.play(game)
+    dxp.quit()
+    time.sleep(10)
+    dxp.quit()
+    dxp.kill_process()
+    
     if platform != 'win32':
         assert True
         return
