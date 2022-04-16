@@ -1,5 +1,5 @@
 import draughts
-from draughts.engine import HubEngine, DXPEngine, CheckerBoardEngine, Limit
+from draughts.engine import HubEngine, DXPEngine, CheckerBoardEngine, Limit, PlayResult
 
 import pytest
 import requests
@@ -10,11 +10,17 @@ import stat
 import sys
 import threading
 import time
+import random
 import logging
 platform = sys.platform
 file_extension = '.exe' if platform == 'win32' else ''
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("pydraughts")
+logger.setLevel(logging.DEBUG)
+
+
+def random_move_engine(game):
+    return PlayResult(move=draughts.Move(board_move=random.choice(game.legal_moves()[0])))
 
 
 def download_scan():
@@ -30,6 +36,11 @@ def download_scan():
         zip_ref.extractall('./TEMP/')
     shutil.copyfile(f'./TEMP/scan_31/scan{windows_linux_mac}{file_extension}', f'scan{file_extension}')
     shutil.copyfile('./TEMP/scan_31/scan.ini', 'scan.ini')
+    with open('scan.ini') as file:
+        options = file.read()
+    options = options.replace('book = true', 'book = false')
+    with open('scan.ini', 'w') as file:
+        file.write(options)
     if os.path.exists('data'):
         shutil.rmtree('data')
     shutil.copytree('./TEMP/scan_31/data', 'data')
@@ -100,7 +111,7 @@ def test_hub_engines():
         return
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
-    limit = Limit(10)
+    limit = Limit(5, 0.2)
     game = draughts.Game()
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
@@ -118,7 +129,7 @@ def test_hub_engines():
     
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
-    limit = Limit(10)
+    limit = Limit(5)
     game = draughts.Game()
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
@@ -136,14 +147,11 @@ def test_hub_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def test_hub_dxp_engines():
-    if platform != 'win32':
+def test_dxp_engines():
+    if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
-    hub = HubEngine('kr_hub.exe')
-    hub.init()
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait_to_open_time': 10, 'max-moves': 100, 'initial-time': 30})
-    limit = Limit(10)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait_to_open_time': 10, 'max-moves': 100, 'initial-time': 30})
     game = draughts.Game()
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
@@ -151,7 +159,7 @@ def test_hub_dxp_engines():
         if len(game.move_stack) % 2 == 0:
             best_move = dxp.play(game)
         else:
-            best_move = hub.play(game, limit, False)
+            best_move = random_move_engine(game)
         if best_move.move:
             game.push(best_move.move.board_move)
         else:
@@ -161,23 +169,16 @@ def test_hub_dxp_engines():
     logger.info('Quited dxp 1')
     dxp.kill_process()
     logger.info('Killed dxp 1')
-    hub.quit()
-    logger.info('Quited hub 1')
-    hub.kill_process()
-    logger.info('Killed hub 1')
 
-    hub = HubEngine('kr_hub.exe')
-    hub.init()
-    dxp = DXPEngine(['scan.exe', 'dxp'], {'engine-opened': False}, initial_time=30)
-    limit = Limit(10)
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     game = draughts.Game()
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
         logger.info(f'move2: {len(game.move_stack)}')
-        if len(game.move_stack) % 2 == 0:
+        if len(game.move_stack) % 2 == 1:
             best_move = dxp.play(game)
         else:
-            best_move = hub.play(game, limit, False)
+            best_move = random_move_engine(game)
         if best_move.move:
             game.push(best_move.move.board_move)
         else:
@@ -187,10 +188,6 @@ def test_hub_dxp_engines():
     logger.info('Quited dxp 2')
     dxp.kill_process()
     logger.info('Killed dxp 2')
-    hub.quit()
-    logger.info('Quited hub 2')
-    hub.kill_process()
-    logger.info('Killed hub 2')
 
 
 @pytest.mark.timeout(300, method="thread")
@@ -275,12 +272,15 @@ def test_engines():
     hub.ponderhit()
     thr.join()
 
-    hub.go('startpos', '35-30', my_time=30, inc=2, moves_left=40)
-    hub.go('startpos', '35-30', my_time=30, moves_left=40)
-    hub.play(draughts.Game(fen='W:W22:B9,18'), Limit(depth=15, nodes=10000, movetime=10), False)
-    time.sleep(0.01)
+    hub.go('Wbbbbbbbbbbbbbbbbbbbbeeeeeeeeeewwwwwwwwwwwwwwwwwwww', '35-30', my_time=30, inc=2, moves_left=40)
+    hub.go('Wbbbbbbbbbbbbbbbbbbbbeeeeeeeeeewwwwwwwwwwwwwwwwwwww', '35-30', my_time=30, moves_left=40)
+    hub.play(draughts.Game(fen='W:W22:B9,18'), Limit(movetime=10), False)
+    hub.play(draughts.Game(fen='B:W22:B18'), Limit(nodes=10000), False)
+    hub.play(draughts.Game(fen='B:W22:B18'), Limit(depth=15), False)
     hub.stop()
-    hub.play(draughts.Game(fen='B:W22:B18'), Limit(depth=15, nodes=10000, movetime=10), False)
+    hub.play(draughts.Game(fen='WeeeeeeeebeeeeeeeebeeeeeeeeeeeeeeeWeeeeeeeeeeeeeeee'), Limit(time=10), False)
+    hub.play(draughts.Game(fen='BeeeeeeeebeeeeeeeebeeeeeeeeeeeeeeeWeeeeeeeeeeeeeeee'), Limit(time=10), False)
+    hub.quit()
     hub.kill_process()
     
     if platform != 'win32':

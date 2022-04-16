@@ -10,7 +10,7 @@ import logging
 from importlib import reload
 from typing import Optional, Dict, Union, List, Any
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("pydraughts")
 
 
 class DXPEngine:
@@ -49,8 +49,8 @@ class DXPEngine:
             command = ' '.join(command)
             self.command = command
             self.p = self._open_process(command, cwd)
-            self.thr = threading.Thread(target=self._recv)
-            self.thr.start()
+            self.engine_receive_thread = threading.Thread(target=self._recv)
+            self.engine_receive_thread.start()
 
         self.start_time = time.perf_counter_ns()
 
@@ -107,6 +107,7 @@ class DXPEngine:
                 os.killpg(self.p.pid, signal.SIGKILL)
 
             self.p.communicate()
+            self.engine_receive_thread.join()
 
     def _connect(self) -> None:
         """Connect to the engine."""
@@ -139,7 +140,7 @@ class DXPEngine:
                 line = line.rstrip()
 
                 if line:
-                    logging.debug(f"{self.ENGINE} %s >> %s {self.p.pid} {line}")
+                    logger.debug(f"{self.ENGINE} %s >> %s {self.p.pid} {line}")
             except ValueError as err:
                 if self.exit:
                     break

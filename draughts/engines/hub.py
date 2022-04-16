@@ -11,7 +11,7 @@ import re
 import math
 from typing import Union, Optional, List, Tuple, Any, Dict, Set
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("pydraughts")
 
 
 class HubEngine:
