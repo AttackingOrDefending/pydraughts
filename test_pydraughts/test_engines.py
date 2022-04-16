@@ -151,7 +151,7 @@ def test_dxp_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
-    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait_to_open_time': 10, 'max-moves': 100, 'initial-time': 30})
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait-to-open-time': 10, 'max-moves': 100, 'initial-time': 30})
     game = draughts.Game()
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
