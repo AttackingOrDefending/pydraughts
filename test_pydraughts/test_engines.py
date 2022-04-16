@@ -281,6 +281,7 @@ def test_engines():
     time.sleep(0.01)
     hub.stop()
     hub.play(draughts.Game(fen='B:W22:B18'), Limit(depth=15), False)
+    hub.quit()
     hub.kill_process()
     
     if platform != 'win32':
