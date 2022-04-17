@@ -15,9 +15,11 @@ class Engine64:
         """Kill the engine process."""
         handle = self.engine._handle
         try:
+            # Windows
             ctypes.windll.kernel32.FreeLibrary.argtypes = [wintypes.HMODULE]
             ctypes.windll.kernel32.FreeLibrary(handle)
         except Exception:
+            # Unix
             self.engine.dlcose(handle)
 
     def enginecommand(self, command: str) -> Tuple[bytes, int]:

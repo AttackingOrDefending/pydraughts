@@ -101,12 +101,12 @@ class DamExchange:
             result['type'] = "R"
             result['name'] = msg[3:35].strip()  # initiator
             result['fColor'] = msg[35:36]  # color of follower
-            result['gameTime'] = msg[36:40]
-            result['numMoves'] = msg[40:44]
-            result['posInd'] = msg[44:45]
+            result['gameTime'] = msg[36:39]
+            result['numMoves'] = msg[39:42]
+            result['posInd'] = msg[42:43]
             if result['posInd'] != "A":
-                result['mColor'] = msg[45:46]  # color to move for position
-                result['pos'] = msg[46:96]
+                result['mColor'] = msg[43:44]  # color to move for position
+                result['pos'] = msg[44:94]
         elif mtype == "A":  # GAMEACC
             result['type'] = "A"
             result['engineName'] = msg[1:33].strip()  # follower name

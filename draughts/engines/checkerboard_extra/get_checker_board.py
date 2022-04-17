@@ -17,7 +17,7 @@ def get_board(board: draughts.Game) -> ctypes.Array:
     FREE = 0
 
     white_starts = board.variant not in ['english']
-    flip_board = board.variant not in ['english', 'italian']
+    flip_column = board.variant not in ['english', 'italian']
 
     for loc in range(1, board.board.position_count + 1):
         piece = board.board.searcher.get_piece_by_position(loc)
@@ -33,7 +33,7 @@ def get_board(board: draughts.Game) -> ctypes.Array:
         # 1. In italian the bottom-left square isn't playable, so in CheckerBoard the board is flipped vertically.
         # 2. In most variants the bottom-left square for the starting side (usually white) is in column a,
         # while in english black starts, so the bottom-left square for the starting side (black) is in row h.
-        if flip_board:
+        if flip_column:
             column = board.board.width - 1 - column
 
         if row % 2 == 0:
@@ -71,7 +71,7 @@ def from_board(checker_board: ctypes.Array, old_board: draughts.Game) -> str:
     FREE = 0
 
     white_starts = old_board.variant not in ['english']
-    flip_board = old_board.variant not in ['english', 'italian']
+    flip_column = old_board.variant not in ['english', 'italian']
 
     for loc in range(1, old_board.board.position_count + 1):
         row = ceil(loc / old_board.board.width) - 1  # From get_row_from_position
@@ -83,7 +83,7 @@ def from_board(checker_board: ctypes.Array, old_board: draughts.Game) -> str:
         # 1. In italian the bottom-left square isn't playable, so in CheckerBoard the board is flipped vertically.
         # 2. In most variants the bottom-left square for the starting side (usually white) is in column a,
         # while in english black starts, so the bottom-left square for the starting side (black) is in row h.
-        if flip_board:
+        if flip_column:
             column = old_board.board.width - 1 - column
 
         if row % 2 == 0:
