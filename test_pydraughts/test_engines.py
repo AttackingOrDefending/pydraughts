@@ -291,15 +291,6 @@ def test_engines():
         assert False
     except EOFError:
         assert True
-    
-    # Game already finished; gameend not allowed
-    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    game = draughts.Game()
-    dxp.play(game)
-    dxp.quit()
-    time.sleep(10)
-    dxp.quit()
-    dxp.kill_process()
 
     # options is None
     dxp = DXPEngine(None, None, initial_time=30)
