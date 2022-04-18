@@ -15,7 +15,7 @@ logger = logging.getLogger("pydraughts")
 
 
 class HubEngine:
-    def __init__(self, command: Union[List[str], str], cwd: str = None, ENGINE: int = 5) -> None:
+    def __init__(self, command: Union[List[str], str], cwd: Optional[str] = None, ENGINE: int = 5) -> None:
         self.ENGINE = ENGINE
         self.info = {}
         self.id = {}
@@ -173,6 +173,10 @@ class HubEngine:
 
         if name == 'variant' and self.variants or name != 'variant':
             self.send("set-param name=%s value=%s" % (name, value))
+
+    def configure(self, options: Dict[str, Union[str, bool, None]]) -> None:
+        for name, value in options.items():
+            self.setoption(name, value)
 
     def go(self, fen: str, moves: Optional[str] = None, my_time: Union[int, float, None] = None, inc: Union[int, float, None] = None, moves_left: Optional[int] = None, movetime: Union[int, float, None] = None, depth: Optional[int] = None, nodes: Optional[int] = None, ponder: Optional[bool] = False) -> Tuple[str, Optional[str]]:
         """Send the engine a go command."""

@@ -16,12 +16,12 @@ class Limit:
 
 
 class PlayResult:
-    def __init__(self, move: Optional[Move] = None, ponder: Optional[Move] = None, info: Optional[Dict] = None, draw_offered: bool = False, resign: bool = False):
+    def __init__(self, move: Optional[Move] = None, ponder: Optional[Move] = None, info: Optional[Dict] = None, draw_offered: bool = False, resigned: bool = False):
         self.move = move
         self.ponder = ponder
         self.info = info
         self.draw_offered = draw_offered
-        self.resign = resign
+        self.resigned = resigned
 
 
 __all__ = ['HubEngine', 'DXPEngine', 'CheckerBoardEngine', 'Limit', 'PlayResult']

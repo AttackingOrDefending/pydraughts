@@ -14,7 +14,7 @@ logger = logging.getLogger("pydraughts")
 
 
 class DXPEngine:
-    def __init__(self, command: Union[List[str], str, None] = None, options: Optional[Dict[str, Union[str, int, bool]]] = None, initial_time: int = 0, ENGINE: int = 5) -> None:
+    def __init__(self, command: Union[List[str], str, None] = None, cwd: Optional[str] = None, options: Optional[Dict[str, Union[str, int, bool]]] = None, initial_time: int = 0, ENGINE: int = 5) -> None:
         global dxp
         dxp = reload(dxp)
         if options is None:
@@ -35,11 +35,10 @@ class DXPEngine:
         self._last_move = None
         self.exit = False
 
-        for name, value in options.items():
-            self.setoption(name, value)
+        self.configure(options)
 
         if not self.engine_opened:
-            cwd = os.getcwd()
+            cwd = cwd or os.getcwd()
             cwd = os.path.realpath(os.path.expanduser(cwd))
             if type(command) == str:
                 command = [command]
@@ -68,6 +67,10 @@ class DXPEngine:
             self.max_moves = 0
         elif name == 'initial-time':
             self.initial_time = 0
+
+    def configure(self, options: Dict[str, Union[str, int, bool]]) -> None:
+        for name, value in options.items():
+            self.setoption(name, value)
 
     def _open_process(self, command: str, cwd: Optional[str] = None, shell: bool = True, _popen_lock: Any = threading.Lock()) -> subprocess.Popen:
         """Open the engine process."""
@@ -176,7 +179,7 @@ class DXPEngine:
         best_move = self._recv_move()
         if best_move:
             best_move = draughts.Move(board, best_move)
-        return draughts.engine.PlayResult(best_move, None)
+        return draughts.engine.PlayResult(best_move, None, {})
 
     def quit(self) -> None:
         """Quit the engine."""
