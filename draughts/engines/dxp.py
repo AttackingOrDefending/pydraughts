@@ -14,7 +14,7 @@ logger = logging.getLogger("pydraughts")
 
 
 class DXPEngine:
-    def __init__(self, command: Union[List[str], str, None] = None, options: Optional[Dict[str, Union[str, int, bool]]] = None, initial_time: int = 0, cwd: Optional[str] = None, ENGINE: int = 5) -> None:
+    def __init__(self, command: Union[List[str], str, None] = None, cwd: Optional[str] = None, options: Optional[Dict[str, Union[str, int, bool]]] = None, initial_time: int = 0, ENGINE: int = 5) -> None:
         global dxp
         dxp = reload(dxp)
         if options is None:
