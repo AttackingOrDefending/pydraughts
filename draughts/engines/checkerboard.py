@@ -4,7 +4,7 @@ import os
 import draughts
 import draughts.engine
 from draughts.convert import move_to_variant
-from typing import Union, List, Any
+from typing import Union, List, Any, Dict
 
 
 class CheckerBoardEngine:
@@ -44,6 +44,10 @@ class CheckerBoardEngine:
             self.divide_time_by = value
         else:
             self.engine.enginecommand(f"set {name} {value}")
+
+    def configure(self, options: Dict[str, Union[str, int]]) -> None:
+        for name, value in options.items():
+            self.setoption(name, value)
 
     def kill_process(self) -> None:
         """Kill the engine process."""

@@ -251,9 +251,11 @@ class Piece:
         # Check if the pieces are on the same row or column
         if (column_difference == 0 or row_difference == 0) and (row_difference % 2 == 0 if self.half_of_the_squares_are_playable else True):
             for multiplier in range(1, max(self.board.width, self.board.height)):
-                # In frisian, the square directly in front, behind, on the left and on the right
-                # of the piece isn't playable.
-                if multiplier % 2 == 1 and self.half_of_the_squares_are_playable:
+                # In frisian, the square directly in front, behind, on the left and on the right of the piece
+                # isn't playable. We only skip if 'column_difference == 0' because the squares on the right and left,
+                # even though they have a distance of two squares (including non-playable squares),
+                # it is considered as the next column.
+                if multiplier % 2 == 1 and self.half_of_the_squares_are_playable and column_difference == 0:
                     continue
 
                 next_row = current_row - multiplier * add_row
@@ -392,7 +394,7 @@ class Piece:
         # while if all the squares are playable, it is only 1 row away.
         row_in_front = 2 if self.half_of_the_squares_are_playable else 1
 
-        if self.orthogonal_moves or self.orthogonal_captures and self.men_can_capture_backwards and capture:
+        if self.orthogonal_moves or self.orthogonal_captures and capture:
             # If self.orthogonal_moves is False:
             # With forward=True we will calculate left and up and with forward=False we will calculate right and down.
             # e.g. If the piece is at 33, square 32 will be considered in forward=True and
