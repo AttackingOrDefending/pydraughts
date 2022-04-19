@@ -264,7 +264,7 @@ def test_engines():
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
     hub.ping()
-    hub.setoption('book', True)
+    hub.configure({'book': True})
     hub.setoption('book', False)
 
     # Test searching and pondering
@@ -311,7 +311,7 @@ def test_engines():
     checkerboard.play(game, limit)
 
     # Test setoption
-    checkerboard.setoption('divide-time-by', 20)
+    checkerboard.configure({'divide-time-by': 20})
     checkerboard.setoption('book', 2)
     checkerboard.kill_process()
 

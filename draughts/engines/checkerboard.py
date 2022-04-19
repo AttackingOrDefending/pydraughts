@@ -45,7 +45,7 @@ class CheckerBoardEngine:
         else:
             self.engine.enginecommand(f"set {name} {value}")
 
-    def configure(self, options: Dict[str, Union[str, bool, None]]) -> None:
+    def configure(self, options: Dict[str, Union[str, int]]) -> None:
         for name, value in options.items():
             self.setoption(name, value)
 
