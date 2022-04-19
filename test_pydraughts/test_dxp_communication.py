@@ -40,17 +40,21 @@ def test_console_handler_with_dxp_engine():
         return
     # Game started; setup not allowed
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp.console.run_command('conn')
+    time.sleep(5)
+    dxp.console.run_command('setup')
+    dxp_run.current.started = True
     dxp.console.run_command('setup')
     # Game already started; gamereq not allowed
     dxp.console.run_command('gamereq')
-    # GAMEEND (number of commands = 1)
-    dxp.console.run_command('gameend')
     # Already connected
     dxp.console.run_command('conn')
     # CHAT
     dxp.console.run_command('chat MESSAGE')
     # BACKREQ
     dxp.console.run_command('backreq')
+    # GAMEEND (number of commands = 1)
+    dxp.console.run_command('gameend')
     dxp.quit()
     dxp.kill_process()
 
