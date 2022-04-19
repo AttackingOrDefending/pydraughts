@@ -26,17 +26,20 @@ def test_console_handler():
     # gamereq (number of commands = 2) & Error sending game request: send exception: no connection
     tConsoleHandler.run_command('gamereq W')
 
+    # BACKREQ Not yet supported
+    dxp_run = reload(dxp_run)
+    tConsoleHandler = dxp_run.ConsoleHandler()
+    tConsoleHandler.run_command('setup')
+    dxp_run.current.started = True
+    tConsoleHandler.run_command('backreq')
+
 
 def test_console_handler_with_dxp_engine():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
-    # BACKREQ Not yet supported
-    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    game = Game()
-    dxp.play(game)
-    dxp.console.run_command('backreq')
     # Game started; setup not allowed
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command('setup')
     # Game already started; gamereq not allowed
     dxp.console.run_command('gamereq')
