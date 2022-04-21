@@ -1,9 +1,9 @@
 from draughts.convert import move_from_variant
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Union
 
 
 class Move:
-    def __init__(self, board: Any = None, board_move: List[List[int]] = None, hub_move: str = None, hub_position_move: str = None, pdn_move: str = None, pdn_position_move: str = None, steps_move: List[int] = None, li_api_move: List[str] = None, li_one_move: str = None, has_captures: Optional[bool] = None, possible_moves: List[List[List[int]]] = None, possible_captures: List[List[Optional[int]]] = None, hub_to_pdn_pseudolegal: bool = False, variant: Optional[str] = None, notation: int = 2, squares_per_letter: int = 4, is_null: Optional[bool] = None) -> None:
+    def __init__(self, board: Any = None, board_move: Optional[List[List[int]]] = None, hub_move: Optional[str] = None, hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None, pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None, li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None, has_captures: Optional[bool] = None, possible_moves: Optional[List[List[List[int]]]] = None, possible_captures: Optional[List[List[Optional[int]]]] = None, hub_to_pdn_pseudolegal: bool = False, variant: Optional[str] = None, notation: int = 2, squares_per_letter: int = 4, is_null: Optional[bool] = None) -> None:
         self.board_move = board_move
         self.hub_move = hub_move
         self.hub_position_move = hub_position_move
@@ -28,8 +28,8 @@ class Move:
             self.is_null = self.board_move == [[0, 0]] or self.hub_move == '0-0' or self.hub_position_move == '0000' or self.pdn_move == '0-0' or self.pdn_position_move == '0000' or self.steps_move == [0, 0] or self.li_api_move == ['0000'] or self.li_one_move == '0000'
 
         if (board_move or hub_move or hub_position_move or pdn_move or pdn_position_move or steps_move or li_api_move or li_one_move) and not self.is_null:
-            if board or possible_moves and possible_captures:
-                if not possible_moves or not possible_captures:
+            if board or possible_moves is not None and possible_captures is not None:
+                if possible_moves is None or possible_captures is None:
                     self.possible_moves, self.possible_captures = board.legal_moves()
                 self._to_board()
                 self.captures = self.possible_captures[self.possible_moves.index(self.board_move)]
@@ -48,14 +48,14 @@ class Move:
             self.li_api_move = ['0000']
             self.li_one_move = '0000'
 
-    def _make_len_2(self, move):
+    def _make_len_2(self, move: Union[str, int]) -> str:
         """
         Add a 0 in the front of the square if it is only 1 digit.
         e.g. The move 5 will be turned to 05 but the move 23 will be left the same.
         """
         return f'0{move}' if len(str(move)) == 1 else str(move)
 
-    def _sort_captures(self, captures):
+    def _sort_captures(self, captures: List[Optional[int]]) -> str:
         """
         Sort the captures from the smallest number to the highest.
         e.g. [10, 30, 19] will change to '101930'.

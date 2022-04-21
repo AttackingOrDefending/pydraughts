@@ -69,6 +69,7 @@ class DXPEngine:
             self.initial_time = 0
 
     def configure(self, options: Dict[str, Union[str, int, bool]]) -> None:
+        """Configure many options at once."""
         for name, value in options.items():
             self.setoption(name, value)
 

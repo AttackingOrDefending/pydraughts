@@ -7,6 +7,7 @@ from typing import List, Optional, Dict, Union
 
 
 class _PDNGame:
+    """Read one PDN game."""
     def __init__(self, pdn_text: str) -> None:
         self.values_to_variant = {20: "standard", 21: "english", 22: "italian", 23: "american pool", 24: "spanish", 25: "russian", 26: "brazilian", 27: "canadian", 28: "portuguese", 29: "czech", 30: "turkish", 31: "thai", 40: "frisian", 41: "spantsiretti"}
         self.tags = {}
@@ -43,12 +44,12 @@ class _PDNGame:
         last_move_line = -1
         move_lines = []
         for index, line in enumerate(lines[last_tag_line + 1:]):
-            splitted_line = re.split(r'[\s|\]](1-0|1/2-1/2|0-1|2-0|1-1|0-2|0-0|\*)[\s|\[]', ' ' + line + ' ', maxsplit=1)
-            if len(splitted_line) == 3:
-                move_lines.append(splitted_line[0])
+            split_line = re.split(r'[\s|\]](1-0|1/2-1/2|0-1|2-0|1-1|0-2|0-0|\*)[\s|\[]', ' ' + line + ' ', maxsplit=1)
+            if len(split_line) == 3:
+                move_lines.append(split_line[0])
                 last_move_line = index
-                self.game_ending = splitted_line[1]
-                rest_of_games.append(splitted_line[2])
+                self.game_ending = split_line[1]
+                rest_of_games.append(split_line[2])
                 break
             if re.sub(r'\s', '', line):
                 move_lines.append(line)
@@ -148,6 +149,7 @@ class _PDNGame:
 
 
 class PDNReader:
+    """Read PDN games."""
     def __init__(self, pdn_text: Optional[str] = None, filename: Optional[str] = None, encodings: Union[List[str], str, None] = None) -> None:
         assert pdn_text or filename
         if encodings is None:
@@ -177,6 +179,7 @@ class PDNReader:
 
 
 class PDNWriter:
+    """Write a game to a file."""
     VARIANT_TO_GAMETYPE = {'standard': 20, 'english': 21, 'italian': 22, 'russian': 25, 'brazilian': 26, 'turkish': 30, 'frisian': 40, 'frysk!': 40}
     SHORT_TO_LONG_GAMETYPE = {'20': '20,W,10,10,N2,0', '21': '21,B,8,8,N1,0', '22': '22,W,8,8,N2,1', '25': '25,W,8,8,A0,0', '26': '26,W,8,8,A0,0', '30': '30,W,8,8,A0,0', '40': '40,W,10,10,N2,0'}
 

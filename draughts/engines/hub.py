@@ -175,6 +175,7 @@ class HubEngine:
             self.send("set-param name=%s value=%s" % (name, value))
 
     def configure(self, options: Dict[str, Union[str, bool, None]]) -> None:
+        """Configure many options at once."""
         for name, value in options.items():
             self.setoption(name, value)
 

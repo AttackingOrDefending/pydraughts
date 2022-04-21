@@ -1,6 +1,6 @@
 from __future__ import annotations
 from math import ceil
-from typing import List
+from typing import List, Any, Dict, Optional
 
 WHITE = 2
 BLACK = 1
@@ -8,14 +8,14 @@ BLACK = 1
 
 class Piece:
 
-    def __init__(self, variant: str = 'standard') -> None:
-        self.player = None
+    def __init__(self, position: int, player: int, board: Any, variant: str = 'standard') -> None:
+        self.player = player
         self.king = False
         self.captured = False
-        self.position = None
-        self.board = None
+        self.position = position
+        self.board = board
         self.became_king = -100
-        self.capture_move_enemies = {}
+        self.capture_move_enemies: Dict[int, Piece] = {}
         self.variant = variant
         self.reset_for_new_board()
 
@@ -38,8 +38,8 @@ class Piece:
 
     def reset_for_new_board(self) -> None:
         """Reset possible moves to None."""
-        self.possible_capture_moves = None
-        self.possible_positional_moves = None
+        self.possible_capture_moves: Optional[List[List[int]]] = None
+        self.possible_positional_moves: Optional[List[List[int]]] = None
 
     def get_square(self, row: int, column: int) -> int:
         """Get the square given the row and column."""

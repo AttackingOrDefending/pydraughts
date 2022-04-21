@@ -1,6 +1,6 @@
 from __future__ import annotations
 from functools import reduce
-from typing import List, Optional
+from typing import List, Optional, Dict
 from draughts.core.piece import Piece
 
 WHITE = 2
@@ -13,11 +13,11 @@ class BoardSearcher:
         """Build the searcher."""
         self.board = board
         self.uncaptured_pieces = list(filter(lambda piece: not piece.captured, board.pieces))
-        self.open_positions = []
-        self.filled_positions = []
-        self.player_positions = {}
-        self.player_pieces = {}
-        self.position_pieces = {}
+        self.open_positions: List[int] = []
+        self.filled_positions: List[int] = []
+        self.player_positions: Dict[int, List[int]] = {}
+        self.player_pieces: Dict[int, List[Piece]] = {}
+        self.position_pieces: Dict[int, Piece] = {}
 
         self.build_filled_positions()
         self.build_open_positions()
@@ -67,6 +67,6 @@ class BoardSearcher:
         """
         return self.player_pieces[self.board.player_turn] if not self.board.piece_requiring_further_capture_moves else [self.board.piece_requiring_further_capture_moves]
 
-    def get_piece_by_position(self, position: int) -> Optional[Piece]:
+    def get_piece_by_position(self, position: int) -> Piece:
         """Get the piece given its position."""
-        return self.position_pieces.get(position)
+        return self.position_pieces[position]

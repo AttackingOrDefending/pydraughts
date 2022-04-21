@@ -6,6 +6,7 @@ from msl.loadlib import Client64
 
 
 class Engine32(Client64):
+    """64 bit client to communicate with the 32 bit server that is running the old Checkerboard engine."""
     def __init__(self, command: str) -> None:
 
         command = command.replace('\\', '\\\\')

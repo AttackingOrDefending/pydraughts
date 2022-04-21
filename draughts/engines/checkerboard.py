@@ -46,6 +46,7 @@ class CheckerBoardEngine:
             self.engine.enginecommand(f"set {name} {value}")
 
     def configure(self, options: Dict[str, Union[str, int]]) -> None:
+        """Configure many options at once."""
         for name, value in options.items():
             self.setoption(name, value)
 
