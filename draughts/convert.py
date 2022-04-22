@@ -212,8 +212,6 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
         white_pieces_remove_hyphen, black_pieces_remove_hyphen = black_pieces_remove_hyphen, white_pieces_remove_hyphen
         starts = 'W' if starts == 'B' else 'B'
 
-    white_pieces_remove_hyphen = list(map(str, white_pieces_remove_hyphen))
-    black_pieces_remove_hyphen = list(map(str, black_pieces_remove_hyphen))
     white_pieces_remove_hyphen.sort()
     black_pieces_remove_hyphen.sort()
     return f'{starts}:W{",".join(white_pieces_remove_hyphen)}:B{",".join(black_pieces_remove_hyphen)}'

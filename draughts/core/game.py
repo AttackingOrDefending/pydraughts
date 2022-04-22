@@ -598,7 +598,11 @@ class Game:
                 for number in range(start, end + 1):
                     white_pieces_remove_hyphen.append(add_for_king + str(number))
             else:
-                white_pieces_remove_hyphen.append(white_piece)
+                add_for_king = ''
+                if white_piece[0] == 'K':
+                    add_for_king = 'K'
+                    white_piece = white_piece[1:]
+                white_pieces_remove_hyphen.append(add_for_king + str(_algebraic_to_numeric_square(white_piece, squares_per_letter, every_other_square)))
 
         black_pieces_remove_hyphen = []
         for black_piece in black_pieces:
@@ -612,14 +616,13 @@ class Game:
                 for number in range(start, end + 1):
                     black_pieces_remove_hyphen.append(add_for_king + str(number))
             else:
-                black_pieces_remove_hyphen.append(black_piece)
+                add_for_king = ''
+                if black_piece[0] == 'K':
+                    add_for_king = 'K'
+                    black_piece = black_piece[1:]
+                black_pieces_remove_hyphen.append(add_for_king + str(_algebraic_to_numeric_square(black_piece, squares_per_letter, every_other_square)))
 
         position_count = _get_squares(self.variant)[0]
-
-        white_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, white_pieces_remove_hyphen))
-        black_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, black_pieces_remove_hyphen))
-        white_pieces_remove_hyphen = list(map(str, white_pieces_remove_hyphen))
-        black_pieces_remove_hyphen = list(map(str, black_pieces_remove_hyphen))
 
         for index in range(1, position_count + 1):
             str_index = str(index)
