@@ -2,7 +2,7 @@ from __future__ import annotations
 from draughts.core.board import Board
 from draughts.core.move import Move
 import pickle
-from draughts.convert import _algebraic_to_numeric_square, _get_squares, fen_to_variant, move_to_variant
+from draughts.convert import _algebraic_to_numeric_square, _get_squares, fen_to_variant
 from typing import List, Union, Tuple, Optional
 
 WHITE = 2
@@ -100,11 +100,13 @@ class Game:
         if move not in self.get_possible_moves() and not is_null_move:
             raise ValueError('The provided move is not possible')
         turn = self.whose_turn()
+        was_king = False
 
         if is_null_move:
             self.board.switch_turn()
             enemy_position = None
         else:
+            was_king = self.board.searcher.get_piece_by_position(move[0]).king
             self.board, enemy_position = self.board.push_move(move, len(self.move_stack) + 1, self._not_added_capture)
         self.moves.append(move)
 
@@ -123,9 +125,8 @@ class Game:
             self._not_added_move = []
             self._not_added_capture = []
 
-            piece = self.board.searcher.get_piece_by_position(move[1])
             self.moves_since_last_capture = 0 if self.board.previous_move_was_capture else self.moves_since_last_capture + 1
-            if not is_null_move and piece.king and not captures:
+            if was_king and not captures:
                 self.reversible_moves.append(move_to_add)
                 self.consecutive_noncapture_king_moves += 1
             else:
