@@ -69,4 +69,4 @@ class BoardSearcher:
 
     def get_piece_by_position(self, position: int) -> Piece:
         """Get the piece given its position."""
-        return self.position_pieces.get(position)
+        return self.position_pieces[position]
