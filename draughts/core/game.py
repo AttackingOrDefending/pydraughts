@@ -184,7 +184,7 @@ class Game:
 
     def is_threefold(self) -> bool:
         """Get if the current position has occurred at least three times."""
-        return self.fens and self.fens.count(self.fens[-1]) >= 3
+        return bool(self.fens and self.fens.count(self.fens[-1]) >= 3)
 
     def is_draw(self) -> bool:
         """Get if the game is a draw."""
@@ -399,7 +399,7 @@ class Game:
 
             values = []
             for capture in captures:
-                value = 0
+                value = 0.
                 for position in capture:
                     if position is None:
                         continue
@@ -434,8 +434,8 @@ class Game:
                     has_man = True
 
             if has_man and len(self.move_stack) >= 6:
-                last_3_moves = [self.move_stack[-6], self.move_stack[-4], self.move_stack[-2]]
-                last_3_moves = list(map(lambda move: move.li_one_move, last_3_moves))
+                last_3_move_stack_moves = [self.move_stack[-6], self.move_stack[-4], self.move_stack[-2]]
+                last_3_moves = list(map(lambda move: move.li_one_move, last_3_move_stack_moves))
                 last_3_moves_same_piece = last_3_moves[0][-2:] == last_3_moves[1][:2] and last_3_moves[1][-2:] == last_3_moves[2][:2]
                 was_a_capture = bool(list(filter(bool, [self.capture_stack[-6], self.capture_stack[-4], self.capture_stack[-2]])))
                 loc = int(last_3_moves[-1][-2:])
@@ -569,19 +569,16 @@ class Game:
         This function exists because hub engines return the captures in alphabetical order
         (e.g. for the move 231201 scan returns 23x01x07x18 instead of 23x01x18x07).
         """
-        captures = list(map(self.make_len_2, captures))
-        captures.sort()
-        captures = ''.join(captures)
-        return captures
+        return ''.join(list(sorted(map(self.make_len_2, captures))))
 
     def li_fen_to_hub_fen(self, li_fen: str) -> str:
         """Convert a fen to a Hub fen."""
         _, _, squares_per_letter, every_other_square = _get_squares(self.variant)
         fen = ''
-        li_fen = li_fen.split(':')
-        fen += li_fen[0]
-        white_pieces = li_fen[1][1:].split(',')
-        black_pieces = li_fen[2][1:].split(',')
+        split_li_fen = li_fen.split(':')
+        fen += split_li_fen[0]
+        white_pieces = split_li_fen[1][1:].split(',')
+        black_pieces = split_li_fen[2][1:].split(',')
         white_pieces = list(filter(bool, white_pieces))
         black_pieces = list(filter(bool, black_pieces))
 

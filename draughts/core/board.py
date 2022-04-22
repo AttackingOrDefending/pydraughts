@@ -101,8 +101,6 @@ class Board:
         """Make a capture move."""
         self.previous_move_was_capture = True
         piece = self.searcher.get_piece_by_position(move[0])
-        if not isinstance(piece, Piece):
-            raise Exception(f"There is no piece in {move[0]}.")
         originally_was_king = piece.king
         enemy_piece = piece.capture_move_enemies[move[1]]
         enemy_position = enemy_piece.position
@@ -130,8 +128,6 @@ class Board:
         """Make a positional move."""
         self.previous_move_was_capture = False
         piece = self.searcher.get_piece_by_position(move[0])
-        if not isinstance(piece, Piece):
-            raise Exception(f"There is no piece in {move[0]}.")
         self.move_piece(piece, move[1], move_number)
         self.switch_turn()
 
