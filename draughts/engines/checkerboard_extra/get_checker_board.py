@@ -20,7 +20,6 @@ def get_board(board: draughts.Game) -> ctypes.Array:
     flip_column = board.variant not in ['english', 'italian']
 
     for loc in range(1, board.board.position_count + 1):
-        piece = board.board.searcher.get_piece_by_position(loc)
         row = ceil(loc / board.board.width) - 1  # From get_row_from_position
 
         # Because in english black starts
@@ -42,7 +41,8 @@ def get_board(board: draughts.Game) -> ctypes.Array:
             column = (column + 1) * 2 - 1  # To account for the always empty white squares
 
         number = FREE
-        if piece:
+        if loc in board.board.searcher.filled_positions:
+            piece = board.board.searcher.get_piece_by_position(loc)
             # In Checkerboard black starts first, so the colors are reversed
             if piece.player == draughts.WHITE and not piece.king:
                 number = (WHITE if white_starts else BLACK) + MAN

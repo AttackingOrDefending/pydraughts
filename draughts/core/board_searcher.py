@@ -43,8 +43,8 @@ class BoardSearcher:
     def build_player_pieces(self) -> None:
         """Find all the pieces of both players."""
         self.player_pieces = {
-            1: reduce((lambda pieces, piece: pieces + ([piece] if piece.player == BLACK else [])), self.uncaptured_pieces, []),
-            2: reduce((lambda pieces, piece: pieces + ([piece] if piece.player == WHITE else [])), self.uncaptured_pieces, [])
+            BLACK: reduce((lambda pieces, piece: pieces + ([piece] if piece.player == BLACK else [])), self.uncaptured_pieces, []),
+            WHITE: reduce((lambda pieces, piece: pieces + ([piece] if piece.player == WHITE else [])), self.uncaptured_pieces, [])
         }
 
     def build_position_pieces(self) -> None:

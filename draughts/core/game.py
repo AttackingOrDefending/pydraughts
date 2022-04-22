@@ -31,21 +31,21 @@ class Game:
         self.last_non_reversible_fen = fen_to_variant(self.initial_fen, self.variant)
 
         # moves has every move of a multi-capture as a separate move.
-        self.moves = []
+        self.moves: List[List[int]] = []
 
         # move_stack contains the moves played but a multi-capture is only considered as one move.
         # move_stack is preferred to moves.
-        self.move_stack = []
-        self.capture_stack = []
+        self.move_stack: List[Move] = []
+        self.capture_stack: List[List[int]] = []
 
         # _not_added_move and _not_added_capture contain the moves that are part of a multi-capture.
         # that hasn't been completed yet.
-        self._not_added_move = []
-        self._not_added_capture = []
+        self._not_added_move: List[List[int]] = []
+        self._not_added_capture: List[int] = []
 
         # reversible_moves contains the moves since the last capture or move of a man.
         # (so it only contains non-capture king moves).
-        self.reversible_moves = []
+        self.reversible_moves: List[Move] = []
 
         # fens stores the Hub fen of each position to detect threefold repetition.
         self.fens = [self.initial_hub_fen]
@@ -93,7 +93,7 @@ class Game:
 
             self.board = Board(self.variant, self.fens[-1])
 
-    def move(self, move: List[int], return_captured: bool = False) -> Union[Game, Tuple[Game, int]]:
+    def move(self, move: List[int], return_captured: bool = False) -> Union[Game, Tuple[Game, Optional[int]]]:
         """Make a move. Plays only one jump in case of a multi-capture and not the whole sequence."""
         # [0, 0] is a null move.
         is_null_move = move == [0, 0]
@@ -165,9 +165,8 @@ class Game:
         turn = self.whose_turn()
         opponent_color = WHITE if player == BLACK else BLACK
         if self.variant == 'breakthrough':
-            for loc in range(1, self.board.position_count + 1):
-                piece = self.board.searcher.get_piece_by_position(loc)
-                if piece and piece.player == player and piece.king:
+            for piece in self.board.searcher.player_pieces[player]:
+                if piece.king:
                     # Player wins if they have a king.
                     return True
         elif self.variant == 'antidraughts':
@@ -196,8 +195,8 @@ class Game:
         black_kings = 0
         white_piece_in_long_diagonal = False
         black_piece_in_long_diagonal = False
-        for loc in range(1, self.board.position_count + 1):
-            piece = self.board.searcher.get_piece_by_position(loc)
+        for piece in self.board.searcher.uncaptured_pieces:
+            loc = piece.position
             if piece is not None:
                 if piece.player == WHITE:
                     if loc in long_diagonal:
@@ -312,21 +311,18 @@ class Game:
     def get_fen(self) -> str:
         """Get the Hub fen of the position."""
         playing = 'W' if self.board.player_turn == WHITE else 'B'
-        fen = ''
+        fen = ['e'] * self.board.position_count
 
-        for loc in range(1, self.board.position_count + 1):
-            piece = self.board.searcher.get_piece_by_position(loc)
-            letter = 'e'
-            if piece is not None:
-                if piece.player == WHITE:
-                    letter = 'w'
-                else:
-                    letter = 'b'
-                if piece.king:
-                    letter = letter.capitalize()
-            fen += letter
+        for piece in self.board.searcher.uncaptured_pieces:
+            if piece.player == WHITE:
+                letter = 'w'
+            else:
+                letter = 'b'
+            if piece.king:
+                letter = letter.capitalize()
+            fen[piece.position - 1] = letter
 
-        final_fen = playing + fen
+        final_fen = playing + "".join(fen)
         return final_fen
 
     def get_li_fen(self) -> str:
@@ -335,37 +331,32 @@ class Game:
         white_pieces = []
         black_pieces = []
 
-        for loc in range(1, self.board.position_count + 1):
-            piece = self.board.searcher.get_piece_by_position(loc)
-            if piece is not None:
-                letter = str(loc)
-                if piece.king:
-                    letter = 'K' + letter
-                if piece.player == WHITE:
-                    white_pieces.append(letter)
-                else:
-                    black_pieces.append(letter)
+        for piece in self.board.searcher.uncaptured_pieces:
+            letter = str(piece.position)
+            if piece.king:
+                letter = 'K' + letter
+            if piece.player == WHITE:
+                white_pieces.append(letter)
+            else:
+                black_pieces.append(letter)
 
         final_fen = f"{playing}:W{','.join(white_pieces)}:B{','.join(black_pieces)}"
         return final_fen
 
     def get_dxp_fen(self) -> str:
         """Get the DXP fen of the position."""
-        fen = ''
+        fen = ['e'] * self.board.position_count
 
-        for loc in range(1, self.board.position_count + 1):
-            piece = self.board.searcher.get_piece_by_position(loc)
-            letter = 'e'
-            if piece is not None:
-                if piece.player == WHITE:
-                    letter = 'w'
-                else:
-                    letter = 'z'
-                if piece.king:
-                    letter = letter.capitalize()
-            fen += letter
+        for piece in self.board.searcher.uncaptured_pieces:
+            if piece.player == WHITE:
+                letter = 'w'
+            else:
+                letter = 'z'
+            if piece.king:
+                letter = letter.capitalize()
+            fen[piece.position - 1] = letter
 
-        return fen
+        return "".join(fen)
 
     def get_moves(self) -> Tuple[List[List[List[int]]], List[List[Optional[int]]]]:
         """
@@ -437,8 +428,7 @@ class Game:
 
             # The same king can't make more than 3 non-capturing moves in a row, if the player has men left.
             has_man = False
-            for loc in range(1, self.board.position_count + 1):
-                piece = self.board.searcher.get_piece_by_position(loc)
+            for piece in self.board.searcher.uncaptured_pieces:
                 if piece and not piece.king and piece.player == self.whose_turn():
                     has_man = True
 
@@ -447,11 +437,12 @@ class Game:
                 last_3_moves = list(map(lambda move: move.li_one_move, last_3_moves))
                 last_3_moves_same_piece = last_3_moves[0][-2:] == last_3_moves[1][:2] and last_3_moves[1][-2:] == last_3_moves[2][:2]
                 was_a_capture = bool(list(filter(bool, [self.capture_stack[-6], self.capture_stack[-4], self.capture_stack[-2]])))
-                piece = self.board.searcher.get_piece_by_position(int(last_3_moves[-1][-2:]))
-                if piece is None:  # It is None when the piece was captured.
+                loc = int(last_3_moves[-1][-2:])
+                if loc in self.board.searcher.open_positions:
                     is_king = False
                     is_king_for_at_least_3_moves = True
                 else:
+                    piece = self.board.searcher.get_piece_by_position(loc)
                     is_king = piece.king
                     is_king_for_at_least_3_moves = len(self.move_stack) - piece.became_king >= 6
                 if is_king and last_3_moves_same_piece and not was_a_capture and is_king_for_at_least_3_moves:

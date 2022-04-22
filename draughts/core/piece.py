@@ -47,6 +47,7 @@ class Piece:
 
     def is_movable(self, captures: List[int]) -> bool:
         """Get if the piece can move."""
+        print('a')
         return bool((self.get_possible_capture_moves(captures) or self.get_possible_positional_moves()) and not self.captured)
 
     def capture(self) -> None:
@@ -204,8 +205,8 @@ class Piece:
         for index, position in enumerate(positions_to_check):
             enemy_piece_found = False
             for semi_position in positions_to_check[:index + 1]:
-                piece = self.board.searcher.get_piece_by_position(semi_position)
-                if piece is not None:
+                if semi_position in self.board.searcher.filled_positions:
+                    piece = self.board.searcher.get_piece_by_position(semi_position)
                     # It stops if it meets a piece of the same color or another opponent piece
                     if piece.player == self.player or enemy_piece_found:
                         break
@@ -280,8 +281,8 @@ class Piece:
             for index, position in enumerate(positions_to_check):
                 enemy_piece_found = False
                 for semi_position in positions_to_check[:index + 1]:
-                    piece = self.board.searcher.get_piece_by_position(semi_position)
-                    if piece is not None:
+                    if semi_position in self.board.searcher.filled_positions:
+                        piece = self.board.searcher.get_piece_by_position(semi_position)
                         # It stops if it meets a piece of the same color or another opponent piece.
                         if piece.player == self.player or enemy_piece_found:
                             break
@@ -336,6 +337,7 @@ class Piece:
 
     def build_possible_positional_moves(self) -> List[List[int]]:
         """Build all possible positional moves (not capture moves) for this piece."""
+        print(self.get_adjacent_positions())
         new_positions = list(filter((lambda position: self.board.position_is_open(position)), self.get_adjacent_positions()))
 
         return self.create_moves_from_new_positions(new_positions)
@@ -445,8 +447,7 @@ class Piece:
 
         for index, position in enumerate(positions_diagonal_1):
             for semi_position in positions_diagonal_1[:index + 1]:
-                piece = self.board.searcher.get_piece_by_position(semi_position)
-                if piece is not None and not capture:
+                if semi_position in self.board.searcher.filled_positions and not capture:
                     # If we encounter a piece, and we are searching for a positional move not a capture move, we break the loop
                     break
             else:
@@ -456,8 +457,7 @@ class Piece:
 
         for index, position in enumerate(positions_diagonal_2):
             for semi_position in positions_diagonal_2[:index + 1]:
-                piece = self.board.searcher.get_piece_by_position(semi_position)
-                if piece is not None and not capture:
+                if semi_position in self.board.searcher.filled_positions and not capture:
                     # If we encounter a piece, and we are searching for a positional move not a capture move, we break the loop
                     break
             else:

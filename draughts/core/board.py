@@ -53,6 +53,8 @@ class Board:
         """Count the pieces of one player that can be moved."""
         if captures is None:
             captures = []
+        print(self.searcher.get_pieces_by_player(player_number))
+        print(self.searcher.get_pieces_by_player(player_number)[0].is_movable(captures))
         return reduce((lambda count, piece: count + (1 if piece.is_movable(captures) else 0)), self.searcher.get_pieces_by_player(player_number), 0)
 
     def get_possible_moves(self, captures: List[int]) -> List[List[int]]:
@@ -71,7 +73,7 @@ class Board:
 
     def position_is_open(self, position: int) -> bool:
         """Get if the position is open (a piece is not in the given square)."""
-        return not self.searcher.get_piece_by_position(position)
+        return position in self.searcher.open_positions
 
     def create_new_board_from_move(self, move: List[int], move_number: int, captures: List[int]) -> Tuple[Board, Optional[int]]:
         """Create a new board and play the move given."""
