@@ -31,7 +31,7 @@ class BoardSearcher:
 
     def build_open_positions(self) -> None:
         """Find the open positions (empty squares)."""
-        self.open_positions = list(set(range(1, self.board.position_count)).difference(self.filled_positions))
+        self.open_positions = list(set(range(1, self.board.position_count + 1)).difference(self.filled_positions))
 
     def build_player_positions(self) -> None:
         """Find the positions where each player has a piece."""
@@ -69,4 +69,4 @@ class BoardSearcher:
 
     def get_piece_by_position(self, position: int) -> Piece:
         """Get the piece given its position."""
-        return self.position_pieces[position]
+        return self.position_pieces.get(position)

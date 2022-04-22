@@ -58,7 +58,7 @@ class Move:
         return ''.join(list(sorted(map(self._make_len_2, captures))))
 
     def _to_board(self, board_move_given: Optional[List[List[int]]] = None, hub_move: Optional[str] = None, hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None, pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None, li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None) -> List[List[int]]:
-        """Convert the move to all other move types. Requires a Game() object to make the conversions."""
+        """Convert the move to a board_move. Requires a Game() object to make the conversions."""
 
         board_move = [] if board_move_given is None else board_move_given
         # Hub related move
@@ -135,7 +135,7 @@ class Move:
         return board_move
 
     def _from_board(self, hub_move: Optional[str] = None, hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None, pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None, li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None) -> None:
-        """Convert the move to a board_move. Requires a Game() object to make the conversions."""
+        """Convert the move to all other move types. Requires a Game() object to make the conversions."""
 
         hub_move = "" if hub_move is None else hub_move
         hub_position_move = "" if hub_position_move is None else hub_position_move
