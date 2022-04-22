@@ -47,7 +47,6 @@ class Piece:
 
     def is_movable(self, captures: List[int]) -> bool:
         """Get if the piece can move."""
-        print('a')
         return bool((self.get_possible_capture_moves(captures) or self.get_possible_positional_moves()) and not self.captured)
 
     def capture(self) -> None:
@@ -337,7 +336,6 @@ class Piece:
 
     def build_possible_positional_moves(self) -> List[List[int]]:
         """Build all possible positional moves (not capture moves) for this piece."""
-        print(self.get_adjacent_positions())
         new_positions = list(filter((lambda position: self.board.position_is_open(position)), self.get_adjacent_positions()))
 
         return self.create_moves_from_new_positions(new_positions)

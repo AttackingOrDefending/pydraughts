@@ -53,8 +53,6 @@ class Board:
         """Count the pieces of one player that can be moved."""
         if captures is None:
             captures = []
-        print(self.searcher.get_pieces_by_player(player_number))
-        print(self.searcher.get_pieces_by_player(player_number)[0].is_movable(captures))
         return reduce((lambda count, piece: count + (1 if piece.is_movable(captures) else 0)), self.searcher.get_pieces_by_player(player_number), 0)
 
     def get_possible_moves(self, captures: List[int]) -> List[List[int]]:
