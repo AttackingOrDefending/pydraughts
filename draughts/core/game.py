@@ -316,7 +316,7 @@ class Game:
 
         for loc in range(1, self.board.position_count + 1):
             letter = 'e'
-            if loc in self.board.searcher.uncaptured_pieces:
+            if loc in self.board.searcher.filled_positions:
                 piece = self.board.searcher.get_piece_by_position(loc)
                 if piece.player == WHITE:
                     letter = 'w'
@@ -353,7 +353,7 @@ class Game:
 
         for loc in range(1, self.board.position_count + 1):
             letter = 'e'
-            if loc in self.board.searcher.uncaptured_pieces:
+            if loc in self.board.searcher.filled_positions:
                 piece = self.board.searcher.get_piece_by_position(loc)
                 if piece.player == WHITE:
                     letter = 'w'
