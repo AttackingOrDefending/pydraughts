@@ -19,7 +19,6 @@ class CheckerBoardEngine:
         else:
             self.command = command
         self.ENGINE = ENGINE
-        # self.engine = None
         self.info = None
         self.id = {}
         self.result = None
@@ -32,10 +31,8 @@ class CheckerBoardEngine:
     def _open_engine(self) -> Union[Tuple[Engine64, int], Tuple[Engine32, int]]:
         """Open the engine process."""
         try:
-            # self.engine = Engine64(self.command)
             return Engine64(self.command), 64
         except Exception:
-            # self.engine = Engine32(self.command)
             return Engine32(self.command), 32
 
     def setoption(self, name: str, value: Union[str, int]) -> None:

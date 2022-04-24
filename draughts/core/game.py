@@ -312,18 +312,21 @@ class Game:
     def get_fen(self) -> str:
         """Get the Hub fen of the position."""
         playing = 'W' if self.board.player_turn == WHITE else 'B'
-        fen = ['e'] * self.board.position_count
+        fen = ''
 
-        for piece in self.board.searcher.uncaptured_pieces:
-            if piece.player == WHITE:
-                letter = 'w'
-            else:
-                letter = 'b'
-            if piece.king:
-                letter = letter.capitalize()
-            fen[piece.position - 1] = letter
+        for loc in range(1, self.board.position_count + 1):
+            letter = 'e'
+            if loc in self.board.searcher.uncaptured_pieces:
+                piece = self.board.searcher.get_piece_by_position(loc)
+                if piece.player == WHITE:
+                    letter = 'w'
+                else:
+                    letter = 'b'
+                if piece.king:
+                    letter = letter.capitalize()
+            fen += letter
 
-        final_fen = playing + "".join(fen)
+        final_fen = playing + fen
         return final_fen
 
     def get_li_fen(self) -> str:
@@ -346,18 +349,21 @@ class Game:
 
     def get_dxp_fen(self) -> str:
         """Get the DXP fen of the position."""
-        fen = ['e'] * self.board.position_count
+        fen = ''
 
-        for piece in self.board.searcher.uncaptured_pieces:
-            if piece.player == WHITE:
-                letter = 'w'
-            else:
-                letter = 'z'
-            if piece.king:
-                letter = letter.capitalize()
-            fen[piece.position - 1] = letter
+        for loc in range(1, self.board.position_count + 1):
+            letter = 'e'
+            if loc in self.board.searcher.uncaptured_pieces:
+                piece = self.board.searcher.get_piece_by_position(loc)
+                if piece.player == WHITE:
+                    letter = 'w'
+                else:
+                    letter = 'z'
+                if piece.king:
+                    letter = letter.capitalize()
+            fen += letter
 
-        return "".join(fen)
+        return fen
 
     def get_moves(self) -> Tuple[List[List[List[int]]], List[List[Optional[int]]]]:
         """

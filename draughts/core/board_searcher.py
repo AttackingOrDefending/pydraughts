@@ -1,6 +1,6 @@
 from __future__ import annotations
 from functools import reduce
-from typing import List, Optional, Dict
+from typing import List, Dict
 from draughts.core.piece import Piece
 
 WHITE = 2

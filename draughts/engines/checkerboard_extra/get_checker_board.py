@@ -3,18 +3,19 @@ import draughts
 from math import ceil
 
 
+# From CheckerBoard API:
+WHITE = 1
+BLACK = 2
+MAN = 4
+KING = 8
+FREE = 0
+
+
 def get_board(board: draughts.Game) -> ctypes.Array:
     """Get a CheckerBoard board (for use in CheckerBoard engines) from a Game() object."""
 
     one_column = (ctypes.c_int * 8)
     checkerboard_board = (one_column * 8)()
-
-    # From CheckerBoard API:
-    WHITE = 1
-    BLACK = 2
-    MAN = 4
-    KING = 8
-    FREE = 0
 
     white_starts = board.variant not in ['english']
     flip_column = board.variant not in ['english', 'italian']
@@ -62,13 +63,6 @@ def from_board(checker_board: ctypes.Array, old_board: draughts.Game) -> str:
 
     # board_numbers = [[square for square in column] for column in checker_board]
     fen = 'B' if old_board.whose_turn() == draughts.WHITE else 'W'  # switch turns
-
-    # From CheckerBoard API:
-    WHITE = 1
-    BLACK = 2
-    MAN = 4
-    KING = 8
-    FREE = 0
 
     white_starts = old_board.variant not in ['english']
     flip_column = old_board.variant not in ['english', 'italian']

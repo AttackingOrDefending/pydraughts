@@ -3,7 +3,7 @@
 import threading
 import logging
 from draughts.engines.dxp_communication.dxp_classes import DamExchange, MySocket, GameStatus, DXP_WHITE, DXP_BLACK
-from typing import Union, List, Optional
+from typing import Union
 
 last_move = None
 accepted = None

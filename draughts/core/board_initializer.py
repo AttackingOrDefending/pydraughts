@@ -1,5 +1,5 @@
 from draughts.core.piece import Piece
-from typing import Any, Optional
+from typing import Any
 
 WHITE = 2
 BLACK = 1
