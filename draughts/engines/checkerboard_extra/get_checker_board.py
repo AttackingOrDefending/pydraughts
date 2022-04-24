@@ -6,8 +6,8 @@ from math import ceil
 def get_board(board: draughts.Game) -> ctypes.Array:
     """Get a CheckerBoard board (for use in CheckerBoard engines) from a Game() object."""
 
-    row = (ctypes.c_int * 8)
-    checkerboard_board = (row * 8)()
+    one_column = (ctypes.c_int * 8)
+    checkerboard_board = (one_column * 8)()
 
     # From CheckerBoard API:
     WHITE = 1

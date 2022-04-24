@@ -17,10 +17,10 @@ logger = logging.getLogger("pydraughts")
 class HubEngine:
     def __init__(self, command: Union[List[str], str], cwd: Optional[str] = None, ENGINE: int = 5) -> None:
         self.ENGINE = ENGINE
-        self.info = {}
-        self.id = {}
-        self.options = set()
-        self.variants = set()
+        self.info: Dict[str, Any] = {}
+        self.id: Dict[str, str] = {}
+        self.options: Set[str] = set()
+        self.variants: Set[str] = set()
         cwd = cwd or os.getcwd()
         cwd = os.path.realpath(os.path.expanduser(cwd))
         if type(command) == str:
@@ -35,7 +35,7 @@ class HubEngine:
 
     def _open_process(self, command: str, cwd: Optional[str] = None, shell: Optional[bool] = True, _popen_lock: Any = threading.Lock()) -> subprocess.Popen:
         """Open the engine process."""
-        kwargs = {
+        kwargs: Dict[str, Any] = {
             "shell": shell,
             "stdout": subprocess.PIPE,
             "stderr": subprocess.STDOUT,
@@ -106,9 +106,9 @@ class HubEngine:
         """Send the hub command to an engine."""
         self.send("hub")
 
-        engine_info = {}
-        options = set()
-        variants = set()
+        engine_info: Dict[str, str] = {}
+        options: Set[str] = set()
+        variants: Set[str] = set()
 
         while True:
             command, arg = self.recv_hub()
@@ -117,14 +117,14 @@ class HubEngine:
                 return engine_info, options, variants
             elif command == "id":
                 args = re.split(r' +(?![^"]*"(?:(?:[^"]*"){2})*[^"]*$)', arg)
-                args = list(map(lambda item: item.split("="), args))
-                for key, value in args:
+                split_args = list(map(lambda item: item.split("="), args))
+                for key, value in split_args:
                     engine_info[key] = value
             elif command == "param":
                 args = re.split(r' +(?![^"]*"(?:(?:[^"]*"){2})*[^"]*$)', arg)
-                args = list(map(lambda item: item.split("="), args))
+                split_args = list(map(lambda item: item.split("="), args))
                 is_variant = False
-                for key, value in args:
+                for key, value in split_args:
                     if key == "name":
                         options.add(value)
                         if value == "variant":
@@ -214,15 +214,16 @@ class HubEngine:
             if command == "done":
                 args = arg.split()
                 pondermove = None
-                args = list(map(lambda item: item.split("="), args))
-                bestmove = args[0][1]
-                if len(args) == 2:
-                    pondermove = args[1][1]
+                split_args = list(map(lambda item: item.split("="), args))
+                bestmove = split_args[0][1]
+                if len(split_args) == 2:
+                    pondermove = split_args[1][1]
                 return bestmove, pondermove
             elif command == "info":
                 args = re.split(r' +(?![^"]*"(?:(?:[^"]*"){2})*[^"]*$)', arg)
-                args = list(map(lambda item: item.split("="), args))
-                for key, value in args:
+                split_args = list(map(lambda item: item.split("="), args))
+                value: Any
+                for key, value in split_args:
                     if key in ["depth", "nodes"]:
                         value = int(value)
                     elif key in ["mean-depth", "time", "nps"]:

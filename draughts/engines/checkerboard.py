@@ -4,7 +4,7 @@ import os
 import draughts
 import draughts.engine
 from draughts.convert import move_to_variant
-from typing import Union, List, Any, Dict
+from typing import Union, List, Any, Dict, Tuple
 
 
 class CheckerBoardEngine:
@@ -19,24 +19,24 @@ class CheckerBoardEngine:
         else:
             self.command = command
         self.ENGINE = ENGINE
-        self.engine = None
+        # self.engine = None
         self.info = None
         self.id = {}
         self.result = None
         self.divide_time_by = divide_time_by
         self.checkerboard_timing = checkerboard_timing
         self._sent_variant = False
-        self.bits = self._open_engine()
+        self.engine, self.bits = self._open_engine()
         self.id["name"] = self.engine.enginecommand('name')[0].decode()
 
-    def _open_engine(self) -> int:
+    def _open_engine(self) -> Union[Tuple[Engine64, int], Tuple[Engine32, int]]:
         """Open the engine process."""
         try:
-            self.engine = Engine64(self.command)
-            return 64
+            # self.engine = Engine64(self.command)
+            return Engine64(self.command), 64
         except Exception:
-            self.engine = Engine32(self.command)
-            return 32
+            # self.engine = Engine32(self.command)
+            return Engine32(self.command), 32
 
     def setoption(self, name: str, value: Union[str, int]) -> None:
         """Set an engine option."""

@@ -27,8 +27,8 @@ class DXPEngine:
         self.engine_opened = True  # Whether the engine is already open or pydraughts should open it
         self.wait_to_open_time = 10
         self.ENGINE = ENGINE
-        self.info = {}
-        self.id = {}
+        self.info: Dict[str, Any] = {}
+        self.id: Dict[str, str] = {}
         self.console = dxp.tConsoleHandler
         self.receiver = dxp.tReceiveHandler
         self.game_started = False

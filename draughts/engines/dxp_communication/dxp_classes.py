@@ -4,7 +4,7 @@ from __future__ import annotations
 import socket
 import logging
 import draughts
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Union
 
 logger = logging.getLogger("pydraughts")
 
@@ -89,10 +89,10 @@ class MySocket:
 
 
 class DamExchange:
-    def parse(self, msg: str) -> Dict[str, str]:
+    def parse(self, msg: str) -> Dict[str, Union[str, List[str]]]:
         """Parse an incoming DXP message."""
         # Parse incoming DXP message. Returns relevant items depending on mtype.
-        result = {}
+        result: Dict[str, Union[str, List[str]]] = {}
         mtype = msg[0:1]
         if mtype == "C":  # CHAT
             result['type'] = "C"
