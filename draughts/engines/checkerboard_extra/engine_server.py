@@ -11,6 +11,7 @@ with open(os.path.join(os.path.dirname(__file__), 'engine_name.txt')) as file:
 
 
 class Engine32Server(Server32):
+    """32 bit server to run old Checkerboard engines."""
 
     def __init__(self, host: str, port: int, **kwargs: Any) -> None:
         super(Engine32Server, self).__init__(DLL_name, 'windll', host, port)

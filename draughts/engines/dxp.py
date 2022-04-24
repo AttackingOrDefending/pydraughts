@@ -27,8 +27,8 @@ class DXPEngine:
         self.engine_opened = True  # Whether the engine is already open or pydraughts should open it
         self.wait_to_open_time = 10
         self.ENGINE = ENGINE
-        self.info = {}
-        self.id = {}
+        self.info: Dict[str, Any] = {}
+        self.id: Dict[str, str] = {}
         self.console = dxp.tConsoleHandler
         self.receiver = dxp.tReceiveHandler
         self.game_started = False
@@ -69,6 +69,7 @@ class DXPEngine:
             self.initial_time = 0
 
     def configure(self, options: Dict[str, Union[str, int, bool]]) -> None:
+        """Configure many options at once."""
         for name, value in options.items():
             self.setoption(name, value)
 

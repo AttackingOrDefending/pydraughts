@@ -3,24 +3,24 @@ import draughts
 from math import ceil
 
 
+# From CheckerBoard API:
+WHITE = 1
+BLACK = 2
+MAN = 4
+KING = 8
+FREE = 0
+
+
 def get_board(board: draughts.Game) -> ctypes.Array:
     """Get a CheckerBoard board (for use in CheckerBoard engines) from a Game() object."""
 
-    row = (ctypes.c_int * 8)
-    checkerboard_board = (row * 8)()
-
-    # From CheckerBoard API:
-    WHITE = 1
-    BLACK = 2
-    MAN = 4
-    KING = 8
-    FREE = 0
+    one_column = (ctypes.c_int * 8)
+    checkerboard_board = (one_column * 8)()
 
     white_starts = board.variant not in ['english']
     flip_column = board.variant not in ['english', 'italian']
 
     for loc in range(1, board.board.position_count + 1):
-        piece = board.board.searcher.get_piece_by_position(loc)
         row = ceil(loc / board.board.width) - 1  # From get_row_from_position
 
         # Because in english black starts
@@ -42,7 +42,8 @@ def get_board(board: draughts.Game) -> ctypes.Array:
             column = (column + 1) * 2 - 1  # To account for the always empty white squares
 
         number = FREE
-        if piece:
+        if loc in board.board.searcher.filled_positions:
+            piece = board.board.searcher.get_piece_by_position(loc)
             # In Checkerboard black starts first, so the colors are reversed
             if piece.player == draughts.WHITE and not piece.king:
                 number = (WHITE if white_starts else BLACK) + MAN
@@ -62,13 +63,6 @@ def from_board(checker_board: ctypes.Array, old_board: draughts.Game) -> str:
 
     # board_numbers = [[square for square in column] for column in checker_board]
     fen = 'B' if old_board.whose_turn() == draughts.WHITE else 'W'  # switch turns
-
-    # From CheckerBoard API:
-    WHITE = 1
-    BLACK = 2
-    MAN = 4
-    KING = 8
-    FREE = 0
 
     white_starts = old_board.variant not in ['english']
     flip_column = old_board.variant not in ['english', 'italian']

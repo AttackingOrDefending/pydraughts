@@ -7,22 +7,22 @@ from typing import List, Optional, Dict, Union
 
 
 class _PDNGame:
+    """Read one PDN game."""
     def __init__(self, pdn_text: str) -> None:
         self.values_to_variant = {20: "standard", 21: "english", 22: "italian", 23: "american pool", 24: "spanish", 25: "russian", 26: "brazilian", 27: "canadian", 28: "portuguese", 29: "czech", 30: "turkish", 31: "thai", 40: "frisian", 41: "spantsiretti"}
-        self.tags = {}
-        self.moves = []
-        self.variant = None
-        self.notation = None
-        self.notation_type = None
+        self.tags: Dict[str, str] = {}
+        self.moves: List[str] = []
+        self.variant: Optional[str] = None
+        self.notation: Optional[int] = None
+        self.notation_type: Optional[str] = None
         self.game_ending = '*'
         self.pdn_text = pdn_text
-        self._rest_of_games = []
+        self._rest_of_games: List[str] = []
         self._read()
 
     def _read(self) -> None:
         """Read a PDN game."""
-        lines = self.pdn_text
-        lines = lines.split('\n')
+        lines = self.pdn_text.split('\n')
         tag_lines = []
         last_tag_line = -1
         for index, line in enumerate(lines):
@@ -43,12 +43,12 @@ class _PDNGame:
         last_move_line = -1
         move_lines = []
         for index, line in enumerate(lines[last_tag_line + 1:]):
-            splitted_line = re.split(r'[\s|\]](1-0|1/2-1/2|0-1|2-0|1-1|0-2|0-0|\*)[\s|\[]', ' ' + line + ' ', maxsplit=1)
-            if len(splitted_line) == 3:
-                move_lines.append(splitted_line[0])
+            split_line = re.split(r'[\s|\]](1-0|1/2-1/2|0-1|2-0|1-1|0-2|0-0|\*)[\s|\[]', ' ' + line + ' ', maxsplit=1)
+            if len(split_line) == 3:
+                move_lines.append(split_line[0])
                 last_move_line = index
-                self.game_ending = splitted_line[1]
-                rest_of_games.append(splitted_line[2])
+                self.game_ending = split_line[1]
+                rest_of_games.append(split_line[2])
                 break
             if re.sub(r'\s', '', line):
                 move_lines.append(line)
@@ -56,7 +56,7 @@ class _PDNGame:
 
         rest_of_games += lines[last_tag_line + 1 + last_move_line + 1:]
 
-        moves = " ".join(move_lines)
+        str_moves = " ".join(move_lines)
 
         # Changes to the PDN.
 
@@ -73,25 +73,25 @@ class _PDNGame:
                 text, n = re.subn(r'{[^{}]*}', '', text)  # Remove non-nested/flat balanced parts.
             return text
 
-        moves = remove_text_between_parens(moves)
-        moves = remove_text_between_brackets(moves)
-        moves = re.sub(r" +", " ", moves)
-        moves = re.sub(r"\$[0-9]+", "", moves)
-        moves = moves.replace('. ...', '...')
-        moves = moves.replace('...', '.')
-        moves = moves.replace('?', '')
-        moves = moves.replace('!', '')
-        moves = moves.replace('. ', '.')
-        moves = moves.replace('- ', '-')
-        moves = moves.replace('x ', 'x')
-        moves = moves.replace(': ', ':')
+        str_moves = remove_text_between_parens(str_moves)
+        str_moves = remove_text_between_brackets(str_moves)
+        str_moves = re.sub(r" +", " ", str_moves)
+        str_moves = re.sub(r"\$[0-9]+", "", str_moves)
+        str_moves = str_moves.replace('. ...', '...')
+        str_moves = str_moves.replace('...', '.')
+        str_moves = str_moves.replace('?', '')
+        str_moves = str_moves.replace('!', '')
+        str_moves = str_moves.replace('. ', '.')
+        str_moves = str_moves.replace('- ', '-')
+        str_moves = str_moves.replace('x ', 'x')
+        str_moves = str_moves.replace(': ', ':')
 
-        move_numbers = re.findall(r"\d+\.", moves)
+        move_numbers = re.findall(r"\d+\.", str_moves)
         double_numbers = list(set(filter(lambda move: move_numbers.count(move) >= 2, move_numbers)))
         for move_number in double_numbers:
-            moves = moves[:moves.index(move_number) + len(move_number)] + moves[moves.index(move_number) + len(move_number):].replace(move_number, "")
+            str_moves = str_moves[:str_moves.index(move_number) + len(move_number)] + str_moves[str_moves.index(move_number) + len(move_number):].replace(move_number, "")
 
-        moves = moves.split(".")[1:]
+        moves = str_moves.split(".")[1:]
         if not moves:
             return
         starts = self.tags.get('FEN', 'W')
@@ -148,6 +148,7 @@ class _PDNGame:
 
 
 class PDNReader:
+    """Read PDN games."""
     def __init__(self, pdn_text: Optional[str] = None, filename: Optional[str] = None, encodings: Union[List[str], str, None] = None) -> None:
         assert pdn_text or filename
         if encodings is None:
@@ -177,10 +178,11 @@ class PDNReader:
 
 
 class PDNWriter:
+    """Write a game to a file."""
     VARIANT_TO_GAMETYPE = {'standard': 20, 'english': 21, 'italian': 22, 'russian': 25, 'brazilian': 26, 'turkish': 30, 'frisian': 40, 'frysk!': 40}
     SHORT_TO_LONG_GAMETYPE = {'20': '20,W,10,10,N2,0', '21': '21,B,8,8,N1,0', '22': '22,W,8,8,N2,1', '25': '25,W,8,8,A0,0', '26': '26,W,8,8,A0,0', '30': '30,W,8,8,A0,0', '40': '40,W,10,10,N2,0'}
 
-    def __init__(self, filename: str, board: Optional[Game] = None, moves: List[Union[str, Move]] = None, variant: Optional[str] = None, starting_fen: Optional[str] = None, tags: Optional[Dict[str, Union[str, int]]] = None, game_ending: str = '*', replay_moves_from_board: bool = True, file_encoding: str = 'utf8', file_mode: str = 'a') -> None:
+    def __init__(self, filename: str, board: Optional[Game] = None, moves: Optional[List[Union[str, Move]]] = None, variant: Optional[str] = None, starting_fen: Optional[str] = None, tags: Optional[Dict[str, Union[str, int]]] = None, game_ending: str = '*', replay_moves_from_board: bool = True, file_encoding: str = 'utf8', file_mode: str = 'a') -> None:
         """
         :param replay_moves_from_board: The already saved pdn_move in move_stack may be wrong because it is pseudolegal
         and doesn't account for ambiguous moves. If replay_moves_from_board is enabled, it will replay all the moves to
@@ -188,8 +190,8 @@ class PDNWriter:
         """
         assert board or moves is not None
         self.pdn_text = ''
-        self.notation_type = None
-        self.notation = None
+        self.notation_type: Optional[str] = None
+        self.notation: Optional[int] = None
         self.convert_fen = True
 
         self.board = board
@@ -244,7 +246,7 @@ class PDNWriter:
         pdn_text += '\n'
 
         if self.to_standard_notation:
-            game_type = self.SHORT_TO_LONG_GAMETYPE.get(self.tags['GameType'], self.tags['GameType'])
+            game_type = self.SHORT_TO_LONG_GAMETYPE.get(str(self.tags['GameType']), str(self.tags['GameType']))
             values = game_type.split(',')
             notation = values[4]
             self.notation_type = notation[0].lower()

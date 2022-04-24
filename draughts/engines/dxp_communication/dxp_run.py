@@ -3,6 +3,7 @@
 import threading
 import logging
 from draughts.engines.dxp_communication.dxp_classes import DamExchange, MySocket, GameStatus, DXP_WHITE, DXP_BLACK
+from typing import Union
 
 last_move = None
 accepted = None
@@ -55,8 +56,8 @@ class ConsoleHandler:
                 logger.debug("Move not allowed; server has to move")
                 return
             logger.debug(f"Command step move piece: {comm.strip()}")
-            steps = comm.strip().split()[1].split('-')
-            steps = list(map(int, steps))
+            str_steps = comm.strip().split()[1].split('-')
+            steps = list(map(int, str_steps))
 
             lock.acquire()  # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
             if current.started and current.myColor == current.get_color():
@@ -89,6 +90,7 @@ class ConsoleHandler:
             if current.started:
                 logger.debug("Game marked as started. First exit to start a new game.")
                 return
+            port: Union[str, int]
             host, port = '127.0.0.1', 27531  # default
             if len(comm.split()) == 2:
                 _, host = comm.split()

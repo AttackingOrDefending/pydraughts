@@ -1,9 +1,10 @@
 from __future__ import annotations
 from draughts.core.board_searcher import BoardSearcher
 from draughts.core.board_initializer import BoardInitializer
+from draughts.core.piece import Piece
 from functools import reduce
 import pickle
-from typing import Optional, List, Tuple, Any
+from typing import Optional, List, Tuple, Any, Dict
 
 WHITE = 2
 BLACK = 1
@@ -37,8 +38,8 @@ class Board:
             self.rows_per_user_with_pieces = 4
 
         self.position_count = self.width * self.height
-        self.position_layout = {}
-        self.piece_requiring_further_capture_moves = None
+        self.position_layout: Dict[int, Dict[int, int]] = {}
+        self.piece_requiring_further_capture_moves: Optional[Piece] = None
         self.previous_move_was_capture = False
         self.variant = variant
         self.fen = fen
@@ -70,7 +71,7 @@ class Board:
 
     def position_is_open(self, position: int) -> bool:
         """Get if the position is open (a piece is not in the given square)."""
-        return not self.searcher.get_piece_by_position(position)
+        return position in self.searcher.open_positions
 
     def create_new_board_from_move(self, move: List[int], move_number: int, captures: List[int]) -> Tuple[Board, Optional[int]]:
         """Create a new board and play the move given."""
@@ -104,7 +105,7 @@ class Board:
         enemy_piece = piece.capture_move_enemies[move[1]]
         enemy_position = enemy_piece.position
         enemy_piece.capture()
-        self.move_piece(move, move_number)
+        self.move_piece(piece, move[1], move_number)
         if not originally_was_king and piece.king and self.pieces_promote_and_stop_capturing:
             further_capture_moves_for_piece = []
         elif not originally_was_king and not self.pieces_promote_and_continue_capturing:
@@ -126,17 +127,18 @@ class Board:
     def perform_positional_move(self, move: List[int], move_number: int) -> None:
         """Make a positional move."""
         self.previous_move_was_capture = False
-        self.move_piece(move, move_number)
+        piece = self.searcher.get_piece_by_position(move[0])
+        self.move_piece(piece, move[1], move_number)
         self.switch_turn()
 
     def switch_turn(self) -> None:
         """Switch the turn."""
         self.player_turn = BLACK if self.player_turn == WHITE else WHITE
 
-    def move_piece(self, move: List[int], move_number: int) -> None:
+    def move_piece(self, piece: Piece, to: int, move_number: int) -> None:
         """Move a piece."""
-        self.searcher.get_piece_by_position(move[0]).move(move[1], move_number)
-        self.pieces = sorted(self.pieces, key=lambda piece: piece.position if piece.position else 0)
+        piece.move(to, move_number)
+        self.pieces = sorted(self.pieces, key=lambda piece: piece.position if not piece.captured else 0)
 
     def is_valid_row_and_column(self, row: int, column: int) -> bool:
         """Get if the given row and column is inside the board."""

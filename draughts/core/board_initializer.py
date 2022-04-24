@@ -38,11 +38,13 @@ class BoardInitializer:
                 piece = None
                 if position.lower() == 'w':
                     # Index + 1 because enumerate returns 0-49 while the board takes 1-50.
-                    piece = self.create_piece(2, index + 1)
+                    piece = self.create_piece(WHITE, index + 1)
+                    if position == 'W':
+                        piece.king = True
                 elif position.lower() == 'b':
-                    piece = self.create_piece(1, index + 1)
-                if position == 'W' or position == 'B':
-                    piece.king = True
+                    piece = self.create_piece(BLACK, index + 1)
+                    if position == 'B':
+                        piece.king = True
                 if piece:
                     pieces.append(piece)
         else:  # Not used, but it isn't removed, because it may be needed in the future
@@ -63,9 +65,6 @@ class BoardInitializer:
 
     def create_piece(self, player_number: int, position: int) -> Piece:
         """Create a piece."""
-        piece = Piece(variant=self.board.variant)
-        piece.player = player_number
-        piece.position = position
-        piece.board = self.board
+        piece = Piece(position, player_number, self.board, variant=self.board.variant)
 
         return piece

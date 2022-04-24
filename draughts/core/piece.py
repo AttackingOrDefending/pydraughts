@@ -1,6 +1,6 @@
 from __future__ import annotations
 from math import ceil
-from typing import List
+from typing import List, Any, Dict, Optional
 
 WHITE = 2
 BLACK = 1
@@ -8,14 +8,14 @@ BLACK = 1
 
 class Piece:
 
-    def __init__(self, variant: str = 'standard') -> None:
-        self.player = None
+    def __init__(self, position: int, player: int, board: Any, variant: str = 'standard') -> None:
+        self.player = player
         self.king = False
         self.captured = False
-        self.position = None
-        self.board = None
+        self.position = position
+        self.board = board
         self.became_king = -100
-        self.capture_move_enemies = {}
+        self.capture_move_enemies: Dict[int, Piece] = {}
         self.variant = variant
         self.reset_for_new_board()
 
@@ -38,8 +38,8 @@ class Piece:
 
     def reset_for_new_board(self) -> None:
         """Reset possible moves to None."""
-        self.possible_capture_moves = None
-        self.possible_positional_moves = None
+        self.possible_capture_moves: Optional[List[List[int]]] = None
+        self.possible_positional_moves: Optional[List[List[int]]] = None
 
     def get_square(self, row: int, column: int) -> int:
         """Get the square given the row and column."""
@@ -204,8 +204,8 @@ class Piece:
         for index, position in enumerate(positions_to_check):
             enemy_piece_found = False
             for semi_position in positions_to_check[:index + 1]:
-                piece = self.board.searcher.get_piece_by_position(semi_position)
-                if piece is not None:
+                if semi_position in self.board.searcher.filled_positions:
+                    piece = self.board.searcher.get_piece_by_position(semi_position)
                     # It stops if it meets a piece of the same color or another opponent piece
                     if piece.player == self.player or enemy_piece_found:
                         break
@@ -280,8 +280,8 @@ class Piece:
             for index, position in enumerate(positions_to_check):
                 enemy_piece_found = False
                 for semi_position in positions_to_check[:index + 1]:
-                    piece = self.board.searcher.get_piece_by_position(semi_position)
-                    if piece is not None:
+                    if semi_position in self.board.searcher.filled_positions:
+                        piece = self.board.searcher.get_piece_by_position(semi_position)
                         # It stops if it meets a piece of the same color or another opponent piece.
                         if piece.player == self.player or enemy_piece_found:
                             break
@@ -445,8 +445,7 @@ class Piece:
 
         for index, position in enumerate(positions_diagonal_1):
             for semi_position in positions_diagonal_1[:index + 1]:
-                piece = self.board.searcher.get_piece_by_position(semi_position)
-                if piece is not None and not capture:
+                if semi_position in self.board.searcher.filled_positions and not capture:
                     # If we encounter a piece, and we are searching for a positional move not a capture move, we break the loop
                     break
             else:
@@ -456,8 +455,7 @@ class Piece:
 
         for index, position in enumerate(positions_diagonal_2):
             for semi_position in positions_diagonal_2[:index + 1]:
-                piece = self.board.searcher.get_piece_by_position(semi_position)
-                if piece is not None and not capture:
+                if semi_position in self.board.searcher.filled_positions and not capture:
                     # If we encounter a piece, and we are searching for a positional move not a capture move, we break the loop
                     break
             else:

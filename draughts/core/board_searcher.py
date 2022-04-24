@@ -1,6 +1,6 @@
 from __future__ import annotations
 from functools import reduce
-from typing import List, Optional
+from typing import List, Dict
 from draughts.core.piece import Piece
 
 WHITE = 2
@@ -13,11 +13,11 @@ class BoardSearcher:
         """Build the searcher."""
         self.board = board
         self.uncaptured_pieces = list(filter(lambda piece: not piece.captured, board.pieces))
-        self.open_positions = []
-        self.filled_positions = []
-        self.player_positions = {}
-        self.player_pieces = {}
-        self.position_pieces = {}
+        self.open_positions: List[int] = []
+        self.filled_positions: List[int] = []
+        self.player_positions: Dict[int, List[int]] = {}
+        self.player_pieces: Dict[int, List[Piece]] = {}
+        self.position_pieces: Dict[int, Piece] = {}
 
         self.build_filled_positions()
         self.build_open_positions()
@@ -31,7 +31,7 @@ class BoardSearcher:
 
     def build_open_positions(self) -> None:
         """Find the open positions (empty squares)."""
-        self.open_positions = list(set(range(1, self.board.position_count)).difference(self.filled_positions))
+        self.open_positions = list(set(range(1, self.board.position_count + 1)).difference(self.filled_positions))
 
     def build_player_positions(self) -> None:
         """Find the positions where each player has a piece."""
@@ -43,8 +43,8 @@ class BoardSearcher:
     def build_player_pieces(self) -> None:
         """Find all the pieces of both players."""
         self.player_pieces = {
-            1: reduce((lambda pieces, piece: pieces + ([piece] if piece.player == BLACK else [])), self.uncaptured_pieces, []),
-            2: reduce((lambda pieces, piece: pieces + ([piece] if piece.player == WHITE else [])), self.uncaptured_pieces, [])
+            BLACK: reduce((lambda pieces, piece: pieces + ([piece] if piece.player == BLACK else [])), self.uncaptured_pieces, []),
+            WHITE: reduce((lambda pieces, piece: pieces + ([piece] if piece.player == WHITE else [])), self.uncaptured_pieces, [])
         }
 
     def build_position_pieces(self) -> None:
@@ -67,6 +67,6 @@ class BoardSearcher:
         """
         return self.player_pieces[self.board.player_turn] if not self.board.piece_requiring_further_capture_moves else [self.board.piece_requiring_further_capture_moves]
 
-    def get_piece_by_position(self, position: int) -> Optional[Piece]:
+    def get_piece_by_position(self, position: int) -> Piece:
         """Get the piece given its position."""
-        return self.position_pieces.get(position)
+        return self.position_pieces[position]

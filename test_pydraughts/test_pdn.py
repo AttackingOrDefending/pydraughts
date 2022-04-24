@@ -47,7 +47,7 @@ def test_pdn_writing():
     original_moves = moves
     game = Game(variant='russian')
     for move in moves:
-        game.push(Move(pdn_move=move, board=game, notation=0, variant=game.variant).board_move)
+        game.push(Move(pdn_move=move, board=game, variant=game.variant).board_move)
 
     PDNWriter('pdn_writer.pdn', game, game_ending=one_game.game_ending)
 

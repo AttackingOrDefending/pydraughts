@@ -2,7 +2,7 @@ from __future__ import annotations
 from draughts.core.board import Board
 from draughts.core.move import Move
 import pickle
-from draughts.convert import _algebraic_to_numeric_square, _get_squares, fen_to_variant, move_to_variant
+from draughts.convert import _algebraic_to_numeric_square, _get_squares, fen_to_variant
 from typing import List, Union, Tuple, Optional
 
 WHITE = 2
@@ -31,21 +31,21 @@ class Game:
         self.last_non_reversible_fen = fen_to_variant(self.initial_fen, self.variant)
 
         # moves has every move of a multi-capture as a separate move.
-        self.moves = []
+        self.moves: List[List[int]] = []
 
         # move_stack contains the moves played but a multi-capture is only considered as one move.
         # move_stack is preferred to moves.
-        self.move_stack = []
-        self.capture_stack = []
+        self.move_stack: List[Move] = []
+        self.capture_stack: List[List[int]] = []
 
         # _not_added_move and _not_added_capture contain the moves that are part of a multi-capture.
         # that hasn't been completed yet.
-        self._not_added_move = []
-        self._not_added_capture = []
+        self._not_added_move: List[List[int]] = []
+        self._not_added_capture: List[int] = []
 
         # reversible_moves contains the moves since the last capture or move of a man.
         # (so it only contains non-capture king moves).
-        self.reversible_moves = []
+        self.reversible_moves: List[Move] = []
 
         # fens stores the Hub fen of each position to detect threefold repetition.
         self.fens = [self.initial_hub_fen]
@@ -93,18 +93,20 @@ class Game:
 
             self.board = Board(self.variant, self.fens[-1])
 
-    def move(self, move: List[int], return_captured: bool = False) -> Union[Game, Tuple[Game, int]]:
+    def move(self, move: List[int], return_captured: bool = False) -> Union[Game, Tuple[Game, Optional[int]]]:
         """Make a move. Plays only one jump in case of a multi-capture and not the whole sequence."""
         # [0, 0] is a null move.
         is_null_move = move == [0, 0]
         if move not in self.get_possible_moves() and not is_null_move:
             raise ValueError('The provided move is not possible')
         turn = self.whose_turn()
+        was_king = False
 
         if is_null_move:
             self.board.switch_turn()
             enemy_position = None
         else:
+            was_king = self.board.searcher.get_piece_by_position(move[0]).king
             self.board, enemy_position = self.board.push_move(move, len(self.move_stack) + 1, self._not_added_capture)
         self.moves.append(move)
 
@@ -123,9 +125,8 @@ class Game:
             self._not_added_move = []
             self._not_added_capture = []
 
-            piece = self.board.searcher.get_piece_by_position(move[1])
             self.moves_since_last_capture = 0 if self.board.previous_move_was_capture else self.moves_since_last_capture + 1
-            if not is_null_move and piece.king and not captures:
+            if was_king and not captures:
                 self.reversible_moves.append(move_to_add)
                 self.consecutive_noncapture_king_moves += 1
             else:
@@ -165,9 +166,8 @@ class Game:
         turn = self.whose_turn()
         opponent_color = WHITE if player == BLACK else BLACK
         if self.variant == 'breakthrough':
-            for loc in range(1, self.board.position_count + 1):
-                piece = self.board.searcher.get_piece_by_position(loc)
-                if piece and piece.player == player and piece.king:
+            for piece in self.board.searcher.player_pieces[player]:
+                if piece.king:
                     # Player wins if they have a king.
                     return True
         elif self.variant == 'antidraughts':
@@ -184,7 +184,7 @@ class Game:
 
     def is_threefold(self) -> bool:
         """Get if the current position has occurred at least three times."""
-        return self.fens and self.fens.count(self.fens[-1]) >= 3
+        return bool(self.fens and self.fens.count(self.fens[-1]) >= 3)
 
     def is_draw(self) -> bool:
         """Get if the game is a draw."""
@@ -196,8 +196,8 @@ class Game:
         black_kings = 0
         white_piece_in_long_diagonal = False
         black_piece_in_long_diagonal = False
-        for loc in range(1, self.board.position_count + 1):
-            piece = self.board.searcher.get_piece_by_position(loc)
+        for piece in self.board.searcher.uncaptured_pieces:
+            loc = piece.position
             if piece is not None:
                 if piece.player == WHITE:
                     if loc in long_diagonal:
@@ -315,9 +315,9 @@ class Game:
         fen = ''
 
         for loc in range(1, self.board.position_count + 1):
-            piece = self.board.searcher.get_piece_by_position(loc)
             letter = 'e'
-            if piece is not None:
+            if loc in self.board.searcher.filled_positions:
+                piece = self.board.searcher.get_piece_by_position(loc)
                 if piece.player == WHITE:
                     letter = 'w'
                 else:
@@ -335,16 +335,14 @@ class Game:
         white_pieces = []
         black_pieces = []
 
-        for loc in range(1, self.board.position_count + 1):
-            piece = self.board.searcher.get_piece_by_position(loc)
-            if piece is not None:
-                letter = str(loc)
-                if piece.king:
-                    letter = 'K' + letter
-                if piece.player == WHITE:
-                    white_pieces.append(letter)
-                else:
-                    black_pieces.append(letter)
+        for piece in self.board.searcher.uncaptured_pieces:
+            letter = str(piece.position)
+            if piece.king:
+                letter = 'K' + letter
+            if piece.player == WHITE:
+                white_pieces.append(letter)
+            else:
+                black_pieces.append(letter)
 
         final_fen = f"{playing}:W{','.join(white_pieces)}:B{','.join(black_pieces)}"
         return final_fen
@@ -354,9 +352,9 @@ class Game:
         fen = ''
 
         for loc in range(1, self.board.position_count + 1):
-            piece = self.board.searcher.get_piece_by_position(loc)
             letter = 'e'
-            if piece is not None:
+            if loc in self.board.searcher.filled_positions:
+                piece = self.board.searcher.get_piece_by_position(loc)
                 if piece.player == WHITE:
                     letter = 'w'
                 else:
@@ -407,7 +405,7 @@ class Game:
 
             values = []
             for capture in captures:
-                value = 0
+                value = 0.
                 for position in capture:
                     if position is None:
                         continue
@@ -437,21 +435,21 @@ class Game:
 
             # The same king can't make more than 3 non-capturing moves in a row, if the player has men left.
             has_man = False
-            for loc in range(1, self.board.position_count + 1):
-                piece = self.board.searcher.get_piece_by_position(loc)
+            for piece in self.board.searcher.uncaptured_pieces:
                 if piece and not piece.king and piece.player == self.whose_turn():
                     has_man = True
 
             if has_man and len(self.move_stack) >= 6:
-                last_3_moves = [self.move_stack[-6], self.move_stack[-4], self.move_stack[-2]]
-                last_3_moves = list(map(lambda move: move.li_one_move, last_3_moves))
+                last_3_move_stack_moves = [self.move_stack[-6], self.move_stack[-4], self.move_stack[-2]]
+                last_3_moves = list(map(lambda move: move.li_one_move, last_3_move_stack_moves))
                 last_3_moves_same_piece = last_3_moves[0][-2:] == last_3_moves[1][:2] and last_3_moves[1][-2:] == last_3_moves[2][:2]
                 was_a_capture = bool(list(filter(bool, [self.capture_stack[-6], self.capture_stack[-4], self.capture_stack[-2]])))
-                piece = self.board.searcher.get_piece_by_position(int(last_3_moves[-1][-2:]))
-                if piece is None:  # It is None when the piece was captured.
+                loc = int(last_3_moves[-1][-2:])
+                if loc in self.board.searcher.open_positions:
                     is_king = False
                     is_king_for_at_least_3_moves = True
                 else:
+                    piece = self.board.searcher.get_piece_by_position(loc)
                     is_king = piece.king
                     is_king_for_at_least_3_moves = len(self.move_stack) - piece.became_king >= 6
                 if is_king and last_3_moves_same_piece and not was_a_capture and is_king_for_at_least_3_moves:
@@ -577,19 +575,16 @@ class Game:
         This function exists because hub engines return the captures in alphabetical order
         (e.g. for the move 231201 scan returns 23x01x07x18 instead of 23x01x18x07).
         """
-        captures = list(map(self.make_len_2, captures))
-        captures.sort()
-        captures = ''.join(captures)
-        return captures
+        return ''.join(list(sorted(map(self.make_len_2, captures))))
 
     def li_fen_to_hub_fen(self, li_fen: str) -> str:
         """Convert a fen to a Hub fen."""
         _, _, squares_per_letter, every_other_square = _get_squares(self.variant)
         fen = ''
-        li_fen = li_fen.split(':')
-        fen += li_fen[0]
-        white_pieces = li_fen[1][1:].split(',')
-        black_pieces = li_fen[2][1:].split(',')
+        split_li_fen = li_fen.split(':')
+        fen += split_li_fen[0]
+        white_pieces = split_li_fen[1][1:].split(',')
+        black_pieces = split_li_fen[2][1:].split(',')
         white_pieces = list(filter(bool, white_pieces))
         black_pieces = list(filter(bool, black_pieces))
 
@@ -607,7 +602,11 @@ class Game:
                 for number in range(start, end + 1):
                     white_pieces_remove_hyphen.append(add_for_king + str(number))
             else:
-                white_pieces_remove_hyphen.append(white_piece)
+                add_for_king = ''
+                if white_piece[0] == 'K':
+                    add_for_king = 'K'
+                    white_piece = white_piece[1:]
+                white_pieces_remove_hyphen.append(add_for_king + str(_algebraic_to_numeric_square(white_piece, squares_per_letter, every_other_square)))
 
         black_pieces_remove_hyphen = []
         for black_piece in black_pieces:
@@ -621,14 +620,13 @@ class Game:
                 for number in range(start, end + 1):
                     black_pieces_remove_hyphen.append(add_for_king + str(number))
             else:
-                black_pieces_remove_hyphen.append(black_piece)
+                add_for_king = ''
+                if black_piece[0] == 'K':
+                    add_for_king = 'K'
+                    black_piece = black_piece[1:]
+                black_pieces_remove_hyphen.append(add_for_king + str(_algebraic_to_numeric_square(black_piece, squares_per_letter, every_other_square)))
 
         position_count = _get_squares(self.variant)[0]
-
-        white_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, white_pieces_remove_hyphen))
-        black_pieces_remove_hyphen = list(map(lambda move: _algebraic_to_numeric_square(move, squares_per_letter) if move[0].lower() != 'k' else move, black_pieces_remove_hyphen))
-        white_pieces_remove_hyphen = list(map(str, white_pieces_remove_hyphen))
-        black_pieces_remove_hyphen = list(map(str, black_pieces_remove_hyphen))
 
         for index in range(1, position_count + 1):
             str_index = str(index)
