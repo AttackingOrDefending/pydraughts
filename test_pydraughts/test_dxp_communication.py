@@ -5,6 +5,7 @@ from importlib import reload
 from draughts import Game
 import time
 import sys
+import pytest
 import logging
 platform = sys.platform
 file_extension = '.exe' if platform == 'win32' else ''
@@ -27,6 +28,7 @@ def test_console_handler():
     tConsoleHandler.run_command('gamereq W')
 
 
+@pytest.mark.timeout(300, method="thread")
 def test_console_handler_with_dxp_engine():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
