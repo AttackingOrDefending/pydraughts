@@ -216,25 +216,25 @@ class Game:
             if self.consecutive_noncapture_king_moves >= 50:
                 return True
             # 1 king vs 3 pieces (with at least 1 king) and 16 moves made.
-            if white_pieces == white_kings == 1 and black_pieces == 3 and black_kings >= 1 and self.moves_since_last_capture >= 32:
+            if white_pieces == white_kings == 1 and black_pieces == 3 and black_kings >= 1 and self.consecutive_noncapture_king_moves >= 32:
                 return True
-            if black_pieces == black_kings == 1 and white_pieces == 3 and white_kings >= 1 and self.moves_since_last_capture >= 32:
+            if black_pieces == black_kings == 1 and white_pieces == 3 and white_kings >= 1 and self.consecutive_noncapture_king_moves >= 32:
                 return True
             # 1 king vs 2 or fewer pieces (with at least 1 king) and 5 moves made.
-            if white_pieces == white_kings == 1 and black_pieces <= 2 and black_kings >= 1 and self.moves_since_last_capture >= 10:
+            if white_pieces == white_kings == 1 and black_pieces <= 2 and black_kings >= 1 and self.consecutive_noncapture_king_moves >= 10:
                 return True
-            if black_pieces == black_kings == 1 and white_pieces <= 2 and white_kings >= 1 and self.moves_since_last_capture >= 10:
+            if black_pieces == black_kings == 1 and white_pieces <= 2 and white_kings >= 1 and self.consecutive_noncapture_king_moves >= 10:
                 return True
             return self.is_threefold()
         elif self.variant in ['frisian', 'frysk!']:
             # 2 kings vs 1 king and 7 moves made.
-            if white_pieces == white_kings == 1 and black_pieces == black_kings == 2 and self.moves_since_last_capture >= 14:
+            if white_pieces == white_kings == 1 and black_pieces == black_kings == 2 and self.consecutive_noncapture_king_moves >= 14:
                 return True
-            if white_pieces == white_kings == 2 and black_pieces == black_kings == 1 and self.moves_since_last_capture >= 14:
+            if white_pieces == white_kings == 2 and black_pieces == black_kings == 1 and self.consecutive_noncapture_king_moves >= 14:
                 return True
             # 1 king vs 1 king and 2 moves made (officially immediately if there can't be a forced capture).
             # but we don't detect if there is a forced capture.
-            if white_pieces == white_kings == black_pieces == black_kings == 1 and self.moves_since_last_capture >= 4:
+            if white_pieces == white_kings == black_pieces == black_kings == 1 and self.consecutive_noncapture_king_moves >= 4:
                 return True
         elif self.variant == 'antidraughts':
             # Only way to draw is threefold.
@@ -244,28 +244,28 @@ class Game:
             return False
         elif self.variant in ['russian', 'brazilian']:
             # 3 or more kings vs 1 king and 15 moves made.
-            if white_pieces == white_kings == 1 and black_pieces == black_kings >= 3 and self.moves_since_last_capture >= 30:
+            if white_pieces == white_kings == 1 and black_pieces == black_kings >= 3 and self.consecutive_noncapture_king_moves >= 30:
                 return True
-            if white_pieces == white_kings >= 3 and black_pieces == black_kings == 1 and self.moves_since_last_capture >= 30:
+            if white_pieces == white_kings >= 3 and black_pieces == black_kings == 1 and self.consecutive_noncapture_king_moves >= 30:
                 return True
             # 15 consecutive non-capture king moves.
             if self.consecutive_noncapture_king_moves >= 30:
                 return True
             # Same number of kings, same number of pieces, 4 or 5 pieces per side and 30 moves made.
-            if white_kings == black_kings >= 1 and white_pieces == black_pieces and white_pieces in [4, 5] and self.moves_since_last_capture >= 60:
+            if white_kings == black_kings >= 1 and white_pieces == black_pieces and white_pieces in [4, 5] and self.consecutive_noncapture_king_moves >= 60:
                 return True
             # Same number of kings, same number of pieces, 6 or 7 pieces per side and 60 moves made.
-            if white_kings == black_kings >= 1 and white_pieces == black_pieces and white_pieces in [6, 7] and self.moves_since_last_capture >= 120:
+            if white_kings == black_kings >= 1 and white_pieces == black_pieces and white_pieces in [6, 7] and self.consecutive_noncapture_king_moves >= 120:
                 return True
             # 3 pieces (with at least 1 king) vs 1 king on the long diagonal and 5 moves made.
-            if white_pieces == 3 and white_kings >= 1 and black_pieces == black_kings == 1 and not white_piece_in_long_diagonal and black_piece_in_long_diagonal and self.moves_since_last_capture >= 10:
+            if white_pieces == 3 and white_kings >= 1 and black_pieces == black_kings == 1 and not white_piece_in_long_diagonal and black_piece_in_long_diagonal and self.consecutive_noncapture_king_moves >= 10:
                 return True
-            if white_pieces == white_kings == 1 and black_pieces == 3 and black_kings >= 1 and white_piece_in_long_diagonal and not black_piece_in_long_diagonal and self.moves_since_last_capture >= 10:
+            if white_pieces == white_kings == 1 and black_pieces == 3 and black_kings >= 1 and white_piece_in_long_diagonal and not black_piece_in_long_diagonal and self.consecutive_noncapture_king_moves >= 10:
                 return True
             # 2 pieces (with at least 1 king) vs 1 king and 5 moves made.
-            if white_pieces == 2 and white_kings >= 1 and black_pieces == black_kings == 1 and self.moves_since_last_capture >= 10:
+            if white_pieces == 2 and white_kings >= 1 and black_pieces == black_kings == 1 and self.consecutive_noncapture_king_moves >= 10:
                 return True
-            if white_pieces == white_kings == 1 and black_pieces == 2 and black_kings >= 1 and self.moves_since_last_capture >= 10:
+            if white_pieces == white_kings == 1 and black_pieces == 2 and black_kings >= 1 and self.consecutive_noncapture_king_moves >= 10:
                 return True
             return self.is_threefold()
         elif self.variant in ['english', 'italian']:
