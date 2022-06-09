@@ -68,7 +68,7 @@ def test_game():
     game.pop()
     assert game._not_added_move == []
     assert game.get_fen() == 'WeeeeeeeebeeeeeeeebeeeeeeeeeeeeeebeeeeeeeeeeWeeeeee'
-    
+
     game = Game(fen='W:WK43:BK9')
     game.push([43, 49])
     game.pop()
