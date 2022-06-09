@@ -32,7 +32,7 @@ def test_pdn_reading():
     files = os.listdir('./games/succeed')
     for file in files:
         filepath = os.path.realpath(f'./games/succeed/{file}')
-        games = PDNReader(filename=filepath)
+        PDNReader(filename=filepath)
 
 
 def test_pdn_writing():

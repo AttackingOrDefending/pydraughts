@@ -126,7 +126,7 @@ def test_hub_engines():
     logger.info('Quited hub 1')
     hub.kill_process()
     logger.info('Killed hub 1')
-    
+
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
     limit = Limit(5)
@@ -299,11 +299,11 @@ def test_engines():
     dxp = DXPEngine(f'scan{file_extension} dxp', {'engine-opened': False}, initial_time=30)
     dxp.quit()
     dxp.kill_process()
-    
+
     if platform != 'win32':
         assert True
         return
-    
+
     # Test movetime
     checkerboard = CheckerBoardEngine('cake_189f.dll')
     limit = Limit(movetime=2)
