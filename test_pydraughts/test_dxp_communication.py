@@ -113,15 +113,6 @@ def test_console_handler_with_dxp_engine():
     dxp.quit()
     dxp.kill_process()
 
-    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    dxp.console.run_command('conn')
-    dxp.console.run_command('gamereq B 100')
-    # Message gameend not allowed; wait until your turn
-    time.sleep(2)
-    dxp.console.run_command('gameend')
-    dxp.quit()
-    dxp.kill_process()
-
     # Game not started; backreq not allowed
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     dxp.console.run_command('backreq')
