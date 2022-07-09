@@ -110,6 +110,7 @@ class DXPEngine:
                 # Unix
                 os.killpg(self.p.pid, signal.SIGKILL)
 
+            self.p.communicate()
             self.engine_receive_thread.join()
 
     def _connect(self) -> None:
