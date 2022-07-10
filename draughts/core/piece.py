@@ -41,7 +41,7 @@ class Piece:
         self.possible_capture_moves: Optional[List[List[int]]] = None
         self.possible_positional_moves: Optional[List[List[int]]] = None
 
-    def get_square(self, row: int, column: int) -> int:
+    def get_square(self, row: int, column: int) -> Optional[int]:
         """Get the square given the row and column."""
         return self.board.position_layout.get(row, {}).get(column)
 
@@ -89,7 +89,7 @@ class Piece:
 
         return self.create_moves_from_new_positions(capture_move_positions)
 
-    def get_diagonal_one_square_behind_enemy(self, enemy_piece: Piece) -> List[int]:
+    def get_diagonal_one_square_behind_enemy(self, enemy_piece: Piece) -> List[Optional[int]]:
         """
         Get the diagonal square directly behind the enemy piece if the piece can move only one square
         (usually men, but in some variants kings can also only move one square).
@@ -110,7 +110,7 @@ class Piece:
 
         return [self.get_square(row_behind_enemy, column_behind_enemy)]
 
-    def get_orthogonal_one_square_behind_enemy(self, enemy_piece: Piece) -> List[int]:
+    def get_orthogonal_one_square_behind_enemy(self, enemy_piece: Piece) -> List[Optional[int]]:
         """
         Get the orthogonal square directly behind the enemy piece if the piece can move only one square
         (usually men, but in some variants kings can also only move one square).

@@ -1,6 +1,6 @@
 from __future__ import annotations
 from functools import reduce
-from typing import List, Dict
+from typing import List, Dict, Any
 from draughts.core.piece import Piece
 
 WHITE = 2
@@ -9,7 +9,7 @@ BLACK = 1
 
 class BoardSearcher:
 
-    def build(self, board) -> None:
+    def build(self, board: Any) -> None:
         """Build the searcher."""
         self.board = board
         self.uncaptured_pieces = list(filter(lambda piece: not piece.captured, board.pieces))
