@@ -8,6 +8,7 @@ import sys
 import pytest
 import os
 import shutil
+import stat
 import zipfile
 import requests
 import logging
