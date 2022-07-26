@@ -99,8 +99,12 @@ def test_console_handler_with_dxp_engine():
     dxp.quit()
     dxp.kill_process()
 
-    # gamereq (number of commands = 3)
+    # Game not started; backreq not allowed
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
+    dxp.console.run_command('backreq')
+    # Command unknown
+    dxp.console.run_command('random-command')
+    # gamereq (number of commands = 3)
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq W 100')
     # Game already finished; gameend not allowed
@@ -111,14 +115,6 @@ def test_console_handler_with_dxp_engine():
     dxp.kill_process()
 
     # "Message gameend not allowed; wait until your turn" test often gets stuck and times out, so it was removed.
-
-    # Game not started; backreq not allowed
-    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    dxp.console.run_command('backreq')
-    # Command unknown
-    dxp.console.run_command('random-command')
-    dxp.quit()
-    dxp.kill_process()
 
 
 def test_dam_exchange():
