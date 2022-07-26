@@ -85,11 +85,15 @@ class Move:
 
         if hub_position_move:
             # Hub position move
+
+            # Order the captures
+            hub_position_move_to_use = hub_position_move[:4] + self._sort_captures([int(hub_position_move[i:i + 2]) for i in range(4, len(hub_position_move), 2)])
+
             moves_li_board = {}
             for possible_move, possible_capture in zip(self.possible_moves, self.possible_captures):
                 li_move = self._make_len_2(possible_move[0][0]) + self._make_len_2(possible_move[-1][1]) + self._sort_captures(possible_capture)
                 moves_li_board[li_move] = possible_move
-            board_move = moves_li_board[hub_position_move]
+            board_move = moves_li_board[hub_position_move_to_use]
 
         # PDN related move
 
