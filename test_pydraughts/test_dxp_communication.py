@@ -6,6 +6,10 @@ from draughts import Game
 import time
 import sys
 import pytest
+import os
+import shutil
+import zipfile
+import requests
 import logging
 platform = sys.platform
 file_extension = '.exe' if platform == 'win32' else ''
@@ -13,6 +17,38 @@ file_extension = '.exe' if platform == 'win32' else ''
 logging.basicConfig()
 logger = logging.getLogger("pydraughts")
 logger.setLevel(logging.DEBUG)
+
+
+def download_scan():
+    windows_linux_mac = ''
+    if platform == 'linux':
+        windows_linux_mac = '_linux'
+    elif platform == 'darwin':
+        windows_linux_mac = '_mac'
+    response = requests.get('https://hjetten.home.xs4all.nl/scan/scan_31.zip', allow_redirects=True)
+    with open('./TEMP/scan_zip.zip', 'wb') as file:
+        file.write(response.content)
+    with zipfile.ZipFile('./TEMP/scan_zip.zip', 'r') as zip_ref:
+        zip_ref.extractall('./TEMP/')
+    shutil.copyfile(f'./TEMP/scan_31/scan{windows_linux_mac}{file_extension}', f'scan{file_extension}')
+    shutil.copyfile('./TEMP/scan_31/scan.ini', 'scan.ini')
+    with open('scan.ini') as file:
+        options = file.read()
+    options = options.replace('book = true', 'book = false')
+    with open('scan.ini', 'w') as file:
+        file.write(options)
+    if os.path.exists('data'):
+        shutil.rmtree('data')
+    shutil.copytree('./TEMP/scan_31/data', 'data')
+    if windows_linux_mac != "":
+        st = os.stat(f'scan{file_extension}')
+        os.chmod(f'scan{file_extension}', st.st_mode | stat.S_IEXEC)
+
+
+if os.path.exists('TEMP'):
+    shutil.rmtree('TEMP')
+os.mkdir('TEMP')
+download_scan()
 
 
 def test_console_handler():
