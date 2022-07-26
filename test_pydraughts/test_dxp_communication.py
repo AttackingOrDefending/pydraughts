@@ -6,11 +6,6 @@ from draughts import Game
 import time
 import sys
 import pytest
-import os
-import shutil
-import stat
-import zipfile
-import requests
 import logging
 platform = sys.platform
 file_extension = '.exe' if platform == 'win32' else ''
@@ -18,38 +13,6 @@ file_extension = '.exe' if platform == 'win32' else ''
 logging.basicConfig()
 logger = logging.getLogger("pydraughts")
 logger.setLevel(logging.DEBUG)
-
-
-def download_scan():
-    windows_linux_mac = ''
-    if platform == 'linux':
-        windows_linux_mac = '_linux'
-    elif platform == 'darwin':
-        windows_linux_mac = '_mac'
-    response = requests.get('https://hjetten.home.xs4all.nl/scan/scan_31.zip', allow_redirects=True)
-    with open('./TEMP/scan_zip.zip', 'wb') as file:
-        file.write(response.content)
-    with zipfile.ZipFile('./TEMP/scan_zip.zip', 'r') as zip_ref:
-        zip_ref.extractall('./TEMP/')
-    shutil.copyfile(f'./TEMP/scan_31/scan{windows_linux_mac}{file_extension}', f'scan{file_extension}')
-    shutil.copyfile('./TEMP/scan_31/scan.ini', 'scan.ini')
-    with open('scan.ini') as file:
-        options = file.read()
-    options = options.replace('book = true', 'book = false')
-    with open('scan.ini', 'w') as file:
-        file.write(options)
-    if os.path.exists('data'):
-        shutil.rmtree('data')
-    shutil.copytree('./TEMP/scan_31/data', 'data')
-    if windows_linux_mac != "":
-        st = os.stat(f'scan{file_extension}')
-        os.chmod(f'scan{file_extension}', st.st_mode | stat.S_IEXEC)
-
-
-if os.path.exists('TEMP'):
-    shutil.rmtree('TEMP')
-os.mkdir('TEMP')
-download_scan()
 
 
 def test_console_handler():
@@ -63,6 +26,22 @@ def test_console_handler():
     tConsoleHandler.run_command('chat message')
     # gamereq (number of commands = 2) & Error sending game request: send exception: no connection
     tConsoleHandler.run_command('gamereq W')
+
+    # terminate program (doesn't do anything) & setup (number of commands = 1)
+    dxp_run = reload(dxp_run)
+    tConsoleHandler = dxp_run.ConsoleHandler()
+    tConsoleHandler.run_command('setup')
+    tConsoleHandler.run_command('q')
+
+    # setup (number of commands = 2)
+    dxp_run = reload(dxp_run)
+    tConsoleHandler = dxp_run.ConsoleHandler()
+    tConsoleHandler.run_command(f'setup {Game().get_dxp_fen()}')
+
+    # setup (number of commands > 3)
+    dxp_run = reload(dxp_run)
+    tConsoleHandler = dxp_run.ConsoleHandler()
+    tConsoleHandler.run_command(f'setup {Game().get_dxp_fen()} {Game().variant} extra')
 
 
 @pytest.mark.timeout(300, method="thread")
@@ -87,25 +66,6 @@ def test_console_handler_with_dxp_engine():
     dxp.console.run_command('backreq')
     # GAMEEND (number of commands = 1)
     dxp.console.run_command('gameend')
-    dxp.quit()
-    dxp.kill_process()
-
-    # terminate program (doesn't do anything) & setup (number of commands = 1)
-    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    dxp.console.run_command('setup')
-    dxp.console.run_command('q')
-    dxp.quit()
-    dxp.kill_process()
-
-    # setup (number of commands = 2)
-    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    dxp.console.run_command(f'setup {Game().get_dxp_fen()}')
-    dxp.quit()
-    dxp.kill_process()
-
-    # setup (number of commands > 3)
-    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    dxp.console.run_command(f'setup {Game().get_dxp_fen()} {Game().variant} extra')
     dxp.quit()
     dxp.kill_process()
 
