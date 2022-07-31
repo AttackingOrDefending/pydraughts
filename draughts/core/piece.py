@@ -25,7 +25,7 @@ class Piece:
         # In most draughts variants only the dark squares are playable.
         self.half_of_the_squares_are_playable = self.variant not in ['turkish']
         # The bottom left square isn't a playing square in italian draughts.
-        self.bottom_left_square_is_playable = self.variant in ['italian']
+        self.bottom_left_square_isnt_playable = self.variant in ['italian']
         # Men can't capture kings in italian draughts.
         self.man_can_capture_king = self.variant not in ['italian']
         # There are three possible values for squares_per_row (4, 5, 8), which is why two lines are needed.
@@ -104,7 +104,7 @@ class Piece:
         if current_row == enemy_row or current_column == enemy_column and (current_row - enemy_row) % 2 == 0:
             return []
 
-        column_adjustment = -1 if current_row % 2 == int(self.bottom_left_square_is_playable) else 1
+        column_adjustment = -1 if current_row % 2 == int(self.bottom_left_square_isnt_playable) else 1
         column_behind_enemy = current_column + column_adjustment if current_column == enemy_column else enemy_column
         row_behind_enemy = enemy_row + (enemy_row - current_row)
 
@@ -517,7 +517,7 @@ class Piece:
         e.g. if current row=3 and i=2, we will return the 2 possible columns for row 5 (which will be the same for row 1).
         """
         column_indexes = [0, 0]
-        start_right = current_row % 2 == int(self.bottom_left_square_is_playable)
+        start_right = current_row % 2 == int(self.bottom_left_square_isnt_playable)
         for semi_i in range(1, i + 1):
             if start_right and semi_i % 2 == 1 or not start_right and semi_i % 2 == 0:
                 column_indexes[1] += 1
