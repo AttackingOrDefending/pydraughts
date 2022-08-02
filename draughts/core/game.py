@@ -2,6 +2,7 @@ from __future__ import annotations
 from draughts.core.board import Board
 from draughts.core.move import Move
 import pickle
+from math import ceil
 from draughts.convert import _algebraic_to_numeric_square, _get_squares, fen_to_variant
 from typing import List, Union, Tuple, Optional
 
@@ -654,3 +655,50 @@ class Game:
             return 'W:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12'
         else:
             return 'W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20'
+    
+    def __repr__(self) -> str:
+        """Get a visual representation of the board."""
+        # From get_checker_board.get_board
+
+        # In most draughts variants only the dark squares are playable.
+        half_of_the_squares_are_playable = self.variant not in ['turkish']
+        # The bottom left square isn't a playing square in italian draughts.
+        bottom_left_square_isnt_playable = self.variant in ['italian']
+        
+        squares_per_row = self.board.width
+        columns = 8 if self.variant in ['russian', 'brazilian', 'english', 'italian', 'turkish'] else 10
+        rows = self.board.height
+        
+        board = [[" " for col in range(columns)] for _ in range(rows)]
+
+        for loc in range(1, self.board.position_count + 1):
+            row_number = ceil(loc / squares_per_row) - 1  # From get_row_from_position
+
+            column = (loc - 1) % squares_per_row  # From get_column
+
+            if not half_of_the_squares_are_playable:
+                pass
+            elif row_number % 2 == 0:
+                column = (column + 1) * 2 - (2 if bottom_left_square_isnt_playable else 1)  # To account for the always empty white squares
+            else:
+                column = (column + 1) * 2 - (1 if bottom_left_square_isnt_playable else 2)  # To account for the always empty white squares
+
+            piece_symbol = " "
+            if loc in self.board.searcher.filled_positions:
+                piece = self.board.searcher.get_piece_by_position(loc)
+                piece_symbol = "w" if piece.player == WHITE else "b"
+                piece_symbol = piece_symbol.upper() if piece.king else piece_symbol
+            board[row_number][column] = piece_symbol
+
+        str_board = ""
+        divider = (4 * columns - 1) * "-" + "\n"
+        for row_index, row in enumerate(board):
+            str_row = ""
+            for str_piece in row:
+                str_row += f" {str_piece} |"
+            str_row = str_row[:-1] + "\n"
+            str_board += str_row
+            if row_index != rows - 1:
+                str_board += divider
+        str_board = str_board[:-1]
+        return str_board        
