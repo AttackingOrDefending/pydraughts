@@ -3,7 +3,6 @@ from draughts.engines.checkerboard_extra.engine_client import Engine32
 import os
 import draughts
 import draughts.engine
-from draughts.convert import move_to_variant
 from typing import Union, List, Any, Dict, Tuple
 
 
@@ -54,7 +53,7 @@ class CheckerBoardEngine:
         else:
             self.engine.kill_process()
 
-    def play(self, board: draughts.Game, time_limit: Any) -> Any:
+    def play(self, board: draughts.Board, time_limit: Any) -> Any:
         """Engine search."""
         time = time_limit.time
         inc = time_limit.inc
@@ -77,7 +76,7 @@ class CheckerBoardEngine:
             self._sent_variant = True
 
         if board.move_stack:
-            gamehist = f'set gamehist {board.last_non_reversible_fen} {" ".join(list(map(lambda move: move_to_variant(move.pdn_move, board.variant), board.reversible_moves)))}'
+            gamehist = f'set gamehist {board._last_non_reversible_fen} {" ".join(list(map(lambda move: move.pdn_move, board._reversible_moves)))}'
             if len(gamehist) > 256:
                 gamehist = " ".join(gamehist[-256:].split()[1:])
             self.engine.enginecommand(gamehist)
@@ -125,7 +124,7 @@ class CheckerBoardEngine:
         self.result = result
         return draughts.engine.PlayResult(bestmove, None, {'info': self.info, 'result': self.result})
 
-    def _row_col_to_num(self, board: draughts.Game, row: int, col: int) -> int:
+    def _row_col_to_num(self, board: draughts.Board, row: int, col: int) -> int:
         """Get the square from the row and column."""
         if row % 2 == 0:
             col = ((col + 2) / 2) - 1
@@ -137,10 +136,10 @@ class CheckerBoardEngine:
         # while in english black starts, so the bottom-left square for the starting side (black) is in row h.
         flip_column = board.variant not in ['english', 'italian']
         if flip_column:
-            col = board.board.width - 1 - col
+            col = board._game.board.width - 1 - col
         # Because in english black starts
         white_starts = board.variant not in ['english']
         if not white_starts:
-            row = (board.board.height - 1) - row
-        loc = board.board.position_layout.get(row, {}).get(col)
+            row = (board._game.board.height - 1) - row
+        loc = board._game.board.position_layout.get(row, {}).get(col)
         return loc

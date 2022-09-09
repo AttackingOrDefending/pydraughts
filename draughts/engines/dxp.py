@@ -122,10 +122,10 @@ class DXPEngine:
                 time.sleep(wait_time)
         self.console.run_command(f'connect {self.ip} {self.port}')
 
-    def _start(self, board: draughts.Game, time: int) -> None:
+    def _start(self, board: draughts.Board, time: int) -> None:
         """Start the game."""
         self._connect()
-        color = 'B' if board.whose_turn() == draughts.WHITE else 'W'
+        color = 'B' if board.turn == draughts.WHITE else 'W'
         time = str(round(time // 60))
         moves = self.max_moves
         self.console.run_command(f'setup {board.initial_fen} {board.variant}')
@@ -167,7 +167,7 @@ class DXPEngine:
                 logger.debug(f'new last move: {self._last_move}')
                 return self._last_move
 
-    def play(self, board: draughts.Game) -> Any:
+    def play(self, board: draughts.Board) -> Any:
         """Engine search."""
         if not self.game_started:
             self._start(board, self.initial_time)

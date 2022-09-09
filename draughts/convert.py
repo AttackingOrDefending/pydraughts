@@ -263,6 +263,6 @@ def move_to_variant(move: str, variant: Optional[str] = None, to_algebraic: Opti
     """Convert internal PDN move to variant PDN move."""
     variant = variant.lower() if variant else variant
     move = _rotate_move(move, variant=variant)
-    if to_algebraic or variant in ['russian', 'brazilian', 'turkish']:
+    if to_algebraic is not False or variant in ['russian', 'brazilian', 'turkish']:
         move = _number_to_algebraic(move, variant=variant)
     return move

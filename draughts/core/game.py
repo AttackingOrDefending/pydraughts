@@ -1,6 +1,6 @@
 from __future__ import annotations
 from draughts.core.board import Board
-from draughts.core.move import Move
+from draughts.core.move import StandardMove
 import pickle
 from math import ceil
 from draughts.convert import _algebraic_to_numeric_square, _get_squares, fen_to_variant
@@ -10,16 +10,20 @@ WHITE = 2
 BLACK = 1
 
 
+def _convert_variant_names(variant: str) -> str:
+    if variant == 'from position':
+        return 'standard'
+    if variant == 'american':
+        return 'english'
+    elif variant == 'frysk':
+        return 'frysk!'
+    return variant
+
+
 class Game:
 
     def __init__(self, variant: str = 'standard', fen: str = 'startpos') -> None:
-        self.variant = variant
-        if self.variant == 'from position':
-            self.variant = 'standard'
-        if self.variant == 'american':
-            self.variant = 'english'
-        elif self.variant == 'frysk':
-            self.variant = 'frysk!'
+        self.variant = _convert_variant_names(variant)
         if fen == 'startpos' or ':' in fen:  # Li fen
             self.initial_fen = self.startpos_to_fen(fen)
             self.initial_hub_fen = self.li_fen_to_hub_fen(self.initial_fen)
@@ -36,7 +40,7 @@ class Game:
 
         # move_stack contains the moves played but a multi-capture is only considered as one move.
         # move_stack is preferred to moves.
-        self.move_stack: List[Move] = []
+        self.move_stack: List[StandardMove] = []
         self.capture_stack: List[List[int]] = []
 
         # _not_added_move and _not_added_capture contain the moves that are part of a multi-capture.
@@ -46,7 +50,7 @@ class Game:
 
         # reversible_moves contains the moves since the last capture or move of a man.
         # (so it only contains non-capture king moves).
-        self.reversible_moves: List[Move] = []
+        self.reversible_moves: List[StandardMove] = []
 
         # fens stores the Hub fen of each position to detect threefold repetition.
         self.fens = [self.initial_hub_fen]
@@ -94,7 +98,7 @@ class Game:
 
             self.board = Board(self.variant, self.fens[-1])
 
-    def move(self, move: List[int], return_captured: bool = False) -> Union[Game, Tuple[Game, Optional[int]]]:
+    def move(self, move: List[int], return_captured: bool = False, include_pdn=False) -> Union[Game, Tuple[Game, Optional[int]]]:
         """Make a move. Plays only one jump in case of a multi-capture and not the whole sequence."""
         # [0, 0] is a null move.
         is_null_move = move == [0, 0]
@@ -120,7 +124,10 @@ class Game:
                 captures = []
             move_to_add_board = self._not_added_move + [move]
             move_to_add_hub = self.make_len_2(move_to_add_board[0][0]) + self.make_len_2(move_to_add_board[-1][1]) + self.sort_captures(captures)
-            move_to_add = Move(board_move=move_to_add_board, hub_position_move=move_to_add_hub, has_captures=bool(captures), hub_to_pdn_pseudolegal=True)
+            if include_pdn:
+                move_to_add = StandardMove(board=self, board_move=move_to_add_board)
+            else:
+                move_to_add = StandardMove(board_move=move_to_add_board, hub_position_move=move_to_add_hub, has_captures=bool(captures), hub_to_pdn_pseudolegal=True)
             self.move_stack.append(move_to_add)
             self.capture_stack.append(captures)
             self._not_added_move = []
@@ -144,13 +151,13 @@ class Game:
         else:
             return self
 
-    def push(self, move: Union[List[List[int]], List[int]], return_captured: bool = False) -> Union[Game, Tuple[Game, List[int]]]:
+    def push(self, move: Union[List[List[int]], List[int]], return_captured: bool = False, include_pdn=False) -> Union[Game, Tuple[Game, List[int]]]:
         """Make a move. Plays the whole move sequence in case of a capture."""
         if type(move[0]) == int:
             move = [move]
         enemy_positions = []
         for move_part in move:
-            enemy_positions.append(self.move(move_part, return_captured))
+            enemy_positions.append(self.move(move_part, return_captured, include_pdn))
         if return_captured:
             enemy_positions = list(map(lambda game_enemy_position: game_enemy_position[1], enemy_positions))
             return self, enemy_positions
@@ -391,7 +398,7 @@ class Game:
         return moves, captured_pieces
 
     def legal_moves(self) -> Tuple[List[List[List[int]]], List[List[Optional[int]]]]:
-        """Get the legal moves for a position."""
+        """Get the legal moves for the current position."""
 
         moves, captures = self.get_moves()
         if not moves:
