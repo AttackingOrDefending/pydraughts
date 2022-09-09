@@ -228,7 +228,8 @@ class Move(StandardMove):
             positions = [pdn_position_move[i:i + 2] for i in range(0, len(pdn_position_move), 2)]
             separator = "x" if self.captures else "-"
             pdn_move = separator.join(list(map(lambda position: str(int(position)), positions)))
-            pdn_move = _number_to_algebraic(pdn_move, variant=self.variant)
+            if self.to_algebraic_variant:
+                pdn_move = _number_to_algebraic(pdn_move, variant=self.variant)
 
         # Board related moves
 

@@ -87,6 +87,10 @@ class MySocket:
         msg = msg.strip()
         return msg
 
+    def __del__(self):
+        if self.sock:
+            self.sock.close()
+
 
 class DamExchange:
     def parse(self, msg: str) -> Dict[str, Union[str, List[str]]]:
