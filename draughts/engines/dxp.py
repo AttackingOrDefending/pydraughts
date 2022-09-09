@@ -178,8 +178,6 @@ class DXPEngine:
             move = '-'.join(move)
             self.console.run_command(f'sm {move}')
         best_move = self._recv_move()
-        if best_move:
-            best_move = draughts.Move(board, best_move)
         return draughts.engine.PlayResult(best_move, None, {})
 
     def quit(self) -> None:

@@ -20,7 +20,7 @@ logger.setLevel(logging.DEBUG)
 
 
 def random_move_engine(game):
-    return PlayResult(move=draughts.Move(board_move=random.choice(game.legal_moves()[0])))
+    return PlayResult(move=random.choice(game.legal_moves()))
 
 
 def download_scan():
@@ -112,13 +112,13 @@ def test_hub_engines():
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
     limit = Limit(5, 0.2)
-    game = draughts.Game()
+    game = draughts.Board()
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
         logger.info(f'move1: {len(game.move_stack)}')
         best_move = hub.play(game, limit, False)
         if best_move.move:
-            game.push(best_move.move.board_move)
+            game.push(best_move.move)
         else:
             break
     logger.info('Finished playing 1')
@@ -130,13 +130,13 @@ def test_hub_engines():
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
     limit = Limit(5)
-    game = draughts.Game()
+    game = draughts.Board()
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
         logger.info(f'move2: {len(game.move_stack)}')
         best_move = hub.play(game, limit, False)
         if best_move.move:
-            game.push(best_move.move.board_move)
+            game.push(best_move.move)
         else:
             break
     logger.info('Finished playing 2')
@@ -152,7 +152,7 @@ def test_dxp_engines():
         assert True
         return
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait-to-open-time': 10, 'max-moves': 100, 'initial-time': 30})
-    game = draughts.Game()
+    game = draughts.Board()
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
         logger.info(f'move1: {len(game.move_stack)}')
@@ -161,7 +161,7 @@ def test_dxp_engines():
         else:
             best_move = random_move_engine(game)
         if best_move.move:
-            game.push(best_move.move.board_move)
+            game.push(best_move.move)
         else:
             break
     logger.info('Finished playing 1')
@@ -171,7 +171,7 @@ def test_dxp_engines():
     logger.info('Killed dxp 1')
 
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    game = draughts.Game()
+    game = draughts.Board()
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
         logger.info(f'move2: {len(game.move_stack)}')
@@ -180,7 +180,7 @@ def test_dxp_engines():
         else:
             best_move = random_move_engine(game)
         if best_move.move:
-            game.push(best_move.move.board_move)
+            game.push(best_move.move)
         else:
             break
     logger.info('Finished playing 2')
@@ -197,13 +197,13 @@ def test_checkerboard_engines():
         return
     checkerboard = CheckerBoardEngine('cake_189f.dll')
     limit = Limit(10, 2)
-    game = draughts.Game(variant='english')
+    game = draughts.Board(variant='english')
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
         logger.info(f'move1: {len(game.move_stack)}')
         best_move = checkerboard.play(game, limit)
         if best_move.move:
-            game.push(best_move.move.board_move)
+            game.push(best_move.move)
         else:
             break
     logger.info('Finished playing 1')
@@ -211,13 +211,13 @@ def test_checkerboard_engines():
 
     checkerboard = CheckerBoardEngine('cake_189f.dll')
     limit = Limit(10)
-    game = draughts.Game(variant='english')
+    game = draughts.Board(variant='english')
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
         logger.info(f'move2: {len(game.move_stack)}')
         best_move = checkerboard.play(game, limit)
         if best_move.move:
-            game.push(best_move.move.board_move)
+            game.push(best_move.move)
         else:
             break
     logger.info('Finished playing 2')
@@ -231,13 +231,13 @@ def test_russian_checkerboard_engines():
         return
     checkerboard = CheckerBoardEngine('kestog.dll')
     limit = Limit(10, 2)
-    game = draughts.Game(variant='russian')
+    game = draughts.Board(variant='russian')
     logger.info('Starting game 1')
     while not game.is_over() and len(game.move_stack) < 100:
         logger.info(f'move1: {len(game.move_stack)}')
         best_move = checkerboard.play(game, limit)
         if best_move.move:
-            game.push(best_move.move.board_move)
+            game.push(best_move.move)
         else:
             break
     logger.info('Finished playing 1')
@@ -245,13 +245,13 @@ def test_russian_checkerboard_engines():
 
     checkerboard = CheckerBoardEngine('kestog.dll')
     limit = Limit(10)
-    game = draughts.Game(variant='russian')
+    game = draughts.Board(variant='russian')
     logger.info('Starting game 2')
     while not game.is_over() and len(game.move_stack) < 100:
         logger.info(f'move2: {len(game.move_stack)}')
         best_move = checkerboard.play(game, limit)
         if best_move.move:
-            game.push(best_move.move.board_move)
+            game.push(best_move.move)
         else:
             break
     logger.info('Finished playing 2')
@@ -275,12 +275,12 @@ def test_engines():
 
     hub.go('Wbbbbbbbbbbbbbbbbbbbbeeeeeeeeeewwwwwwwwwwwwwwwwwwww', '35-30', my_time=30, inc=2, moves_left=40)
     hub.go('Wbbbbbbbbbbbbbbbbbbbbeeeeeeeeeewwwwwwwwwwwwwwwwwwww', '35-30', my_time=30, moves_left=40)
-    hub.play(draughts.Game(fen='W:W22:B9,18'), Limit(movetime=10), False)
-    hub.play(draughts.Game(fen='B:W22:B18'), Limit(nodes=10000), False)
-    hub.play(draughts.Game(fen='B:W22:B18'), Limit(depth=15), False)
+    hub.play(draughts.Board(fen='W:W22:B9,18'), Limit(movetime=10), False)
+    hub.play(draughts.Board(fen='B:W22:B18'), Limit(nodes=10000), False)
+    hub.play(draughts.Board(fen='B:W22:B18'), Limit(depth=15), False)
     hub.stop()
-    hub.play(draughts.Game(fen='WeeeeeeeebeeeeeeeebeeeeeeeeeeeeeeeWeeeeeeeeeeeeeeee'), Limit(time=10), False)
-    hub.play(draughts.Game(fen='BeeeeeeeebeeeeeeeebeeeeeeeeeeeeeeeWeeeeeeeeeeeeeeee'), Limit(time=10), False)
+    hub.play(draughts.Board(fen='WeeeeeeeebeeeeeeeebeeeeeeeeeeeeeeeWeeeeeeeeeeeeeeee'), Limit(time=10), False)
+    hub.play(draughts.Board(fen='BeeeeeeeebeeeeeeeebeeeeeeeeeeeeeeeWeeeeeeeeeeeeeeee'), Limit(time=10), False)
     hub.quit()
     hub.kill_process()
 
@@ -307,7 +307,7 @@ def test_engines():
     # Test movetime
     checkerboard = CheckerBoardEngine('cake_189f.dll')
     limit = Limit(movetime=2)
-    game = draughts.Game(variant='english')
+    game = draughts.Board(variant='english')
     checkerboard.play(game, limit)
 
     # Test setoption
@@ -319,56 +319,56 @@ def test_engines():
     for variant in ('russian', 'brazilian', 'italian', 'english'):
         checkerboard = CheckerBoardEngine('cake_189f.dll')
         limit = Limit(movetime=2)
-        game = draughts.Game(variant=variant)
+        game = draughts.Board(variant=variant)
         checkerboard.play(game, limit)
         checkerboard.kill_process()
 
     # Test time handling
     checkerboard = CheckerBoardEngine('cake_189f.dll')
     limit = Limit(time=-1, inc=-1)
-    game = draughts.Game(variant='english')
+    game = draughts.Board(variant='english')
     checkerboard.play(game, limit)
     limit = Limit(time=-1, inc=2)
-    game = draughts.Game(variant='english')
+    game = draughts.Board(variant='english')
     checkerboard.play(game, limit)
     limit = Limit(time=2, inc=-1)
-    game = draughts.Game(variant='english')
+    game = draughts.Board(variant='english')
     checkerboard.play(game, limit)
     limit = Limit(time=328)
-    game = draughts.Game(variant='english')
+    game = draughts.Board(variant='english')
     checkerboard.play(game, limit)
     limit = Limit(time=1, inc=33)
-    game = draughts.Game(variant='english')
+    game = draughts.Board(variant='english')
     checkerboard.play(game, limit)
     limit = Limit(time=6555, inc=6555)
-    game = draughts.Game(variant='english')
+    game = draughts.Board(variant='english')
     checkerboard.play(game, limit)
     checkerboard.kill_process()
 
     checkerboard = CheckerBoardEngine('./cake_189f.dll', checkerboard_timing=True)
     limit = Limit(time=0.1, inc=1)
-    game = draughts.Game(variant='english')
+    game = draughts.Board(variant='english')
     checkerboard.play(game, limit)
     limit = Limit(time=0.9, inc=1)
-    game = draughts.Game(variant='english')
+    game = draughts.Board(variant='english')
     checkerboard.play(game, limit)
     limit = Limit(time=2, inc=1)
-    game = draughts.Game(variant='english')
+    game = draughts.Board(variant='english')
     checkerboard.play(game, limit)
 
     # gamehist longer than 256 characters
-    game = draughts.Game('english', 'W:WK30:BK4')
+    game = draughts.Board('english', 'W:WK30:BK4')
     for _ in range(65):
-        game.push([30, 26])
-        game.push([4, 8])
-        game.push([26, 30])
-        game.push([8, 4])
+        game.push(draughts.Move(steps_move=[30, 26]))
+        game.push(draughts.Move(steps_move=[4, 8]))
+        game.push(draughts.Move(steps_move=[26, 30]))
+        game.push(draughts.Move(steps_move=[8, 4]))
     limit = Limit(time=10)
     checkerboard.play(game, limit)
 
     # Test CheckerBoardEngine()._row_col_to_num()
-    game = draughts.Game('english')
+    game = draughts.Board('english')
     assert checkerboard._row_col_to_num(game, 0, 2) == 30
-    game = draughts.Game('russian')
+    game = draughts.Board('russian')
     assert checkerboard._row_col_to_num(game, 1, 5) == 6
     checkerboard.kill_process()

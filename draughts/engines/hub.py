@@ -270,7 +270,7 @@ class HubEngine:
         ponder_board = board.copy()
         best_move = draughts.Move(ponder_board, hub_move=bestmove)
         if pondermove:
-            ponder_board.push(best_move.board_move)
+            ponder_board.push(best_move)
             ponder_move = draughts.Move(ponder_board, hub_move=pondermove)
 
         return draughts.engine.PlayResult(best_move, ponder_move, self.info)

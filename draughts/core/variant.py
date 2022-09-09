@@ -301,7 +301,7 @@ class Board:
         :returns: WHITE if white won, BLACK if black won, 0 if it is a draw, and None if the game hasn't ended.
         """
         winner = self._game.get_winner()
-        return 3 - winner if self.variant == "english" else winner
+        return 3 - winner if self.variant == "english" and winner is not None else winner
 
     def is_over(self) -> bool:
         """Get if the game is over."""

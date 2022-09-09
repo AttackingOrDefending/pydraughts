@@ -86,18 +86,23 @@ class Engine64:
 
         result = self.engine.getmove(board, color, maxtime, output, ctypes.byref(playnow), info, moreinfo,  ctypes.byref(cbmove))
 
-        old_fen = game.fen
+        old_fen = game._game.get_fen()
         new_fen = from_board(board, game)
         our_pieces, opponents_pieces = (['w', 'W'], ['b', 'B']) if old_fen[0] == 'W' else (['b', 'B'], ['w', 'W'])
         captures = []
         start_pos, end_pos = None, None
         for index in range(1, len(old_fen)):
+            # print(new_fen, old_fen, index, our_pieces)
             if old_fen[index] in our_pieces and new_fen[index] == 'e':
                 start_pos = index
             elif new_fen[index] in our_pieces and old_fen[index] == 'e':
                 end_pos = index
             elif old_fen[index] in opponents_pieces and new_fen[index] == 'e':
                 captures.append(index)
+        if game.variant == "english":
+            start_pos = 33 - start_pos
+            end_pos = 33 - end_pos
+            captures = list(map(lambda pos: 33 - pos, captures))
         hub_pos_move = None
         if start_pos and end_pos:
             hub_pos_move = game._game.make_len_2(start_pos) + game._game.make_len_2(end_pos) + game._game.sort_captures(captures)

@@ -105,6 +105,7 @@ class CheckerBoardEngine:
                 time_to_use = time / self.divide_time_by
 
         hub_pos_move, info, cbmove, result = self.engine.getmove(board, time_to_use, time, inc, movetime)
+        print(hub_pos_move)
 
         if hub_pos_move:
             bestmove = draughts.Move(board, hub_position_move=hub_pos_move)
