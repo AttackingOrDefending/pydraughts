@@ -1,6 +1,5 @@
 import draughts
 from draughts import Board, Move
-from draughts.convert import move_from_variant
 
 
 def play_game(moves, variant):

@@ -662,7 +662,7 @@ class Game:
             return 'W:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12'
         else:
             return 'W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20'
-    
+
     def __repr__(self) -> str:
         """Get a visual representation of the board."""
         # From get_checker_board.get_board
@@ -671,11 +671,11 @@ class Game:
         half_of_the_squares_are_playable = self.variant not in ['turkish']
         # The bottom left square isn't a playing square in italian draughts.
         bottom_left_square_isnt_playable = self.variant in ['italian']
-        
+
         squares_per_row = self.board.width
         columns = 8 if self.variant in ['russian', 'brazilian', 'english', 'italian', 'turkish'] else 10
         rows = self.board.height
-        
+
         board = [[" " for col in range(columns)] for _ in range(rows)]
 
         for loc in range(1, self.board.position_count + 1):
@@ -708,4 +708,4 @@ class Game:
             if row_index != rows - 1:
                 str_board += divider
         str_board = str_board[:-1]
-        return str_board        
+        return str_board

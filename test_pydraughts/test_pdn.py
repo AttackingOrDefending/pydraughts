@@ -25,7 +25,7 @@ def download_games():
 if os.path.exists('TEMP'):
     shutil.rmtree('TEMP')
 os.mkdir('TEMP')
-# download_games()
+download_games()
 
 
 def test_pdn_reading():
@@ -36,7 +36,7 @@ def test_pdn_reading():
 
 
 def test_pdn_writing():
-    filepath = os.path.realpath('games/succeed/mrcd2000kval.pdn')
+    filepath = os.path.realpath('./games/succeed/mrcd2000kval.pdn')
     games = PDNReader(filename=filepath, encodings='utf8')
     one_game = games.games[1]
     assert one_game.get_titles() == ["", ""]

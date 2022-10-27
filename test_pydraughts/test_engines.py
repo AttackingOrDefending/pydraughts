@@ -94,18 +94,18 @@ def download_kestog():
     shutil.copyfile('./TEMP/KestoG.dll', 'kestog.dll')
 
 
-# if os.path.exists('TEMP'):
-#     shutil.rmtree('TEMP')
-# os.mkdir('TEMP')
-# download_scan()
-# download_kr()
-# download_cake()
-# download_saltare()
-# download_kestog()
+if os.path.exists('TEMP'):
+    shutil.rmtree('TEMP')
+os.mkdir('TEMP')
+download_scan()
+download_kr()
+download_cake()
+download_saltare()
+download_kestog()
 
 
 @pytest.mark.timeout(300, method="thread")
-def est_hub_engines():
+def test_hub_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
@@ -147,7 +147,7 @@ def est_hub_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def est_dxp_engines():
+def test_dxp_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
@@ -191,7 +191,7 @@ def est_dxp_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def est_checkerboard_engines():
+def test_checkerboard_engines():
     if platform != 'win32':
         assert True
         return
@@ -225,7 +225,7 @@ def est_checkerboard_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def est_russian_checkerboard_engines():
+def test_russian_checkerboard_engines():
     if platform != 'win32':
         assert True
         return
@@ -259,7 +259,7 @@ def est_russian_checkerboard_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def est_engines():
+def test_engines():
     # Test ping and setoption
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()

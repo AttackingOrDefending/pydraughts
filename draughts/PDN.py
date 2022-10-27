@@ -1,7 +1,7 @@
 import re
 import string
 from functools import reduce
-from draughts.convert import move_to_variant, fen_to_variant
+from draughts.convert import fen_to_variant
 from draughts import Board, Move
 from typing import List, Optional, Dict, Union
 
