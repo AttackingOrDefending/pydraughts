@@ -29,7 +29,6 @@ class StandardMove:
         if (board_move or hub_move or hub_position_move or pdn_move or pdn_position_move or steps_move or li_api_move or li_one_move) and not self.is_null:
             if self.possible_moves:
                 self.board_move = self._to_board(board_move, hub_move, hub_position_move, pdn_move, pdn_position_move, steps_move, li_api_move, li_one_move)
-                print(self.possible_moves)
                 self.captures = self.possible_captures[self.possible_moves.index(self.board_move)]
                 self.captures = [] if self.captures[0] is None else self.captures
                 self.has_captures = bool(self.captures)

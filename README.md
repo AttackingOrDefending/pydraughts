@@ -35,19 +35,20 @@ Note: White always starts. Black always has the squares starting from 1 (e.g. 1-
 <br/></br>
 * Import pydraughts
 ```python
-from draughts import Game, Move, WHITE, BLACK
+from draughts import Board, Move, WHITE, BLACK
 ```
 * Create a game
 ```python
-game = Game(variant="standard", fen="startpos")
+board = Board(variant="standard", fen="startpos")
 ```
 * Make a move
 ```python
-game.push([34, 30])
+move = Move(board, steps_move=[34, 30])
+board.push(move)
 
 # Multi-capture
-game2 = Game(fen="W:WK40:B19,29")
-game2.push([[40, 23], [23, 14]])
+board2 = Board(fen="W:WK40:B19,29")
+board2.push(Move(board2), pdn_move='40x14')
 ```
 * Get a visual representation of the board
 ```python
@@ -77,22 +78,22 @@ print(board)
 ```
 * Get legal moves
 ```python
-moves, captures = game.legal_moves()
+moves = board.legal_moves()
 ```
 * Detect wins and draws
 ```python
-has_white_won = game.has_player_won(WHITE)
-is_draw = game.is_draw()
-winnner = game.get_winner()
-is_game_over = game.game_over()
+has_white_won = board.winner() == WHITE
+is_draw = board.winner() == 0
+winnner = board.winner()
+is_game_over = board.is_over()
 ```
 * Convert move to other types
 ```python
-move = Move(game, board_move=moves[0]).pdn_move
+move = Move(board, board_move=moves[0].board_move).pdn_move
 ```
 * Get fen
 ```python
-fen = game.get_li_fen()
+fen = game.fen
 ```
 * Communicate with engines
 ```python
@@ -100,7 +101,7 @@ from draughts.engine import HubEngine, Limit
 engine = HubEngine(["scan.exe", "hub"])
 engine.init()
 limit = Limit(time=10)
-engine_move = engine.play(game, limit, ponder=False)
+engine_move = engine.play(board, limit, ponder=False)
 ```
 * Read PDN games
 ```python
@@ -112,7 +113,7 @@ moves = game.moves
 * Write PDN games
 ```python
 from draughts.PDN import PDNWriter
-games = PDNWriter(filename=filepath, board=game)
+games = PDNWriter(filename=filepath, board=board)
 ```
 * Get a ballot
 ```python

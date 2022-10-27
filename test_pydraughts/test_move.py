@@ -45,7 +45,11 @@ def test_standard_move():
     move_ordered = StandardMove(board=game, hub_move='8x13x11x17x18')
     move_unordered = StandardMove(board=game, hub_move='8x13x11x18x17')
     assert move_ordered.board_move == move_unordered.board_move
-    assert Move(Game(), hub_move='31-27').hub_position_move == '3127'
-    assert Move(Game(), pdn_move='31-27').pdn_position_move == '3127'
-    assert Move(Game(fen='W:WK47:B14,19,29,31,42'), pdn_move='47x38x24x13x36').pdn_position_move == '4738241336'
-    assert Move(Game(fen='W:WK47:B14,19,29,31,42'), pdn_position_move='4738200936').pdn_move == '47x38x20x9x36'
+    assert StandardMove(Game(), hub_move='31-27').hub_position_move == '3127'
+    assert StandardMove(Game(), pdn_move='31-27').pdn_position_move == '3127'
+    assert StandardMove(Game(fen='W:WK47:B14,19,29,31,42'), pdn_move='47x38x24x13x36').pdn_position_move == '4738241336'
+    assert StandardMove(Game(fen='W:WK47:B14,19,29,31,42'), pdn_position_move='4738200936').pdn_move == '47x38x20x9x36'
+
+
+def test_deprecation():
+    from draughts.core.move import Move as InternalMove
