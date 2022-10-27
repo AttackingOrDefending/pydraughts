@@ -112,7 +112,6 @@ class CheckerBoardEngine:
             bestmove = draughts.Move(board, hub_move=move_to_variant(hub_move, board.variant, to_algebraic=False))
         else:
             steps = []
-            print(cbmove, hub_pos_move)
             positions = [cbmove['from']]
             jumps = max(cbmove['jumps'], 1)
             for pos in cbmove['path'][1:jumps]:
@@ -121,8 +120,8 @@ class CheckerBoardEngine:
             for pos in positions:
                 steps.append(self._row_col_to_num(board, pos[1], pos[0]))  # Checkerboard returns first the column, then the row
 
-            hub_move = '-'.join(map(str, steps))
-            bestmove = draughts.Move(board, hub_move=move_to_variant(hub_move, board.variant, to_algebraic=False))
+            steps = list(map(lambda step: int(move_to_variant(str(step), board.variant, to_algebraic=False)), steps))
+            bestmove = draughts.Move(board, steps_move=steps)
 
         self.info = info.decode()
         self.result = result

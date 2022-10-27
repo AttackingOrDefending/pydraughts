@@ -28,6 +28,7 @@ def test_game():
     game = Board()
     game._game.push_str_move('3530')
     game = Board(fen='W:W1-40:B41-50')
+    game._game = game._game.copy()
     assert game.fen == 'W:W1,10,11,12,13,14,15,16,17,18,19,2,20,21,22,23,24,25,26,27,28,29,3,30,31,32,33,34,35,36,37,38,39,4,40,5,6,7,8,9:B41,42,43,44,45,46,47,48,49,50'
     assert game._game.board.pieces[0].get_diagonal_one_square_behind_enemy(game._game.board.pieces[10]) == []
 
@@ -89,6 +90,12 @@ def test_game():
     assert list(map(lambda move: move.board_move, game.legal_moves())) == [[[4, 24], [24, 22], [22, 11], [11, 13], [13, 22]], [[4, 24], [24, 22], [22, 11], [11, 13], [13, 27]], [[4, 24], [24, 22], [22, 11], [11, 13], [13, 31]], [[4, 24], [24, 22], [22, 13], [13, 11], [11, 22]], [[4, 24], [24, 22], [22, 13], [13, 11], [11, 28]], [[4, 24], [24, 22], [22, 13], [13, 11], [11, 33]], [[4, 24], [24, 22], [22, 13], [13, 11], [11, 39]]]
 
     assert Board(fen='W:WKa1,K8,9:BK7,Kb2,23').fen == 'W:W9,K1,K8:B23,K6,K7'
+
+    game = Board()
+    game._game.move([31, 27], include_pdn=True)
+    game._game.null()
+    assert game._game.is_over() is False
+    assert game._game.li_fen_to_hub_fen('W:WK1-3:BK4-6') == 'WWWWBBBeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
 
 
 def fifty_square_draw_board(game, repeat_time=12, half_time=True):
