@@ -106,6 +106,7 @@ class Game:
             raise ValueError('The provided move is not possible')
         turn = self.whose_turn()
         was_king = False
+        old_board = self.copy_fast() if include_pdn else None
 
         if is_null_move:
             self.board.switch_turn()
@@ -125,7 +126,7 @@ class Game:
             move_to_add_board = self._not_added_move + [move]
             move_to_add_hub = self.make_len_2(move_to_add_board[0][0]) + self.make_len_2(move_to_add_board[-1][1]) + self.sort_captures(captures)
             if include_pdn:
-                move_to_add = StandardMove(board=self, board_move=move_to_add_board)
+                move_to_add = StandardMove(board=old_board, board_move=move_to_add_board)
             else:
                 move_to_add = StandardMove(board_move=move_to_add_board, hub_position_move=move_to_add_hub, has_captures=bool(captures), hub_to_pdn_pseudolegal=True)
             self.move_stack.append(move_to_add)
