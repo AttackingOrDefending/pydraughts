@@ -92,7 +92,6 @@ def test_game():
     assert Board(fen='W:WKa1,K8,9:BK7,Kb2,23').fen == 'W:W9,K1,K8:B23,K6,K7'
 
     game = Board()
-    print(game._game.legal_moves())
     game._game.move([31, 27], include_pdn=True)
     game._game.null()
     assert game._game.is_over() is False

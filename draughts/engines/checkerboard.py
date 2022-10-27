@@ -3,8 +3,11 @@ from draughts.engines.checkerboard_extra.engine_client import Engine32
 import os
 import draughts
 import draughts.engine
+import logging
 from draughts.convert import move_to_variant
 from typing import Union, List, Any, Dict, Tuple
+
+logger = logging.getLogger("pydraughts")
 
 
 class CheckerBoardEngine:
@@ -105,7 +108,11 @@ class CheckerBoardEngine:
             else:
                 time_to_use = time / self.divide_time_by
 
+        logger.debug(f"Fen: {board.fen}, Time to use: {time_to_use}, Time: {time}, Inc: {inc}, Movetime: {movetime}")
+
         hub_pos_move, info, cbmove, result = self.engine.getmove(board, time_to_use, time, inc, movetime)
+
+        logger.debug(f"Hub Pos Move: {hub_pos_move}, CBMove: {cbmove}, Info: {info}, Result: {result}")
 
         if hub_pos_move:
             hub_move = '-'.join([hub_pos_move[i:i+2] for i in range(0, len(hub_pos_move), 2)])
