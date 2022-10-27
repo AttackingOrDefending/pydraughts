@@ -3,6 +3,7 @@ from draughts.engines.checkerboard_extra.engine_client import Engine32
 import os
 import draughts
 import draughts.engine
+from draughts.convert import move_to_variant
 from typing import Union, List, Any, Dict, Tuple
 
 
@@ -105,12 +106,13 @@ class CheckerBoardEngine:
                 time_to_use = time / self.divide_time_by
 
         hub_pos_move, info, cbmove, result = self.engine.getmove(board, time_to_use, time, inc, movetime)
-        print(hub_pos_move)
 
         if hub_pos_move:
-            bestmove = draughts.Move(board, hub_position_move=hub_pos_move)
+            hub_move = '-'.join([hub_pos_move[i:i+2] for i in range(0, len(hub_pos_move), 2)])
+            bestmove = draughts.Move(board, hub_move=move_to_variant(hub_move, board.variant, to_algebraic=False))
         else:
             steps = []
+            print(cbmove, hub_pos_move)
             positions = [cbmove['from']]
             jumps = max(cbmove['jumps'], 1)
             for pos in cbmove['path'][1:jumps]:
@@ -119,7 +121,8 @@ class CheckerBoardEngine:
             for pos in positions:
                 steps.append(self._row_col_to_num(board, pos[1], pos[0]))  # Checkerboard returns first the column, then the row
 
-            bestmove = draughts.Move(board, steps_move=steps)
+            hub_move = '-'.join(map(str, steps))
+            bestmove = draughts.Move(board, hub_move=move_to_variant(hub_move, board.variant, to_algebraic=False))
 
         self.info = info.decode()
         self.result = result

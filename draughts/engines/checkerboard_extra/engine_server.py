@@ -32,10 +32,7 @@ class Engine32Server(Server32):
         board = get_board(game)
 
         # Reversed color because red (black) starts first and not white in english checkers in Checkerboard.
-        color = BLACK if game.whose_turn() == draughts.WHITE else WHITE
-        white_starts = game.variant not in ['english']
-        if white_starts:
-            color = 3 - color
+        color = WHITE if game.turn == draughts.WHITE else BLACK
 
         info = 0
         moreinfo = 0
@@ -82,7 +79,7 @@ class Engine32Server(Server32):
 
         result = self.lib.getmove(board, color, maxtime, output, ctypes.byref(playnow), info, moreinfo, ctypes.byref(cbmove))
 
-        old_fen = game.get_fen()
+        old_fen = game._game.get_fen()
         new_fen = from_board(board, game)
         our_pieces, opponents_pieces = (['w', 'W'], ['b', 'B']) if old_fen[0] == 'W' else (['b', 'B'], ['w', 'W'])
         captures = []
@@ -94,10 +91,9 @@ class Engine32Server(Server32):
                 end_pos = index
             elif old_fen[index] in opponents_pieces and new_fen[index] == 'e':
                 captures.append(index)
+        hub_pos_move = None
         if start_pos and end_pos:
-            hub_pos_move = game.make_len_2(start_pos) + game.make_len_2(end_pos) + game.sort_captures(captures)
-        else:
-            hub_pos_move = None
+            hub_pos_move = game._game.make_len_2(start_pos) + game._game.make_len_2(end_pos) + game._game.sort_captures(captures)
 
         cbmove_output_2 = {}
         cbmove_output_2['jumps'] = cbmove.jumps

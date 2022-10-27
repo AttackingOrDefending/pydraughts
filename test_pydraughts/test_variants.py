@@ -1,14 +1,14 @@
 import draughts
-from draughts import Game, Move
+from draughts import Board, Move
 from draughts.convert import move_from_variant
 
 
 def play_game(moves, variant):
-    game = Game(variant)
+    game = Board(variant)
     for move in moves:
-        assert game.get_winner() is None
-        game.push(Move(pdn_move=move_from_variant(move, variant=game.variant), board=game).board_move)
-    game.get_winner()
+        assert game.winner() is None
+        game.push(Move(pdn_move=move, board=game))
+    game.winner()
     return game
 
 
@@ -19,14 +19,14 @@ def test_variants():
     # Frisian
     frisian_moves = '32-27 19-23 27-21 17x26 31-27 26x28 33x24 20x29 39x17 12x21 34-30 21-26 30-25 13-18 38-32 8-12 40-34 12-17 34-30 7-12 43-38 14-20 25x14 9x40 45x34 17-21 34-30 18-22 30-25 12-17 32x12 17x8 38-33 21-27 37x17 11x22 33-29 22-27 29-24 2-7 42-37 16-21 36x16 6x26 37x17 21x12 41-36 1-6 36x16 6x26 46-41 12-17 41-37 17-22 37-32 22x42 48x37 8-12 50-45 3-9 44-39 10-14 24-20 15x24 25x23 14-20 49-44 12-17 44-40 17-22 23x21 26x17 39-34 17-21 37-31 21x41 47x36 4-10 34-30 9-13 30-25 7-12 25x14 10x19 35-30 19-23 36-31 12-17 30-25 23-29 40-34 29x40 45x34 5-10 34-29 10-14 29-24 14x34 25-20 34-40 20-15 40-45 15-10 13-19 10-5 19-24 5-32 24-29 32-49 29-33 49-43 17-21 43x26 45-50 31-27 50-39 26-48 39-50 48-37 50-44 37-19 44-49'.split()
     game = play_game(frisian_moves, 'frisian')
-    assert game.legal_moves() == ([[[27, 21]], [[27, 22]]], [[None], [None]])
+    assert list(map(lambda move: move.board_move, game.legal_moves())) == [[[27, 21]], [[27, 22]]]
     # Frysk!
     frysk_moves = '48-43 1-7 43-39 7-11 46-41 11-17 41-37 17-21 37-31 21x41 47x36 5-10 36-31 3-8 49-44 10-14 44-40 8-12 40-35 14-20 39-33 20-24 50-45 4-9 33-28 2-8 28-22 12x32 31x33 8-12 35-30 24x35 45x25 9-14 33-28 12-17 28-23 17-21 23-18 21-27 18-12 27-31 12-7 31-37 7-1 37-42 1-18 42-47 18-4 47-36 4x34 36-41 25-20 41-10 20-15 10-19 34-12 19-28 12-34 28-19 15-10 19x5 34-18 5-14 18-22 14-10'.split()
     play_game(frysk_moves, 'frysk')
     # Antidraughts
     antidraughts_moves = '35-30 16-21 31-27 20-24 27x16 24x35 36-31 15-20 31-26 20-25 41-36 17-21 16x27 10-15 33-28 18-22 27x18 13x33 38x29 12-18 29-24 19x30 32-27 18-22 27x18 5-10 43-38 8-12 18-13 9x18 36-31 18-22 49-43 22-27 31x22 12-18 22x13 14-19 13x24 30x19 34-29 11-17 26-21 17x26 29-24 19x30 37-32 6-11 46-41 7-12 38-33 30-34 40x29 12-17 45-40 2-8 50-45 15-20 41-36 1-7 36-31 26x28 33x22 17x28 39-33 28x50 42-37 35x44 37-31 8-12 29-24 20x29 45-40 44x35 43-39 50x36 47-41 36x47 48-42 47x33'.split()
     game = play_game(antidraughts_moves, 'antidraughts')
-    assert game.get_winner() == draughts.WHITE
+    assert game.winner() == draughts.WHITE
     # Breakthrough
     breakthrough_moves = '32-28 19-24 37-32 17-21 34-29 21-26 39-34 26x37 42x31 18-22 28x17 11x22 44-39 12-18 47-42 14-19 50-44 10-14 41-37 7-12 34-30 4-10 46-41 1-7 30-25 19-23 40-34 14-19 25x14 9x20 32-28 23x32 37x17 12x21 34-30 21-26 41-37 20-25 29x20 25x34 39x30 15x24 45-40 16-21 38-32 6-11 43-38 11-16 49-43 7-12 40-34 3-9 43-39 10-14 33-29 24x33 38x29 2-7 30-24 19x30 35x24 5-10 42-38 18-22 34-30 21-27 32x21 16x27 29-23 10-15 30-25 27-32 38x18 13x22 48-42 22-28 23x32 8-13 39-33 14-19 33-28 19x30 25x34 7-11 31-27 9-14 34-29 14-20 29-23 20-25 27-22 12-17 22-18 13x33 23-19 26-31 37x26 33-39 44x33 17-22 19-13 25-30 13-9 22-27 32x21 11-17 21x12 15-20 9-4'.split()
     play_game(breakthrough_moves, 'breakthrough')

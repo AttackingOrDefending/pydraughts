@@ -119,10 +119,7 @@ def _algebraic_to_numeric_square(square: str, squares_per_letter: int, every_oth
 def _number_to_algebraic(number_move: str, width: Optional[int] = None, variant: Optional[str] = None, every_other_square: Optional[bool] = None) -> str:
     """Convert a numeric move to an algebraic move."""
     if every_other_square is None:
-        if variant == 'turkish':
-            every_other_square = False
-        else:
-            every_other_square = True
+        every_other_square = _get_squares(variant)[3]
     algebraic_notation = number_move[0] in string.ascii_letters
     if algebraic_notation:
         return number_move
@@ -164,6 +161,8 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
         _, _, squares_per_letter, every_other_square = _get_squares(variant)
 
     fen = li_fen.split(':')
+    if len(fen) < 3:
+        return li_fen
     starts = fen[0]
     white_pieces = fen[1][1:].split(',')
     black_pieces = fen[2][1:].split(',')
@@ -263,6 +262,6 @@ def move_to_variant(move: str, variant: Optional[str] = None, to_algebraic: Opti
     """Convert internal PDN move to variant PDN move."""
     variant = variant.lower() if variant else variant
     move = _rotate_move(move, variant=variant)
-    if to_algebraic is not False or variant in ['russian', 'brazilian', 'turkish']:
+    if to_algebraic is not False and variant in ['russian', 'brazilian', 'turkish']:
         move = _number_to_algebraic(move, variant=variant)
     return move

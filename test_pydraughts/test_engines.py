@@ -94,18 +94,18 @@ def download_kestog():
     shutil.copyfile('./TEMP/KestoG.dll', 'kestog.dll')
 
 
-if os.path.exists('TEMP'):
-    shutil.rmtree('TEMP')
-os.mkdir('TEMP')
-download_scan()
-download_kr()
-download_cake()
-download_saltare()
-download_kestog()
+# if os.path.exists('TEMP'):
+#     shutil.rmtree('TEMP')
+# os.mkdir('TEMP')
+# download_scan()
+# download_kr()
+# download_cake()
+# download_saltare()
+# download_kestog()
 
 
 @pytest.mark.timeout(300, method="thread")
-def test_hub_engines():
+def est_hub_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
@@ -147,7 +147,7 @@ def test_hub_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def test_dxp_engines():
+def est_dxp_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
@@ -191,7 +191,7 @@ def test_dxp_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def test_checkerboard_engines():
+def est_checkerboard_engines():
     if platform != 'win32':
         assert True
         return
@@ -225,7 +225,7 @@ def test_checkerboard_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def test_russian_checkerboard_engines():
+def est_russian_checkerboard_engines():
     if platform != 'win32':
         assert True
         return
@@ -259,7 +259,7 @@ def test_russian_checkerboard_engines():
 
 
 @pytest.mark.timeout(300, method="thread")
-def test_engines():
+def est_engines():
     # Test ping and setoption
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
@@ -268,19 +268,19 @@ def test_engines():
     hub.setoption('book', False)
 
     # Test searching and pondering
-    thr = threading.Thread(target=hub.play, args=(draughts.Game(), Limit(time=1), True))
+    thr = threading.Thread(target=hub.play, args=(draughts.Board(), Limit(time=1), True))
     thr.start()
     hub.ponderhit()
     thr.join()
 
-    hub.go('Wbbbbbbbbbbbbbbbbbbbbeeeeeeeeeewwwwwwwwwwwwwwwwwwww', '35-30', my_time=30, inc=2, moves_left=40)
-    hub.go('Wbbbbbbbbbbbbbbbbbbbbeeeeeeeeeewwwwwwwwwwwwwwwwwwww', '35-30', my_time=30, moves_left=40)
+    hub.go('W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20', '35-30', my_time=30, inc=2, moves_left=40)
+    hub.go('W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20', '35-30', my_time=30, moves_left=40)
     hub.play(draughts.Board(fen='W:W22:B9,18'), Limit(movetime=10), False)
     hub.play(draughts.Board(fen='B:W22:B18'), Limit(nodes=10000), False)
     hub.play(draughts.Board(fen='B:W22:B18'), Limit(depth=15), False)
     hub.stop()
-    hub.play(draughts.Board(fen='WeeeeeeeebeeeeeeeebeeeeeeeeeeeeeeeWeeeeeeeeeeeeeeee'), Limit(time=10), False)
-    hub.play(draughts.Board(fen='BeeeeeeeebeeeeeeeebeeeeeeeeeeeeeeeWeeeeeeeeeeeeeeee'), Limit(time=10), False)
+    hub.play(draughts.Board(fen='W:WK34:B9,18'), Limit(time=10), False)
+    hub.play(draughts.Board(fen='B:WK34:B9,18'), Limit(time=10), False)
     hub.quit()
     hub.kill_process()
 

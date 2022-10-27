@@ -1,6 +1,6 @@
 from __future__ import annotations
 from draughts.core.game import Game, _convert_variant_names
-from draughts.convert import fen_from_variant, fen_to_variant, move_from_variant, move_to_variant, _number_to_algebraic
+from draughts.convert import fen_from_variant, fen_to_variant, move_from_variant, move_to_variant, _number_to_algebraic, _algebraic_to_number
 from draughts.core.move import StandardMove
 import pickle
 from typing import Optional, Any, List, Tuple
@@ -69,6 +69,7 @@ class Move(StandardMove):
 
         if pdn_move:
             # PDN move
+            pdn_move = _algebraic_to_number(pdn_move, variant=self.variant)
 
             if "-" in pdn_move:
                 pdn_position_move = "".join(list(map(self._make_len_2, pdn_move.split("-"))))
@@ -278,7 +279,7 @@ class Board:
     def push(self, move: Move) -> Board:
         """Make a move."""
         self.move_stack.append(move)
-        board_move = move.board_move
+        board_move = move.board_move.copy()
         for index, steps in enumerate(board_move):
             board_move[index] = list(map(lambda square: int(move_from_variant(str(square), variant=self.variant)), steps))
         self._game.push(board_move)
@@ -302,7 +303,7 @@ class Board:
         :returns: WHITE if white won, BLACK if black won, 0 if it is a draw, and None if the game hasn't ended.
         """
         winner = self._game.get_winner()
-        return 3 - winner if self.variant == "english" and winner is not None else winner
+        return 3 - winner if self.variant == "english" and winner else winner
 
     def is_over(self) -> bool:
         """Get if the game is over."""
