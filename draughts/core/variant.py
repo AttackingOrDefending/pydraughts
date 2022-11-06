@@ -1,25 +1,32 @@
-from draughts.convert import move_from_variant
-from typing import List, Optional, Any, Union
-import warnings
+from __future__ import annotations
+from draughts.core.game import Game, _convert_variant_names
+from draughts.convert import fen_from_variant, fen_to_variant, move_from_variant, move_to_variant, _number_to_algebraic, _algebraic_to_number
+from draughts.core.move import StandardMove
+import pickle
+from typing import Optional, Any, List, Tuple
 
-warnings.simplefilter("default")
+WHITE = 2
+BLACK = 1
 
 
-class StandardMove:
-    """Convert between different move types. Uses internal move representation (white always starts)."""
+class Move(StandardMove):
+    """Convert between different move types. Accounts for the differences between variants."""
     def __init__(self, board: Any = None, board_move: Optional[List[List[int]]] = None, hub_move: Optional[str] = None, hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None, pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None, li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None, has_captures: Optional[bool] = None, possible_moves: Optional[List[List[List[int]]]] = None, possible_captures: Optional[List[List[Optional[int]]]] = None, hub_to_pdn_pseudolegal: bool = False, variant: Optional[str] = None, is_null: Optional[bool] = None) -> None:
         self.ambiguous: Optional[bool] = None
         self.captures = None
+        self.to_algebraic_variant = None
         self.has_captures = has_captures
         if (possible_moves is None or possible_captures is None) and board:
-            self.possible_moves, self.possible_captures = board.legal_moves()
+            self.possible_moves, self.possible_captures = board._legal_moves_board()
         else:
             self.possible_moves = possible_moves
             self.possible_captures = possible_captures
+        if board and board.variant in ['russian', 'brazilian', 'turkish']:
+            self.to_algebraic_variant = board.variant
         self.hub_to_pdn_pseudolegal = hub_to_pdn_pseudolegal
         self.variant = variant
-        # if not self.variant and board:
-        #     self.variant = board.variant
+        if not self.variant and board:
+            self.variant = board.variant
         self.original_pdn_move = pdn_move
         self.is_null = is_null
 
@@ -45,26 +52,8 @@ class StandardMove:
             self.li_api_move = ['0000']
             self.li_one_move = '0000'
 
-    def _make_len_2(self, move: Union[str, int]) -> str:
-        """
-        Add a 0 in the front of the square if it is only 1 digit.
-        e.g. The move 5 will be turned to 05 but the move 23 will be left the same.
-        """
-        return f'0{move}' if len(str(move)) == 1 else str(move)
-
-    def _sort_captures(self, captures: List[Optional[int]]) -> str:
-        """
-        Sort the captures from the smallest number to the highest.
-        e.g. [10, 30, 19] will change to '101930'.
-        This function exists because hub engines return the captures in alphabetical order
-        (e.g. for the move 231201 scan returns 23x01x07x18 instead of 23x01x18x07)
-        """
-        if captures and captures[0] is None:
-            captures = []
-        return ''.join(list(sorted(map(self._make_len_2, captures))))
-
     def _to_board(self, board_move_given: Optional[List[List[int]]] = None, hub_move: Optional[str] = None, hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None, pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None, li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None) -> List[List[int]]:
-        """Convert the move to a board_move. Requires a Game() object to make the conversions."""
+        """Convert the move to a board_move. Requires a Board() object to make the conversions."""
 
         board_move = [] if board_move_given is None else board_move_given
         # Hub related move
@@ -80,7 +69,7 @@ class StandardMove:
 
         if pdn_move:
             # PDN move
-            pdn_move = move_from_variant(pdn_move, variant=self.variant)
+            pdn_move = _algebraic_to_number(pdn_move, variant=self.variant)
 
             if "-" in pdn_move:
                 pdn_position_move = "".join(list(map(self._make_len_2, pdn_move.split("-"))))
@@ -145,7 +134,7 @@ class StandardMove:
         return board_move
 
     def _from_board(self, hub_move: Optional[str] = None, hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None, pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None, li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None) -> None:
-        """Convert the move to all other move types. Requires a Game() object to make the conversions."""
+        """Convert the move to all other move types. Requires a Board() object to make the conversions."""
 
         hub_move = "" if hub_move is None else hub_move
         hub_position_move = "" if hub_position_move is None else hub_position_move
@@ -240,6 +229,8 @@ class StandardMove:
             positions = [pdn_position_move[i:i + 2] for i in range(0, len(pdn_position_move), 2)]
             separator = "x" if self.captures else "-"
             pdn_move = separator.join(list(map(lambda position: str(int(position)), positions)))
+            if self.to_algebraic_variant:
+                pdn_move = _number_to_algebraic(pdn_move, variant=self.variant)
 
         # Board related moves
 
@@ -261,110 +252,95 @@ class StandardMove:
         self.li_api_move = li_api_move
         self.li_one_move = li_one_move
 
-    def _no_board(self, board_move_given: Optional[List[List[int]]] = None, hub_move: Optional[str] = None, hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None, pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None, li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None) -> None:
-        """Makes as many conversions as possible if the board was not given."""
 
-        board_move = [] if board_move_given is None else board_move_given
-        hub_move = "" if hub_move is None else hub_move
-        hub_position_move = "" if hub_position_move is None else hub_position_move
-        pdn_move = "" if pdn_move is None else pdn_move
-        pdn_position_move = "" if pdn_position_move is None else pdn_position_move
-        steps_move = [] if steps_move is None else steps_move
-        li_api_move = [] if li_api_move is None else li_api_move
-        li_one_move = "" if li_one_move is None else li_one_move
+class Board:
+    """A draughts game which considers the variant."""
+    def __init__(self, variant: str = "standard", fen: str = "startpos"):
+        self.variant = _convert_variant_names(variant)
+        self._game = Game(variant, fen_from_variant(fen, variant) if fen != "startpos" else fen)
+        self.initial_fen = fen_to_variant(self._game.initial_fen, self.variant)
+        self.move_stack = []
+        self.fens = [self.initial_fen]
 
-        # Board related moves
+        self._last_non_reversible_fen = self.initial_fen
+        self._reversible_moves = []
 
-        if steps_move:
-            # steps_move
-            board_move = []
-            for index in range(1, len(steps_move)):
-                board_move.append([steps_move[index - 1], steps_move[index]])
+    def copy(self) -> Board:
+        """Copy the board (transfers all data)."""
+        # At least 6 times faster than deepcopy.
+        return pickle.loads(pickle.dumps(self, -1))
 
-        elif li_api_move:
-            # li_api_move
-            board_move = []
-            for move in li_api_move:
-                board_move.append([int(move[:2]), int(move[2:])])
+    def pop(self) -> Board:
+        """Undo the last move."""
+        self._game.pop()
+        self.fens.pop()
+        return self
 
-        elif li_one_move:
-            # li_one_move
-            steps = [int(li_one_move[i:i + 2]) for i in range(0, len(li_one_move), 2)]
-            board_move = []
-            for index in range(1, len(steps)):
-                board_move.append([steps[index - 1], steps[index]])
+    def push(self, move: Move) -> Board:
+        """Make a move."""
+        self.move_stack.append(move)
+        board_move = move.board_move.copy()
+        for index, steps in enumerate(board_move):
+            board_move[index] = list(map(lambda square: int(move_from_variant(str(square), variant=self.variant)), steps))
+        self._game.push(board_move)
+        self.fens.append(fen_to_variant(self._game.get_li_fen(), self.variant))
+        if self._game.reversible_moves:
+            self._reversible_moves.append(move)
+        else:
+            self._reversible_moves = []
+            self._last_non_reversible_fen = self.fen
+        return self
 
-        if board_move:
-            # steps_move
-            steps = [board_move[0][0]]
-            for move in board_move:
-                steps.append(move[1])
-            steps_move = steps
+    def null(self) -> Board:
+        """Play a null move."""
+        self.push(Move(self, steps_move=[0, 0]))
+        self.fens.append(fen_to_variant(self._game.get_li_fen(), self.variant))
+        return self
 
-            # li_api_move
-            li_api_move = []
-            for move in board_move:
-                move_part = self._make_len_2(move[0]) + self._make_len_2(move[1])
-                li_api_move.append(move_part)
+    def winner(self) -> Optional[int]:
+        """
+        Get the player who won.
+        :returns: WHITE if white won, BLACK if black won, 0 if it is a draw, and None if the game hasn't ended.
+        """
+        winner = self._game.get_winner()
+        return 3 - winner if self.variant == "english" and winner else winner
 
-            # li_one_move
-            li_one_move = "".join(list(map(self._make_len_2, steps_move)))
+    def is_over(self) -> bool:
+        """Get if the game is over."""
+        return self.winner() is not None
 
-        # Hub related moves
+    @property
+    def fen(self) -> str:
+        """Get the fen of the current position."""
+        return self.fens[-1]
 
-        if hub_move:
-            # Hub move
-            if "-" in hub_move:
-                self.has_captures = False
-                hub_position_move = "".join(list(map(self._make_len_2, hub_move.split("-"))))
-            else:
-                self.has_captures = True
-                hub_position_move = "".join(list(map(self._make_len_2, hub_move.split("x"))))
-        elif hub_position_move:
-            # Hub position move
-            positions = [hub_position_move[i:i + 2] for i in range(0, len(hub_position_move), 2)]
-            separator = "x" if self.has_captures else "-"
-            hub_move = separator.join(list(map(lambda position: str(int(position)), positions)))
+    def _legal_moves_board(self) -> Tuple[List[List[List[int]]], List[List[Optional[int]]]]:
+        """Get the legal moves for the current position in board_move format."""
+        legal_moves, legal_captures = self._game.legal_moves()
+        for move_index, move_capture in enumerate(zip(legal_moves, legal_captures)):
+            for index, steps in enumerate(move_capture[0]):
+                legal_moves[move_index][index] = list(map(lambda square: int(move_to_variant(str(square), variant=self.variant, to_algebraic=False)), steps))
+            legal_captures[move_index] = list(map(lambda square: None if square is None else int(move_to_variant(str(square), variant=self.variant, to_algebraic=False)), move_capture[1]))
+        return legal_moves, legal_captures
 
-        if self.hub_to_pdn_pseudolegal:
-            # Pseudo-legal PDN move
-            pdn_position_move = hub_position_move[:4]
-            separator = "x" if self.has_captures else "-"
-            pdn_move = pdn_position_move[:2] + separator + pdn_position_move[2:]
+    def legal_moves(self) -> List[Move]:
+        """Get the legal moves for the current position."""
+        legal_moves, legal_captures = self._legal_moves_board()
+        legal_moves = list(map(lambda move: Move(board_move=move, possible_moves=legal_moves, possible_captures=legal_captures), legal_moves))
+        return legal_moves
 
-        # PDN related moves
+    @property
+    def turn(self) -> int:
+        """Get whose turn it is."""
+        game_turn = self._game.whose_turn()
+        return 3 - game_turn if self.variant == "english" else game_turn
 
-        if pdn_move:
-            # PDN move
-            pdn_move = move_from_variant(pdn_move, variant=self.variant)
-
-            if "-" in pdn_move:
-                self.has_captures = False
-                pdn_position_move = "".join(list(map(self._make_len_2, pdn_move.split("-"))))
-            else:
-                self.has_captures = True
-                pdn_position_move = "".join(list(map(self._make_len_2, pdn_move.split("x"))))
-        elif pdn_position_move:
-            # PDN position move
-            positions = [pdn_position_move[i:i + 2] for i in range(0, len(pdn_position_move), 2)]
-            separator = "x" if self.has_captures else "-"
-            pdn_move = separator.join(list(map(lambda position: str(int(position)), positions)))
-
-        if pdn_position_move:
-            # Get if the move is ambiguous.
-            self.ambiguous = not (len(pdn_position_move) == 4)
-
-        self.board_move = board_move
-        self.hub_move = hub_move
-        self.hub_position_move = hub_position_move
-        self.pdn_move = pdn_move
-        self.pdn_position_move = pdn_position_move
-        self.steps_move = steps_move
-        self.li_api_move = li_api_move
-        self.li_one_move = li_one_move
-
-
-class Move(StandardMove):
-    def __init__(self, board: Any = None, board_move: Optional[List[List[int]]] = None, hub_move: Optional[str] = None, hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None, pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None, li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None, has_captures: Optional[bool] = None, possible_moves: Optional[List[List[List[int]]]] = None, possible_captures: Optional[List[List[Optional[int]]]] = None, hub_to_pdn_pseudolegal: bool = False, variant: Optional[str] = None, is_null: Optional[bool] = None) -> None:
-        warnings.warn("`Move` was renamed to `StandardMove` and a new `Move` was created that doesn't force white to start. Replace `Move` with `StandardMove` in your code. This `Move` will be removed in version 0.7.0.", DeprecationWarning)
-        super().__init__(board, board_move, hub_move, hub_position_move, pdn_move, pdn_position_move, steps_move, li_api_move, li_one_move, has_captures, possible_moves, possible_captures, hub_to_pdn_pseudolegal, variant, is_null)
+    def __repr__(self) -> str:
+        """Get a visual representation of the board."""
+        game_repr = self._game.__repr__()
+        if self.variant == "english":
+            # game_repr = game_repr[::-1]
+            game_repr = game_repr.replace("b", "z").replace("B", "Z")
+            game_repr = game_repr.replace("w", "b").replace("W", "B")
+            game_repr = game_repr.replace("z", "w").replace("Z", "W")
+        return game_repr

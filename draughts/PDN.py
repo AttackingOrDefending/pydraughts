@@ -1,8 +1,8 @@
 import re
 import string
 from functools import reduce
-from draughts.convert import move_to_variant, fen_to_variant
-from draughts import Game, Move
+from draughts.convert import fen_to_variant
+from draughts import Board, Move
 from typing import List, Optional, Dict, Union
 
 
@@ -182,7 +182,7 @@ class PDNWriter:
     VARIANT_TO_GAMETYPE = {'standard': 20, 'english': 21, 'italian': 22, 'russian': 25, 'brazilian': 26, 'turkish': 30, 'frisian': 40, 'frysk!': 40}
     SHORT_TO_LONG_GAMETYPE = {'20': '20,W,10,10,N2,0', '21': '21,B,8,8,N1,0', '22': '22,W,8,8,N2,1', '25': '25,W,8,8,A0,0', '26': '26,W,8,8,A0,0', '30': '30,W,8,8,A0,0', '40': '40,W,10,10,N2,0'}
 
-    def __init__(self, filename: str, board: Optional[Game] = None, moves: Optional[List[Union[str, Move]]] = None, variant: Optional[str] = None, starting_fen: Optional[str] = None, tags: Optional[Dict[str, Union[str, int]]] = None, game_ending: str = '*', replay_moves_from_board: bool = True, file_encoding: str = 'utf8', file_mode: str = 'a') -> None:
+    def __init__(self, filename: str, board: Optional[Board] = None, moves: Optional[List[Union[str, Move]]] = None, variant: Optional[str] = None, starting_fen: Optional[str] = None, tags: Optional[Dict[str, Union[str, int]]] = None, game_ending: str = '*', replay_moves_from_board: bool = True, file_encoding: str = 'utf8', file_mode: str = 'a') -> None:
         """
         :param replay_moves_from_board: The already saved pdn_move in move_stack may be wrong because it is pseudolegal
         and doesn't account for ambiguous moves. If replay_moves_from_board is enabled, it will replay all the moves to
@@ -192,7 +192,6 @@ class PDNWriter:
         self.pdn_text = ''
         self.notation_type: Optional[str] = None
         self.notation: Optional[int] = None
-        self.convert_fen = True
 
         self.board = board
         if self.board:
@@ -200,15 +199,11 @@ class PDNWriter:
             self.variant = self.board.variant
             self.starting_fen = self.board.initial_fen
             self.tags = {}
-            self.to_standard_notation = True
         else:
             self.moves = moves
             self.variant = variant or 'standard'
-            if starting_fen:
-                self.convert_fen = False
             self.starting_fen = starting_fen or self._startpos_to_fen()
             self.tags = tags or {}
-            self.to_standard_notation = False
         self.game_ending = game_ending
 
         self.replay_moves_from_board = replay_moves_from_board
@@ -222,12 +217,12 @@ class PDNWriter:
         """Replay the moves to fix any ambiguous PDN move."""
         if self.moves and type(self.moves[0]) == str:
             return
-        game = Game(self.variant, self.starting_fen)
+        game = Board(self.variant, self.starting_fen)
         correct_moves = []
         for move in self.moves:
             correct_move = Move(game, board_move=move.board_move)
             correct_moves.append(correct_move)
-            game.push(correct_move.board_move)
+            game.push(correct_move)
         self.moves = correct_moves
 
     def _write(self) -> None:
@@ -238,19 +233,10 @@ class PDNWriter:
             long_gametype = self.SHORT_TO_LONG_GAMETYPE[short_gametype]
             self.tags['GameType'] = long_gametype
         if 'FEN' not in self.tags:
-            if self.convert_fen:
-                self.starting_fen = fen_to_variant(self.starting_fen, variant=self.variant)
             self.tags['FEN'] = self.starting_fen
         for tag in self.tags:
             pdn_text += f'[{tag} "{self.tags[tag]}"]\n'
         pdn_text += '\n'
-
-        if self.to_standard_notation:
-            game_type = self.SHORT_TO_LONG_GAMETYPE.get(str(self.tags['GameType']), str(self.tags['GameType']))
-            values = game_type.split(',')
-            notation = values[4]
-            self.notation_type = notation[0].lower()
-            self.notation = int(notation[1])
 
         standard_moves = []
         for move in self.moves:
@@ -258,9 +244,6 @@ class PDNWriter:
                 standard_move = move.pdn_move
             else:
                 standard_move = move
-
-            if self.to_standard_notation:
-                standard_move = move_to_variant(standard_move, variant=self.variant)
 
             standard_moves.append(standard_move)
 
@@ -295,12 +278,11 @@ class PDNWriter:
     def _startpos_to_fen(self) -> str:
         """Get the starting fen."""
         if self.variant == 'frysk!':
-            return 'W:W46,47,48,49,50:B1,2,3,4,5'
+            fen = 'W:W46,47,48,49,50:B1,2,3,4,5'
         elif self.variant == 'turkish':
-            return 'W:W41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56:B9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24'
-        elif self.variant in ['brazilian', 'russian', 'italian']:
-            return 'W:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12'
-        elif self.variant == 'english':
-            return 'B:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12'
+            fen = 'W:W41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56:B9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24'
+        elif self.variant in ['brazilian', 'russian', 'english', 'italian']:
+            fen = 'W:W21,22,23,24,25,26,27,28,29,30,31,32:B1,2,3,4,5,6,7,8,9,10,11,12'
         else:
-            return 'W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20'
+            fen = 'W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20'
+        return fen_to_variant(fen, self.variant)

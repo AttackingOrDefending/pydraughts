@@ -1,9 +1,9 @@
 from draughts.engine import HubEngine, Limit
-from draughts import Game
+from draughts import Board
 import threading
 import time
 
-game = Game()
+game = Board()
 engine = HubEngine(["scan.exe", "hub"])
 engine.init()
 limit = Limit(time=10)

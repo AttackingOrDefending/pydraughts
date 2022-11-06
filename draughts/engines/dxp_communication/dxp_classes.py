@@ -18,14 +18,14 @@ class GameStatus:
         self.myColor = myColor
         self.started = started
         self.variant = variant
-        self.pos = draughts.Game(fen=fen, variant=variant)
+        self.pos = draughts.Board(fen=fen, variant=variant)
         self.color = self.get_color()
         self.engineName = ''
         self.result = None
 
     def get_color(self) -> int:
         """Get the color of the playing side."""
-        return DXP_WHITE if self.pos.whose_turn() == draughts.WHITE else DXP_BLACK
+        return DXP_WHITE if self.pos.turn == draughts.WHITE else DXP_BLACK
 
 
 class MySocket:
@@ -87,6 +87,10 @@ class MySocket:
         msg = msg.strip()
         return msg
 
+    def __del__(self):
+        if self.sock:
+            self.sock.close()
+
 
 class DamExchange:
     def parse(self, msg: str) -> Dict[str, Union[str, List[str]]]:
@@ -142,7 +146,7 @@ class DamExchange:
         msg = "C" + msg
         return msg
 
-    def msg_gamereq(self, myColor: int, gameTime: int, numMoves: int, pos: Optional[draughts.Game] = None, colorToMove: Optional[int] = None) -> str:
+    def msg_gamereq(self, myColor: int, gameTime: int, numMoves: int, pos: Optional[draughts.Board] = None, colorToMove: Optional[int] = None) -> str:
         """Generate a GAMEREQ message."""
         # Generate GAMEREQ message. Example: R01Tornado voor Windows 4.0        W060065A
         gamereq = []
@@ -158,7 +162,7 @@ class DamExchange:
         else:
             gamereq.append("B")  # posInd == B: use parameters pos and colorToMove
             gamereq.append("W" if colorToMove == DXP_WHITE else "Z")  # mColor
-            gamereq.append(pos.get_dxp_fen())  # board
+            gamereq.append(pos._game.get_dxp_fen())  # board
 
         msg = ""
         for item in gamereq:

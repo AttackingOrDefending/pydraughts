@@ -3,6 +3,7 @@
 import threading
 import logging
 from draughts.engines.dxp_communication.dxp_classes import DamExchange, MySocket, GameStatus, DXP_WHITE, DXP_BLACK
+from draughts import Move
 from typing import Union
 
 last_move = None
@@ -66,10 +67,11 @@ class ConsoleHandler:
                 board_move = []
                 for index in range(1, len(steps)):
                     board_move.append([steps[index - 1], steps[index]])
-                all_moves, all_captures = current.pos.legal_moves()
-                captures = all_captures[all_moves.index(board_move)]
-                if captures[0] is None:
-                    captures = []
+                captures = []
+                for move in current.pos.legal_moves():
+                    if move.steps_move == steps:
+                        captures = move.captures
+                        break
                 msg = dxp.msg_move(steps, captures, timeSpend)
                 logger.debug(f'MOVE: {board_move}')
 
@@ -80,7 +82,7 @@ class ConsoleHandler:
                     logger.debug(f"Error sending move: {err}")
                     return
 
-                current.pos.push(board_move)
+                current.pos.push(Move(board_move=board_move))
             lock.release()  # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
 
         elif comm.startswith('conn'):
@@ -244,18 +246,16 @@ class ReceiveHandler(threading.Thread):
                 steps = [dxpData['from'], dxpData['to']]
                 nsteps = list(map(int, steps))
                 ntakes = list(map(int, dxpData['captures']))
-                board_move = None
-                all_moves, all_captures = current.pos.legal_moves()
-                if not ntakes:
-                    ntakes = [None]
-                for move, capture in zip(all_moves, all_captures):
-                    if move[0][0] == nsteps[0] and move[-1][1] == nsteps[-1] and sorted(ntakes) == sorted(capture):
-                        board_move = move
+                ntakes = list(map(lambda pos: str(pos).zfill(2), sorted(ntakes)))
+                correct_move = None
+                for move in current.pos.legal_moves():
+                    if move.hub_position_move == f"{str(nsteps[0]).zfill(2)}{str(nsteps[-1]).zfill(2)}{''.join(ntakes)}":
+                        correct_move = move
 
-                if board_move is not None:
-                    last_move = board_move
-                    logger.debug(f"\nMove received: {board_move}")
-                    current.pos.push(board_move)
+                if correct_move is not None:
+                    last_move = correct_move
+                    logger.debug(f"\nMove received: {correct_move.steps_move}")
+                    current.pos.push(correct_move)
                 else:
                     logger.debug(f"Error: received move is illegal [{message}]")
 

@@ -2,7 +2,7 @@ from draughts.engines.dxp import DXPEngine
 from draughts.engines.hub import HubEngine
 from draughts.engines.checkerboard import CheckerBoardEngine
 from typing import Optional, Union, Dict, Any
-from draughts.core.move import Move
+from draughts.core.variant import Move
 
 
 class Limit:

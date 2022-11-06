@@ -255,7 +255,7 @@ class HubEngine:
         """Quit the engine."""
         self.send("quit")
 
-    def play(self, board: draughts.Game, time_limit: Any, ponder: bool) -> Any:
+    def play(self, board: draughts.Board, time_limit: Any, ponder: bool) -> Any:
         """Engine search."""
         time = time_limit.time
         inc = time_limit.inc
@@ -264,13 +264,13 @@ class HubEngine:
         movetime = time_limit.movetime
         hub_moves = board.move_stack
         hub_moves = list(map(lambda move: move.hub_move, hub_moves))
-        bestmove, pondermove = self.go(board.initial_hub_fen, moves=' '.join(hub_moves), my_time=time, inc=inc, depth=depth, nodes=nodes, movetime=movetime, ponder=ponder)
+        bestmove, pondermove = self.go(board._game.initial_hub_fen, moves=' '.join(hub_moves), my_time=time, inc=inc, depth=depth, nodes=nodes, movetime=movetime, ponder=ponder)
 
         ponder_move = None
         ponder_board = board.copy()
         best_move = draughts.Move(ponder_board, hub_move=bestmove)
         if pondermove:
-            ponder_board.push(best_move.board_move)
+            ponder_board.push(best_move)
             ponder_move = draughts.Move(ponder_board, hub_move=pondermove)
 
         return draughts.engine.PlayResult(best_move, ponder_move, self.info)

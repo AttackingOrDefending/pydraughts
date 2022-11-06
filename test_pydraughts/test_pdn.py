@@ -1,4 +1,4 @@
-from draughts import Game, Move
+from draughts import Move, Board
 from draughts.PDN import PDNReader, PDNWriter
 
 import requests
@@ -36,7 +36,7 @@ def test_pdn_reading():
 
 
 def test_pdn_writing():
-    filepath = os.path.realpath('games/succeed/mrcd2000kval.pdn')
+    filepath = os.path.realpath('./games/succeed/mrcd2000kval.pdn')
     games = PDNReader(filename=filepath, encodings='utf8')
     one_game = games.games[1]
     assert one_game.get_titles() == ["", ""]
@@ -45,9 +45,9 @@ def test_pdn_writing():
     assert one_game.get_types() == ["", ""]
     moves = one_game.moves
     original_moves = moves
-    game = Game(variant='russian')
+    game = Board(variant='russian')
     for move in moves:
-        game.push(Move(pdn_move=move, board=game, variant=game.variant).board_move)
+        game.push(Move(pdn_move=move, board=game, variant=game.variant))
 
     PDNWriter('pdn_writer.pdn', game, game_ending=one_game.game_ending)
 
@@ -73,7 +73,7 @@ def test_pdn_writing():
         pdn_writer = PDNWriter('pdn_writer_minor_test.pdn', variant=variant, moves=[])
         # We use [1:] in the fen, so we exclude the starting color, because internally white always starts, so Game will
         # always return a fen with white starting, even in english.
-        assert pdn_writer._startpos_to_fen()[1:] == Game(variant).get_li_fen()[1:]
+        assert pdn_writer._startpos_to_fen() == Board(variant).fen
 
     PDNWriter('pdn_writer_minor_test_2.pdn', moves=["35-30"])
     with open('pdn_writer_minor_test_2.pdn') as file:
