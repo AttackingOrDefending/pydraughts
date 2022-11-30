@@ -97,6 +97,11 @@ def test_game():
     assert game._game.is_over() is False
     assert game._game.li_fen_to_hub_fen('W:WK1-3:BK4-6') == 'WWWWBBBeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
 
+    # From https://github.com/AttackingOrDefending/pydraughts/issues/28
+    game = Board('russian', 'W:Wh6:Bg7,c5,d2')
+    assert len(game.legal_moves()) == 1
+    assert game.legal_moves()[0].board_move == [[24, 31], [31, 13], [13, 3]]
+
 
 def fifty_square_draw_board(game, repeat_time=12, half_time=True):
     for _ in range(repeat_time):
