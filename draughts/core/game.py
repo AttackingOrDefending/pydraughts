@@ -546,7 +546,24 @@ class Game:
             moves_legal = moves_pseudo_legal_4
             captures_legal = captures_pseudo_legal_4
 
-        elif self.variant in ['russian', 'english']:
+        elif self.variant == 'russian':
+            # We have to finish the capture sequence that we choose, so we check if another move by the same piece
+            # captures more pieces and starts with the same captures.
+            # For example:
+            # move_1_captures = [28, 18], move_2_captures = [28, 18, 6]
+            # move_2_captures ([28, 18, ...]) starts with the captures in move_1_captures ([28, 18]) and
+            # captures more pieces, so move_1 doesn't finish the capture sequence.
+            moves_legal = []
+            captures_legal = []
+            for move, capture in zip(moves, captures):
+                for possible_move, possible_capture in zip(moves, captures):
+                    if move[0][0] == possible_move[0][0] and capture == possible_capture[:len(capture)] and len(possible_capture) > len(capture):
+                        break
+                else:
+                    moves_legal.append(move)
+                    captures_legal.append(capture)
+
+        elif self.variant == 'english':
             # No restriction. The player can choose, whichever move they prefer.
             # They only have to complete the multi-capture.
             return moves, captures
