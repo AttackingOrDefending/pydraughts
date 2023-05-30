@@ -46,7 +46,7 @@ board.push(move)
 
 # Multi-capture
 board2 = Board(fen="W:WK40:B19,29")
-board2.push(Move(board2), pdn_move='40x14')
+board2.push(Move(board2, pdn_move='40x14'))
 ```
 * Get a visual representation of the board
 ```python
