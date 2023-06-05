@@ -108,8 +108,8 @@ class DXPEngine:
                 self.p.send_signal(signal.CTRL_BREAK_EVENT)
             except AttributeError:
                 # Unix
-                logger.debug("Attempting to kill with SIGKILL.")
-                os.killpg(self.p.pid, signal.SIGKILL)
+                logger.debug("Attempting to kill with SIGTERM.")
+                os.killpg(self.p.pid, signal.SIGTERM)
 
             logger.debug("Killed process.")
             self.p.communicate()
