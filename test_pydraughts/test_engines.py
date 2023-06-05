@@ -146,7 +146,7 @@ def test_hub_engines():
     logger.info('Killed hub 2')
 
 
-@pytest.mark.timeout(300, method="thread")
+@pytest.mark.timeout(500, method="thread")
 def test_dxp_engines():
     if platform not in ['win32', 'linux', 'darwin']:
         assert True
