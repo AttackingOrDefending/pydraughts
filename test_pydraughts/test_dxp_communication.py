@@ -68,7 +68,7 @@ def test_console_handler_with_dxp_engine():
     dxp.console.run_command('backreq')
     # GAMEEND (number of commands = 1)
     dxp.console.run_command('gameend')
-    dxp.quit(max_wait_time=0)  # We don't have a connection, so the engine won't send a gameend request.
+    dxp.quit()
     dxp.kill_process()
 
     # conn (number of commands = 2)
