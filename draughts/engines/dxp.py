@@ -162,7 +162,7 @@ class DXPEngine:
             if not dxp.tReceiveHandler.isListening:
                 break
             if dxp.last_move_changed:
-                logger.debug(f'new last move: {dxp.last_move}')
+                logger.debug(f'new last move: {dxp.last_move.board_move}')
                 return dxp.last_move
 
     def play(self, board: draughts.Board) -> Any:
@@ -178,7 +178,14 @@ class DXPEngine:
         best_move = self._recv_move()
         return draughts.engine.PlayResult(best_move, None, {})
 
+    def _recv_gameend(self) -> None:
+        """Checks if we have received a gameend from the engine."""
+        while True:
+            if dxp.gameend_received:
+                break
+
     def quit(self) -> None:
         """Quit the engine."""
         self.console.run_command('gameend 0')
+        self._recv_gameend()  # Wait for the engine to send a gameend message back.
         self.console.run_command("disconn")
