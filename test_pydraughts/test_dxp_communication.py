@@ -118,7 +118,7 @@ def test_console_handler_with_dxp_engine():
     time.sleep(2)
     dxp.console.run_command('gameend')
     dxp.console.run_command('gameend')
-    dxp.quit(max_wait_time=-1)
+    dxp.quit(max_wait_time=-1)  # The engine has already sent a gameend message.
     dxp.kill_process()
 
     # "Message gameend not allowed; wait until your turn" test often gets stuck and times out, so it was removed.
