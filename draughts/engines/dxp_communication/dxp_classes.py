@@ -31,11 +31,13 @@ class GameStatus:
 class MySocket:
     def __init__(self) -> None:
         self.sock = None
+        self.closed = False
 
     def open(self) -> MySocket:
         """Open the socket."""
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.closed = False
         except Exception:
             self.sock = None
             raise Exception("socket exception: failed to open")
@@ -89,7 +91,10 @@ class MySocket:
 
     def close(self):
         if self.sock:
+            self.closed = True
+            self.sock.shutdown(socket.SHUT_RDWR)
             self.sock.close()
+            self.sock = None
 
     def __del__(self):
         self.close()

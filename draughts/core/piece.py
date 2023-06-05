@@ -43,7 +43,8 @@ class Piece:
 
     def get_square(self, row: int, column: int) -> Optional[int]:
         """Get the square given the row and column."""
-        return self.board.position_layout.get(row, {}).get(column)
+        board_row: dict[int, Optional[int]] = self.board.position_layout.get(row, {})
+        return board_row.get(column)
 
     def is_movable(self, captures: List[int]) -> bool:
         """Get if the piece can move."""
@@ -352,7 +353,8 @@ class Piece:
 
     def get_column(self) -> int:
         """Get the piece's column."""
-        return (self.position - 1) % self.board.width
+        width: int = self.board.width
+        return (self.position - 1) % width
 
     def get_row(self) -> int:
         """Get the piece's row."""

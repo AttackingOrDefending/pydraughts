@@ -298,7 +298,10 @@ class ReceiveHandler(threading.Thread):
             lock.release()  # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
 
         self.isListening = False
-        logger.error("Listening stopped; connection broken")
+        if mySock.closed:
+            logger.debug("Listening stopped; connection broken")
+        else:
+            logger.error("Listening stopped; connection broken")
         logger.debug("Connection broken; receiveHandler stopped. ")
         logger.debug("Save your data and exit program to start again. ")
         return None
