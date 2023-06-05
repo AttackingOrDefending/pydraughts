@@ -97,11 +97,12 @@ def download_kestog():
 if os.path.exists('TEMP'):
     shutil.rmtree('TEMP')
 os.mkdir('TEMP')
-download_scan()
-download_kr()
-download_cake()
-download_saltare()
-download_kestog()
+download_functions = [download_scan, download_kr, download_cake, download_saltare, download_kestog]
+for downloader in download_functions:
+    try:
+        downloader()
+    except Exception:
+        downloader()  # Attempt to download twice if there are problems.
 
 
 @pytest.mark.timeout(300, method="thread")

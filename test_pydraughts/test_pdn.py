@@ -25,7 +25,10 @@ def download_games():
 if os.path.exists('TEMP'):
     shutil.rmtree('TEMP')
 os.mkdir('TEMP')
-download_games()
+try:
+    download_games()
+except Exception:
+    download_games()  # Attempt to download twice if there are problems.
 
 
 def test_pdn_reading():
