@@ -52,7 +52,6 @@ def test_console_handler_with_dxp_engine():
         return
     # Game started; setup not allowed
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    time.sleep(5)  # Wait for the engine to open.
     dxp.console.run_command('conn')
     time.sleep(5)
     dxp.console.run_command('setup')
@@ -66,21 +65,17 @@ def test_console_handler_with_dxp_engine():
     dxp.console.run_command('chat MESSAGE')
     # BACKREQ
     dxp.console.run_command('backreq')
-    # GAMEEND (number of commands = 1)
-    dxp.console.run_command('gameend')
     dxp.quit()
     dxp.kill_process()
 
     # conn (number of commands = 2)
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    time.sleep(5)  # Wait for the engine to open.
     dxp.console.run_command('conn 127.0.0.1')
     dxp.quit()
     dxp.kill_process()
 
     # conn (number of commands = 1)
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    time.sleep(5)  # Wait for the engine to open.
     dxp.console.run_command('conn')
     # chat (number of commands = 1)
     dxp.console.run_command('chat')
@@ -91,7 +86,6 @@ def test_console_handler_with_dxp_engine():
 
     # gamereq (number of commands = 2)
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    time.sleep(5)  # Wait for the engine to open.
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq W')
     dxp.quit()
@@ -99,7 +93,6 @@ def test_console_handler_with_dxp_engine():
 
     # gamereq (number of commands = 3)
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    time.sleep(5)  # Wait for the engine to open.
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq B 100')
     dxp.quit()
@@ -107,18 +100,17 @@ def test_console_handler_with_dxp_engine():
 
     # Game not started; backreq not allowed
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    time.sleep(5)  # Wait for the engine to open.
     dxp.console.run_command('backreq')
     # Command unknown
     dxp.console.run_command('random-command')
     # gamereq (number of commands = 3)
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq W 100')
-    # Game already finished; gameend not allowed
+    # Game already finished; gameend not allowed & GAMEEND (number of commands = 1)
     time.sleep(2)
     dxp.console.run_command('gameend')
     dxp.console.run_command('gameend')
-    dxp.quit(max_wait_time=-1)  # The engine has already sent a gameend message.
+    dxp.quit()
     dxp.kill_process()
 
     # "Message gameend not allowed; wait until your turn" test often gets stuck and times out, so it was removed.

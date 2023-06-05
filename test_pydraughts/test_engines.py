@@ -166,7 +166,7 @@ def test_dxp_engines():
         else:
             break
     logger.info('Finished playing 1')
-    dxp.quit()
+    dxp.quit(max_wait_time=-1)
     logger.info('Quited dxp 1')
     dxp.kill_process()
     logger.info('Killed dxp 1')
