@@ -114,6 +114,15 @@ class ConsoleHandler:
                 if not tReceiveHandler.isListening:
                     tReceiveHandler.start()
 
+        elif comm.startswith("disconn"):
+            try:
+                mySock.close()
+                logger.debug(f"Successfully closed socket.")
+            except Exception as err:
+                mySock.sock = None
+                logger.debug(f"Error trying to close socket: {err}")
+                return
+
         elif comm.startswith('chat'):
             if len(comm.split()) == 1:
                 return
@@ -170,6 +179,7 @@ class ConsoleHandler:
                 _, reason = comm.split()
             else:
                 reason = "0"
+            accepted = None
             msg = dxp.msg_gameend(reason)
 
             try:
@@ -187,6 +197,7 @@ class ConsoleHandler:
         else:
             logger.debug(f"Command unknown: {comm.strip()}")
             logger.debug(f"Unknown command, type h for help: {comm.strip()}")
+
 
 
 class ReceiveHandler(threading.Thread):

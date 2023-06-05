@@ -87,9 +87,12 @@ class MySocket:
         msg = msg.strip()
         return msg
 
-    def __del__(self):
+    def close(self):
         if self.sock:
             self.sock.close()
+
+    def __del__(self):
+        self.close()
 
 
 class DamExchange:
