@@ -7,6 +7,7 @@ from draughts import Move
 from typing import Union
 
 last_move = None
+last_move_changed = False
 accepted = None
 
 logger = logging.getLogger("pydraughts")
@@ -20,7 +21,7 @@ class ConsoleHandler:
         """Send a command to the DXP engine."""
 
         global current, mySock, lock
-        global accepted, last_move
+        global accepted, last_move, last_move_changed
         logger.debug(f'comm {comm}')
 
         if comm.startswith('q') or comm.startswith('ex'):  # quit/exit
@@ -72,6 +73,7 @@ class ConsoleHandler:
                     if move.steps_move == steps:
                         captures = move.captures
                         break
+                last_move_changed = False
                 msg = dxp.msg_move(steps, captures, timeSpend)
                 logger.debug(f'MOVE: {board_move}')
 
@@ -133,6 +135,7 @@ class ConsoleHandler:
                 return
             logger.debug(f"Command request new game: {comm.strip()}")
             last_move = None
+            last_move_changed = False
             accepted = None
             myColor = "W"  # default
             gameTime = "120"  # default
@@ -200,7 +203,7 @@ class ReceiveHandler(threading.Thread):
 
         logger.debug("ReceiveHandler started")
         global current, mySock, lock
-        global accepted, last_move
+        global accepted, last_move, last_move_changed
         self.isListening = True
         logger.debug("DXP Client starts listening")
         while True:
@@ -254,6 +257,7 @@ class ReceiveHandler(threading.Thread):
 
                 if correct_move is not None:
                     last_move = correct_move
+                    last_move_changed = True
                     logger.debug(f"\nMove received: {correct_move.steps_move}")
                     current.pos.push(correct_move)
                 else:

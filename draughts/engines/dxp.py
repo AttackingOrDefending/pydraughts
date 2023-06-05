@@ -32,7 +32,6 @@ class DXPEngine:
         self.console = dxp.tConsoleHandler
         self.receiver = dxp.tReceiveHandler
         self.game_started = False
-        self._last_move = None
         self.exit = False
 
         self.configure(options)
@@ -162,10 +161,9 @@ class DXPEngine:
         while True:
             if not dxp.tReceiveHandler.isListening:
                 break
-            if self._last_move != dxp.last_move:
-                self._last_move = dxp.last_move
-                logger.debug(f'new last move: {self._last_move}')
-                return self._last_move
+            if dxp.last_move_changed:
+                logger.debug(f'new last move: {dxp.last_move}')
+                return dxp.last_move
 
     def play(self, board: draughts.Board) -> Any:
         """Engine search."""
