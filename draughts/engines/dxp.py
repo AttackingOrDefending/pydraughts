@@ -178,17 +178,7 @@ class DXPEngine:
         best_move = self._recv_move()
         return draughts.engine.PlayResult(best_move, None, {})
 
-    def _recv_gameend(self, max_wait_time: int) -> None:
-        """Checks if we have received a gameend from the engine. Waits a maximum of `max_wait_time` seconds."""
-        if max_wait_time == -1:  # Infinite time
-            max_wait_time = 1000000
-        start_time = time.time()
-        while time.time() < start_time + max_wait_time:
-            if dxp.gameend_received:
-                break
-
-    def quit(self, max_wait_time: int = 10) -> None:
+    def quit(self) -> None:
         """Quit the engine."""
         self.console.run_command('gameend 0')
-        self._recv_gameend(max_wait_time)  # Wait for the engine to send a gameend message back.
         self.console.run_command("disconn")

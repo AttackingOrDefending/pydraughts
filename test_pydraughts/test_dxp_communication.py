@@ -65,6 +65,8 @@ def test_console_handler_with_dxp_engine():
     dxp.console.run_command('chat MESSAGE')
     # BACKREQ
     dxp.console.run_command('backreq')
+    # GAMEEND (number of commands = 1)
+    dxp.console.run_command('gameend')
     dxp.quit()
     dxp.kill_process()
 
@@ -106,7 +108,7 @@ def test_console_handler_with_dxp_engine():
     # gamereq (number of commands = 3)
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq W 100')
-    # Game already finished; gameend not allowed & GAMEEND (number of commands = 1)
+    # Game already finished; gameend not allowed
     time.sleep(2)
     dxp.console.run_command('gameend')
     dxp.console.run_command('gameend')
