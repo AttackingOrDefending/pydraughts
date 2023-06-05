@@ -60,7 +60,8 @@ class MySocket:
         try:
             self.sock.send(bytes(msg, 'utf-8') + b"\0")
         except Exception:
-            raise Exception("send exception: no connection")
+            logger.warning(f"send exception: no connection when trying to send `{msg}`.")
+            raise Exception(f"send exception: no connection when trying to send `{msg}`.")
         return None
 
     def receive(self) -> str:

@@ -182,6 +182,7 @@ class ConsoleHandler:
             else:
                 reason = "0"
             accepted = None
+            current.started = False
             msg = dxp.msg_gameend(reason)
 
             try:
@@ -199,7 +200,6 @@ class ConsoleHandler:
         else:
             logger.debug(f"Command unknown: {comm.strip()}")
             logger.debug(f"Unknown command, type h for help: {comm.strip()}")
-
 
 
 class ReceiveHandler(threading.Thread):

@@ -22,9 +22,10 @@ def test_console_handler():
     tConsoleHandler = dxp_run.ConsoleHandler()
     # conn (number of commands = 2) & Error trying to connect: connection exception: failed to connect
     tConsoleHandler.run_command('conn 127.0.0.1')
-    # chat (number of commands > 1) & Error sending chat message: send exception: no connection
+    # chat (number of commands > 1) & Error sending chat message: send exception: no connection when trying to send `Cmessage`
     tConsoleHandler.run_command('chat message')
-    # gamereq (number of commands = 2) & Error sending game request: send exception: no connection
+    # gamereq (number of commands = 2) & Error sending game request: send exception: no connection when trying to send
+    # `R01DXP Client                      Z120050BWzzzzzzzzzzzzzzzzzzzzeeeeeeeeeewwwwwwwwwwwwwwwwwwww`
     tConsoleHandler.run_command('gamereq W')
 
     # terminate program (doesn't do anything) & setup (number of commands = 1)
@@ -66,7 +67,7 @@ def test_console_handler_with_dxp_engine():
     dxp.console.run_command('backreq')
     # GAMEEND (number of commands = 1)
     dxp.console.run_command('gameend')
-    dxp.quit()
+    dxp.quit(max_wait_time=0)  # We don't have a connection, so the engine won't send a gameend request.
     dxp.kill_process()
 
     # conn (number of commands = 2)
@@ -111,7 +112,7 @@ def test_console_handler_with_dxp_engine():
     time.sleep(2)
     dxp.console.run_command('gameend')
     dxp.console.run_command('gameend')
-    dxp.quit()
+    dxp.quit(max_wait_time=-1)
     dxp.kill_process()
 
     # "Message gameend not allowed; wait until your turn" test often gets stuck and times out, so it was removed.
