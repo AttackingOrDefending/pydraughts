@@ -225,6 +225,7 @@ class ReceiveHandler(threading.Thread):
                 message = mySock.receive()  # wait for message
             except Exception as err:
                 logger.debug(f"Error {err}")
+                mySock.close()
                 break
 
             lock.acquire()  # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
