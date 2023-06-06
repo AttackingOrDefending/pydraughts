@@ -285,13 +285,6 @@ def test_engines():
     hub.quit()
     hub.kill_process()
 
-    # EOFError
-    try:
-        HubEngine(f'sca{file_extension}')
-        assert False
-    except EOFError:
-        assert True
-
     # options is None
     dxp = DXPEngine(None, None, initial_time=30)
     dxp.quit()

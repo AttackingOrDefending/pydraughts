@@ -51,6 +51,7 @@ def test_console_handler_with_dxp_engine():
         return
     # Game started; setup not allowed
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
+    time.sleep(10)  # Wait for the engine to open.
     dxp.console.run_command('conn')
     time.sleep(5)
     dxp.console.run_command('setup')
@@ -71,12 +72,14 @@ def test_console_handler_with_dxp_engine():
 
     # conn (number of commands = 2)
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
+    time.sleep(10)  # Wait for the engine to open.
     dxp.console.run_command('conn 127.0.0.1')
     dxp.quit()
     dxp.kill_process()
 
     # conn (number of commands = 1)
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
+    time.sleep(10)  # Wait for the engine to open.
     dxp.console.run_command('conn')
     # chat (number of commands = 1)
     dxp.console.run_command('chat')
@@ -87,6 +90,7 @@ def test_console_handler_with_dxp_engine():
 
     # gamereq (number of commands = 2)
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
+    time.sleep(10)  # Wait for the engine to open.
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq W')
     dxp.quit()
@@ -94,6 +98,7 @@ def test_console_handler_with_dxp_engine():
 
     # gamereq (number of commands = 3)
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
+    time.sleep(10)  # Wait for the engine to open.
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq B 100')
     dxp.quit()
@@ -101,6 +106,7 @@ def test_console_handler_with_dxp_engine():
 
     # Game not started; backreq not allowed
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
+    time.sleep(10)  # Wait for the engine to open.
     dxp.console.run_command('backreq')
     # Command unknown
     dxp.console.run_command('random-command')
