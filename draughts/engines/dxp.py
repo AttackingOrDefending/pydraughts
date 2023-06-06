@@ -112,21 +112,19 @@ class DXPEngine:
             self.exit = True
             try:
                 # Windows
+                logger.debug("Killing Windows.")
                 self.p.send_signal(signal.CTRL_BREAK_EVENT)
             except AttributeError:
                 # Unix
-                logger.debug(f"pgid: {os.getpgid(self.p.pid)}")
-                os.killpg(os.getpgid(self.p.pid), signal.SIGTERM)
+                logger.debug("Killing UNIX.")
                 logger.debug(f"Pid ({self.p.pid}) exists 3: {psutil.pid_exists(self.p.pid)}")
-                time.sleep(5)
-                logger.debug(f"Pid ({self.p.pid}) exists 4: {psutil.pid_exists(self.p.pid)}")
-                os.killpg(os.getpgid(self.p.pid), signal.SIGKILL)
-            logger.debug(f"Pid ({self.p.pid}) exists 5: {psutil.pid_exists(self.p.pid)}")
+                os.killpg(self.p.pid, signal.SIGKILL)
+            logger.debug(f"Pid ({self.p.pid}) exists 4: {psutil.pid_exists(self.p.pid)}")
 
             self.p.communicate()
-            logger.debug(f"Pid ({self.p.pid}) exists 6: {psutil.pid_exists(self.p.pid)}")
+            logger.debug(f"Pid ({self.p.pid}) exists 5: {psutil.pid_exists(self.p.pid)}")
             self.engine_receive_thread.join()
-            logger.debug(f"Pid ({self.p.pid}) exists 7: {psutil.pid_exists(self.p.pid)}")
+            logger.debug(f"Pid ({self.p.pid}) exists 6: {psutil.pid_exists(self.p.pid)}")
 
     def _connect(self) -> None:
         """Connect to the engine."""
