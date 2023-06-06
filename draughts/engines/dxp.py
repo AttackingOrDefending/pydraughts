@@ -6,6 +6,7 @@ import os
 import signal
 import threading
 import time
+import psutil
 import logging
 from importlib import reload
 from typing import Optional, Dict, Union, List, Any
@@ -102,10 +103,12 @@ class DXPEngine:
     def kill_process(self) -> None:
         """Kill the engine process."""
         if not self.engine_opened:
+            logger.debug(f"Pid ({self.p.pid}) exists: {psutil.pid_exists(self.p.pid)}")
             wait_time = self.quit_time / 1e9 + 10 - time.perf_counter_ns() / 1e9
             logger.debug(f'wait time before killing: {wait_time}')
             if wait_time > 0:
                 time.sleep(wait_time)
+            logger.debug(f"Pid ({self.p.pid}) exists: {psutil.pid_exists(self.p.pid)}")
             self.exit = True
             try:
                 # Windows
@@ -113,9 +116,11 @@ class DXPEngine:
             except AttributeError:
                 # Unix
                 os.killpg(self.p.pid, signal.SIGKILL)
+            logger.debug(f"Pid ({self.p.pid}) exists: {psutil.pid_exists(self.p.pid)}")
 
             self.p.communicate()
             self.engine_receive_thread.join()
+            logger.debug(f"Pid ({self.p.pid}) exists: {psutil.pid_exists(self.p.pid)}")
 
     def _connect(self) -> None:
         """Connect to the engine."""
