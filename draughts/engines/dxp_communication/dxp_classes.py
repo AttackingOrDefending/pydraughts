@@ -37,7 +37,6 @@ class MySocket:
         """Open the socket."""
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.closed = False
         except Exception:
             self.sock = None
@@ -61,8 +60,7 @@ class MySocket:
         try:
             self.sock.send(bytes(msg, 'utf-8') + b"\0")
         except Exception:
-            logger.warning(f"send exception: no connection when trying to send `{msg}`.")
-            raise Exception(f"send exception: no connection when trying to send `{msg}`.")
+            raise Exception("send exception: no connection")
         return None
 
     def receive(self) -> str:

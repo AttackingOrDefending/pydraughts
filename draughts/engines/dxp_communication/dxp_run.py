@@ -9,7 +9,7 @@ from typing import Union
 last_move = None
 last_move_changed = False
 accepted = None
-gameend_received = False
+gameend_sent = False
 
 logger = logging.getLogger("pydraughts")
 
@@ -22,7 +22,7 @@ class ConsoleHandler:
         """Send a command to the DXP engine."""
 
         global current, mySock, lock
-        global accepted, last_move, last_move_changed, gameend_received
+        global accepted, last_move, last_move_changed, gameend_sent
         logger.debug(f'comm {comm}')
 
         if comm.startswith('q') or comm.startswith('ex'):  # quit/exit
@@ -147,9 +147,9 @@ class ConsoleHandler:
             last_move = None
             last_move_changed = False
             accepted = None
-            gameend_received = False
+            gameend_sent = False
             myColor = "W"  # default
-            gameTime = "1"  # default
+            gameTime = "120"  # default
             numMoves = "50"  # default
             if len(comm.split()) == 2:
                 _, myColor = comm.split()
@@ -182,7 +182,7 @@ class ConsoleHandler:
             else:
                 reason = "0"
             accepted = None
-            current.started = False
+            gameend_sent = True
             msg = dxp.msg_gameend(reason)
 
             try:
@@ -202,6 +202,7 @@ class ConsoleHandler:
             logger.debug(f"Unknown command, type h for help: {comm.strip()}")
 
 
+
 class ReceiveHandler(threading.Thread):
     # Subslass of Thread to handle incoming messages from client.
 
@@ -216,7 +217,7 @@ class ReceiveHandler(threading.Thread):
 
         logger.debug("ReceiveHandler started")
         global current, mySock, lock
-        global accepted, last_move, last_move_changed, gameend_received
+        global accepted, last_move, last_move_changed, gameend_sent
         self.isListening = True
         logger.debug("DXP Client starts listening")
         while True:
@@ -241,6 +242,7 @@ class ReceiveHandler(threading.Thread):
                     current.engineName = dxpData["engineName"]
                     logger.debug(f"\nGame request accepted by {dxpData['engineName']}")
                     accepted = True
+                    gameend_sent = False
                 else:
                     current.started = False
                     logger.debug(f"\nGame request NOT accepted by {dxpData['engineName']} Reason: {dxpData['accCode']}")
@@ -249,9 +251,9 @@ class ReceiveHandler(threading.Thread):
             elif dxpData["type"] == "E":
                 logger.debug(f"rcv GAMEEND: {message}")
                 logger.debug(f"\nRequest end of game accepted. Reason: {dxpData['reason']} Stop: {dxpData['stop']}")
-                gameend_received = True
                 # Confirm game end by sending message back (if not sent by me)
-                if current.started:
+                if current.started and not gameend_sent:
+                    gameend_sent = True
                     current.started = False
                     current.result = dxpData["reason"]
                     msg = dxp.msg_gameend(dxpData["reason"])

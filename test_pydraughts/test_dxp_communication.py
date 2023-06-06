@@ -22,10 +22,9 @@ def test_console_handler():
     tConsoleHandler = dxp_run.ConsoleHandler()
     # conn (number of commands = 2) & Error trying to connect: connection exception: failed to connect
     tConsoleHandler.run_command('conn 127.0.0.1')
-    # chat (number of commands > 1) & Error sending chat message: send exception: no connection when trying to send `Cmessage`
+    # chat (number of commands > 1) & Error sending chat message: send exception: no connection
     tConsoleHandler.run_command('chat message')
-    # gamereq (number of commands = 2) & Error sending game request: send exception: no connection when trying to send
-    # `R01DXP Client                      Z120050BWzzzzzzzzzzzzzzzzzzzzeeeeeeeeeewwwwwwwwwwwwwwwwwwww`
+    # gamereq (number of commands = 2) & Error sending game request: send exception: no connection
     tConsoleHandler.run_command('gamereq W')
 
     # terminate program (doesn't do anything) & setup (number of commands = 1)
@@ -52,7 +51,6 @@ def test_console_handler_with_dxp_engine():
         return
     # Game started; setup not allowed
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    time.sleep(10)  # Wait for the engine to open.
     dxp.console.run_command('conn')
     time.sleep(5)
     dxp.console.run_command('setup')
@@ -73,14 +71,12 @@ def test_console_handler_with_dxp_engine():
 
     # conn (number of commands = 2)
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    time.sleep(10)  # Wait for the engine to open.
     dxp.console.run_command('conn 127.0.0.1')
     dxp.quit()
     dxp.kill_process()
 
     # conn (number of commands = 1)
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    time.sleep(10)  # Wait for the engine to open.
     dxp.console.run_command('conn')
     # chat (number of commands = 1)
     dxp.console.run_command('chat')
@@ -91,7 +87,6 @@ def test_console_handler_with_dxp_engine():
 
     # gamereq (number of commands = 2)
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    time.sleep(10)  # Wait for the engine to open.
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq W')
     dxp.quit()
@@ -99,7 +94,6 @@ def test_console_handler_with_dxp_engine():
 
     # gamereq (number of commands = 3)
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    time.sleep(10)  # Wait for the engine to open.
     dxp.console.run_command('conn')
     dxp.console.run_command('gamereq B 100')
     dxp.quit()
@@ -107,7 +101,6 @@ def test_console_handler_with_dxp_engine():
 
     # Game not started; backreq not allowed
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
-    time.sleep(10)  # Wait for the engine to open.
     dxp.console.run_command('backreq')
     # Command unknown
     dxp.console.run_command('random-command')
@@ -118,7 +111,7 @@ def test_console_handler_with_dxp_engine():
     time.sleep(2)
     dxp.console.run_command('gameend')
     dxp.console.run_command('gameend')
-    dxp.quit(max_wait_time=-1)  # The engine has already sent a gameend message.
+    dxp.quit()
     dxp.kill_process()
 
     # "Message gameend not allowed; wait until your turn" test often gets stuck and times out, so it was removed.
