@@ -93,9 +93,9 @@ class MySocket:
     def close(self):
         if self.sock and not self.closed:
             self.closed = True
-            # self.sock.shutdown(socket.SHUT_RDWR)
+            self.sock.shutdown(socket.SHUT_RDWR)
             self.sock.close()
-            # self.sock = None
+            self.sock = None
 
     def __del__(self):
         self.close()
