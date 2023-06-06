@@ -149,7 +149,7 @@ class ConsoleHandler:
             accepted = None
             gameend_received = False
             myColor = "W"  # default
-            gameTime = "120"  # default
+            gameTime = "1"  # default
             numMoves = "50"  # default
             if len(comm.split()) == 2:
                 _, myColor = comm.split()
