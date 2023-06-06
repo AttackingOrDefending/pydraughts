@@ -51,6 +51,7 @@ class DXPEngine:
             self.engine_receive_thread.start()
 
         self.start_time = time.perf_counter_ns()
+        self.quit_time = 0
 
     def setoption(self, name: str, value: Union[str, int, bool]) -> None:
         """Set a DXP option."""
@@ -101,6 +102,10 @@ class DXPEngine:
     def kill_process(self) -> None:
         """Kill the engine process."""
         if not self.engine_opened:
+            wait_time = self.quit_time / 1e9 + 10 - time.perf_counter_ns() / 1e9
+            logger.debug(f'wait time before killing: {wait_time}')
+            if wait_time > 0:
+                time.sleep(wait_time)
             self.exit = True
             try:
                 # Windows
@@ -116,7 +121,7 @@ class DXPEngine:
         """Connect to the engine."""
         if not self.engine_opened:
             wait_time = self.start_time / 1e9 + self.wait_to_open_time - time.perf_counter_ns() / 1e9
-            logger.debug(f'wait time: {wait_time}')
+            logger.debug(f'wait time before connecting: {wait_time}')
             if wait_time > 0:
                 time.sleep(wait_time)
         self.console.run_command(f'connect {self.ip} {self.port}')
@@ -181,4 +186,6 @@ class DXPEngine:
     def quit(self) -> None:
         """Quit the engine."""
         self.console.run_command('gameend 0')
+        time.sleep(10)
         self.console.run_command("disconn")
+        self.quit_time = time.perf_counter_ns()
