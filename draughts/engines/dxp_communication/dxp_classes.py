@@ -37,7 +37,7 @@ class MySocket:
         """Open the socket."""
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            # self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.closed = False
         except Exception:
             self.sock = None
@@ -93,9 +93,9 @@ class MySocket:
     def close(self):
         if self.sock and not self.closed:
             self.closed = True
-            self.sock.shutdown(socket.SHUT_RDWR)
+            # self.sock.shutdown(socket.SHUT_RDWR)
             self.sock.close()
-            self.sock = None
+            # self.sock = None
 
     def __del__(self):
         self.close()
