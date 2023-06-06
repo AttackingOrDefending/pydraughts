@@ -125,8 +125,6 @@ class DXPEngine:
             logger.debug(f"Pid ({self.p.pid}) exists 5: {psutil.pid_exists(self.p.pid)}")
             self.engine_receive_thread.join()
             logger.debug(f"Pid ({self.p.pid}) exists 6: {psutil.pid_exists(self.p.pid)}")
-        time.sleep(5)
-        self.console.run_command("disconn")
 
     def _connect(self) -> None:
         """Connect to the engine."""
@@ -197,4 +195,5 @@ class DXPEngine:
     def quit(self) -> None:
         """Quit the engine."""
         self.console.run_command('gameend 0')
+        self.console.run_command("disconn")
         self.quit_time = time.perf_counter_ns()
