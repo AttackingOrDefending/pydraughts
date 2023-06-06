@@ -162,7 +162,7 @@ class DXPEngine:
             if not dxp.tReceiveHandler.isListening:
                 break
             if dxp.last_move_changed:
-                logger.debug(f'new last move: {dxp.last_move}')
+                logger.debug(f'new last move: {dxp.last_move.board_move}')
                 return dxp.last_move
 
     def play(self, board: draughts.Board) -> Any:
