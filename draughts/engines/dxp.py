@@ -115,11 +115,12 @@ class DXPEngine:
                 self.p.send_signal(signal.CTRL_BREAK_EVENT)
             except AttributeError:
                 # Unix
-                os.killpg(self.p.pid, signal.SIGTERM)
+                logger.debug(f"pgid: {os.getpgid(self.p.pid)}")
+                os.killpg(os.getpgid(self.p.pid), signal.SIGTERM)
                 logger.debug(f"Pid ({self.p.pid}) exists 3: {psutil.pid_exists(self.p.pid)}")
                 time.sleep(5)
                 logger.debug(f"Pid ({self.p.pid}) exists 4: {psutil.pid_exists(self.p.pid)}")
-                os.killpg(self.p.pid, signal.SIGKILL)
+                os.killpg(os.getpgid(self.p.pid), signal.SIGKILL)
             logger.debug(f"Pid ({self.p.pid}) exists 5: {psutil.pid_exists(self.p.pid)}")
 
             self.p.communicate()
