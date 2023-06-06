@@ -90,8 +90,8 @@ class MySocket:
         msg = msg.strip()
         return msg
 
-    def close(self) and not self.closed:
-        if self.sock:
+    def close(self):
+        if self.sock and not self.closed:
             self.closed = True
             self.sock.shutdown(socket.SHUT_RDWR)
             self.sock.close()
