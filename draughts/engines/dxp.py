@@ -95,7 +95,7 @@ class DXPEngine:
             kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
         except AttributeError:
             # Unix
-            kwargs["preexec_fn"] = os.setpgrp
+            kwargs["preexec_fn"] = os.setsid
 
         with _popen_lock:  # Work around Python 2 Popen race condition
             return subprocess.Popen(command, **kwargs)
