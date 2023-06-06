@@ -197,6 +197,5 @@ class DXPEngine:
     def quit(self) -> None:
         """Quit the engine."""
         self.console.run_command('gameend 0')
-        time.sleep(5)
         self.console.run_command("disconn")
         self.quit_time = time.perf_counter_ns()
