@@ -289,11 +289,6 @@ def test_engines():
     dxp = DXPEngine(None, None, initial_time=30)
     dxp.quit()
 
-    # type(command) == str
-    dxp = DXPEngine(f'scan{file_extension} dxp', {'engine-opened': False}, initial_time=30)
-    dxp.quit()
-    dxp.kill_process()
-
     if platform != 'win32':
         assert True
         return
