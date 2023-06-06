@@ -36,4 +36,4 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        pytest --log-cli-level=10
+        pytest --log-cli-level=10 --log-format="%(asctime)s %(name)s %(levelname)s %(message)s" --log-date-format="%Y-%m-%d %H:%M:%S"
