@@ -46,7 +46,7 @@ def test_console_handler():
 
 @pytest.mark.timeout(300, method="thread")
 def test_console_handler_with_dxp_engine():
-    if platform not in ['win32', 'linux', 'darwin']:
+    if platform not in ['win32', 'linux']:
         assert True
         return
     # Game started; setup not allowed
