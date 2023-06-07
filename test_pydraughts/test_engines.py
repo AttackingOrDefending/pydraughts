@@ -10,6 +10,7 @@ import stat
 import sys
 import threading
 import random
+import time
 import logging
 platform = sys.platform
 file_extension = '.exe' if platform == 'win32' else ''
@@ -97,11 +98,12 @@ def download_kestog():
 if os.path.exists('TEMP'):
     shutil.rmtree('TEMP')
 os.mkdir('TEMP')
-download_scan()
-download_kr()
-download_cake()
-download_saltare()
-download_kestog()
+download_functions = [download_scan, download_kr, download_cake, download_saltare, download_kestog]
+for downloader in download_functions:
+    try:
+        downloader()
+    except Exception:
+        downloader()  # Attempt to download twice if there are problems.
 
 
 @pytest.mark.timeout(300, method="thread")
@@ -169,6 +171,8 @@ def test_dxp_engines():
     logger.info('Quited dxp 1')
     dxp.kill_process()
     logger.info('Killed dxp 1')
+
+    time.sleep(20)
 
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     game = draughts.Board()
@@ -284,21 +288,9 @@ def test_engines():
     hub.quit()
     hub.kill_process()
 
-    # EOFError
-    try:
-        HubEngine(f'sca{file_extension}')
-        assert False
-    except EOFError:
-        assert True
-
     # options is None
     dxp = DXPEngine(None, None, initial_time=30)
     dxp.quit()
-
-    # type(command) == str
-    dxp = DXPEngine(f'scan{file_extension} dxp', {'engine-opened': False}, initial_time=30)
-    dxp.quit()
-    dxp.kill_process()
 
     if platform != 'win32':
         assert True

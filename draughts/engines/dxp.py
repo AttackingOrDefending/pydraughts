@@ -32,7 +32,6 @@ class DXPEngine:
         self.console = dxp.tConsoleHandler
         self.receiver = dxp.tReceiveHandler
         self.game_started = False
-        self._last_move = None
         self.exit = False
 
         self.configure(options)
@@ -52,6 +51,7 @@ class DXPEngine:
             self.engine_receive_thread.start()
 
         self.start_time = time.perf_counter_ns()
+        self.quit_time = 0
 
     def setoption(self, name: str, value: Union[str, int, bool]) -> None:
         """Set a DXP option."""
@@ -102,12 +102,18 @@ class DXPEngine:
     def kill_process(self) -> None:
         """Kill the engine process."""
         if not self.engine_opened:
+            wait_time = self.quit_time / 1e9 + 10 - time.perf_counter_ns() / 1e9
+            logger.debug(f'wait time before killing: {wait_time}')
+            if wait_time > 0:
+                time.sleep(wait_time)
             self.exit = True
             try:
                 # Windows
+                logger.debug("Killing Windows.")
                 self.p.send_signal(signal.CTRL_BREAK_EVENT)
             except AttributeError:
                 # Unix
+                logger.debug("Killing UNIX.")
                 os.killpg(self.p.pid, signal.SIGKILL)
 
             self.p.communicate()
@@ -117,7 +123,7 @@ class DXPEngine:
         """Connect to the engine."""
         if not self.engine_opened:
             wait_time = self.start_time / 1e9 + self.wait_to_open_time - time.perf_counter_ns() / 1e9
-            logger.debug(f'wait time: {wait_time}')
+            logger.debug(f'wait time before connecting: {wait_time}')
             if wait_time > 0:
                 time.sleep(wait_time)
         self.console.run_command(f'connect {self.ip} {self.port}')
@@ -162,10 +168,9 @@ class DXPEngine:
         while True:
             if not dxp.tReceiveHandler.isListening:
                 break
-            if self._last_move != dxp.last_move:
-                self._last_move = dxp.last_move
-                logger.debug(f'new last move: {self._last_move}')
-                return self._last_move
+            if dxp.last_move_changed:
+                logger.debug(f'new last move: {dxp.last_move.board_move}')
+                return dxp.last_move
 
     def play(self, board: draughts.Board) -> Any:
         """Engine search."""
@@ -183,3 +188,5 @@ class DXPEngine:
     def quit(self) -> None:
         """Quit the engine."""
         self.console.run_command('gameend 0')
+        self.console.run_command("disconn")
+        self.quit_time = time.perf_counter_ns()

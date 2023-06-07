@@ -31,11 +31,14 @@ class GameStatus:
 class MySocket:
     def __init__(self) -> None:
         self.sock = None
+        self.closed = False
 
     def open(self) -> MySocket:
         """Open the socket."""
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.closed = False
         except Exception:
             self.sock = None
             raise Exception("socket exception: failed to open")
@@ -48,7 +51,7 @@ class MySocket:
             self.sock.connect((host, port))
         except socket.error as msg:
             self.sock = None
-            raise Exception("connection exception: failed to connect")
+            raise Exception(f"connection exception: failed to connect ({msg}).")
         if self.sock is not None:
             self.sock.settimeout(None)  # default
         return self
@@ -56,6 +59,7 @@ class MySocket:
     def send(self, msg: str) -> None:
         """Send a message to the engine."""
         try:
+            logger.debug(f"socket send: {msg}")
             self.sock.send(bytes(msg, 'utf-8') + b"\0")
         except Exception:
             raise Exception("send exception: no connection")
@@ -87,9 +91,15 @@ class MySocket:
         msg = msg.strip()
         return msg
 
-    def __del__(self):
-        if self.sock:
+    def close(self):
+        if self.sock and not self.closed:
+            self.closed = True
+            self.sock.shutdown(socket.SHUT_RDWR)
             self.sock.close()
+            self.sock = None
+
+    def __del__(self):
+        self.close()
 
 
 class DamExchange:

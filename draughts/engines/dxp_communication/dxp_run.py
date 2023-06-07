@@ -7,7 +7,9 @@ from draughts import Move
 from typing import Union
 
 last_move = None
+last_move_changed = False
 accepted = None
+gameend_sent = False
 
 logger = logging.getLogger("pydraughts")
 
@@ -20,7 +22,7 @@ class ConsoleHandler:
         """Send a command to the DXP engine."""
 
         global current, mySock, lock
-        global accepted, last_move
+        global accepted, last_move, last_move_changed, gameend_sent
         logger.debug(f'comm {comm}')
 
         if comm.startswith('q') or comm.startswith('ex'):  # quit/exit
@@ -60,7 +62,7 @@ class ConsoleHandler:
             str_steps = comm.strip().split()[1].split('-')
             steps = list(map(int, str_steps))
 
-            lock.acquire()  # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
+            lock.acquire() # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
             if current.started and current.myColor == current.get_color():
                 timeSpend = 0  # time spend for this move (future)
 
@@ -72,6 +74,7 @@ class ConsoleHandler:
                     if move.steps_move == steps:
                         captures = move.captures
                         break
+                last_move_changed = False
                 msg = dxp.msg_move(steps, captures, timeSpend)
                 logger.debug(f'MOVE: {board_move}')
 
@@ -83,7 +86,7 @@ class ConsoleHandler:
                     return
 
                 current.pos.push(Move(board_move=board_move))
-            lock.release()  # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
+            lock.release() # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
 
         elif comm.startswith('conn'):
             if mySock.sock is not None:
@@ -112,6 +115,15 @@ class ConsoleHandler:
                 if not tReceiveHandler.isListening:
                     tReceiveHandler.start()
 
+        elif comm.startswith("disconn"):
+            try:
+                mySock.close()
+                logger.debug(f"Successfully closed socket.")
+            except Exception as err:
+                mySock.sock = None
+                logger.debug(f"Error trying to close socket: {err}")
+                return
+
         elif comm.startswith('chat'):
             if len(comm.split()) == 1:
                 return
@@ -133,7 +145,9 @@ class ConsoleHandler:
                 return
             logger.debug(f"Command request new game: {comm.strip()}")
             last_move = None
+            last_move_changed = False
             accepted = None
+            gameend_sent = False
             myColor = "W"  # default
             gameTime = "120"  # default
             numMoves = "50"  # default
@@ -167,6 +181,8 @@ class ConsoleHandler:
                 _, reason = comm.split()
             else:
                 reason = "0"
+            accepted = None
+            gameend_sent = True
             msg = dxp.msg_gameend(reason)
 
             try:
@@ -200,7 +216,7 @@ class ReceiveHandler(threading.Thread):
 
         logger.debug("ReceiveHandler started")
         global current, mySock, lock
-        global accepted, last_move
+        global accepted, last_move, last_move_changed, gameend_sent
         self.isListening = True
         logger.debug("DXP Client starts listening")
         while True:
@@ -208,6 +224,7 @@ class ReceiveHandler(threading.Thread):
                 message = mySock.receive()  # wait for message
             except Exception as err:
                 logger.debug(f"Error {err}")
+                mySock.close()
                 break
 
             lock.acquire()  # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
@@ -220,26 +237,28 @@ class ReceiveHandler(threading.Thread):
             elif dxpData["type"] == "A":
                 logger.debug(f"rcv GAMEACC: {message}")
                 if dxpData["accCode"] == "0":
-                    current.started = True
                     current.myColor = current.myColor  # as requested
                     current.engineName = dxpData["engineName"]
                     logger.debug(f"\nGame request accepted by {dxpData['engineName']}")
                     accepted = True
+                    gameend_sent = False
+                    current.started = True
                 else:
-                    current.started = False
                     logger.debug(f"\nGame request NOT accepted by {dxpData['engineName']} Reason: {dxpData['accCode']}")
                     accepted = False
+                    current.started = False
 
             elif dxpData["type"] == "E":
                 logger.debug(f"rcv GAMEEND: {message}")
                 logger.debug(f"\nRequest end of game accepted. Reason: {dxpData['reason']} Stop: {dxpData['stop']}")
                 # Confirm game end by sending message back (if not sent by me)
-                if current.started:
-                    current.started = False
+                if current.started and not gameend_sent:
                     current.result = dxpData["reason"]
                     msg = dxp.msg_gameend(dxpData["reason"])
                     mySock.send(msg)
                     logger.debug(f"snd GAMEEND: {msg}")
+                    gameend_sent = True
+                    current.started = False
 
             elif dxpData["type"] == "M":
                 logger.debug(f"rcv MOVE: {message}")
@@ -254,8 +273,9 @@ class ReceiveHandler(threading.Thread):
 
                 if correct_move is not None:
                     last_move = correct_move
-                    logger.debug(f"\nMove received: {correct_move.steps_move}")
+                    logger.debug(f"Move received: {correct_move.steps_move}")
                     current.pos.push(correct_move)
+                    last_move_changed = True
                 else:
                     logger.debug(f"Error: received move is illegal [{message}]")
 
@@ -283,7 +303,10 @@ class ReceiveHandler(threading.Thread):
             lock.release()  # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
 
         self.isListening = False
-        logger.error("Listening stopped; connection broken")
+        if mySock.closed:
+            logger.debug("Listening stopped; connection broken")
+        else:
+            logger.error("Listening stopped; connection broken")
         logger.debug("Connection broken; receiveHandler stopped. ")
         logger.debug("Save your data and exit program to start again. ")
         return None
