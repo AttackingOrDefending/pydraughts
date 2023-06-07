@@ -24,6 +24,8 @@ class ConsoleHandler:
         global current, mySock, lock
         global accepted, last_move, last_move_changed, gameend_sent
         logger.debug(f'comm {comm}')
+        
+        lock.acquire()  # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
 
         if comm.startswith('q') or comm.startswith('ex'):  # quit/exit
             logger.debug(f"Command terminate program: {comm.strip()}")
@@ -62,7 +64,6 @@ class ConsoleHandler:
             str_steps = comm.strip().split()[1].split('-')
             steps = list(map(int, str_steps))
 
-            lock.acquire()  # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
             if current.started and current.myColor == current.get_color():
                 timeSpend = 0  # time spend for this move (future)
 
@@ -86,7 +87,6 @@ class ConsoleHandler:
                     return
 
                 current.pos.push(Move(board_move=board_move))
-            lock.release()  # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
 
         elif comm.startswith('conn'):
             if mySock.sock is not None:
@@ -200,6 +200,8 @@ class ConsoleHandler:
         else:
             logger.debug(f"Command unknown: {comm.strip()}")
             logger.debug(f"Unknown command, type h for help: {comm.strip()}")
+        
+        lock.release()  # LOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCKLOCK
 
 
 
