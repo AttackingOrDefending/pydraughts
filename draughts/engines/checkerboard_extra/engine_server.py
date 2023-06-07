@@ -6,15 +6,12 @@ from typing import Tuple, Optional, Union, Dict, Any
 
 from msl.loadlib import Server32
 
-with open(os.path.join(os.path.dirname(__file__), 'engine_name.txt')) as file:
-    DLL_name = file.read()
-
 
 class Engine32Server(Server32):
     """32 bit server to run old Checkerboard engines."""
 
     def __init__(self, host: str, port: int, **kwargs: Any) -> None:
-        super(Engine32Server, self).__init__(DLL_name, 'windll', host, port)
+        super(Engine32Server, self).__init__(kwargs["dll_name"], 'windll', host, port)
 
     def enginecommand(self, command: str) -> Tuple[bytes, int]:
         """Send an enginecommand to the engine."""

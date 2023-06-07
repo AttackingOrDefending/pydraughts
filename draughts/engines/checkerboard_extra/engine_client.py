@@ -10,10 +10,8 @@ class Engine32(Client64):
     def __init__(self, command: str) -> None:
 
         command = command.replace('\\', '\\\\')
-        with open(os.path.join(os.path.dirname(__file__), 'engine_name.txt'), 'w') as file:
-            file.write(command)
 
-        super(Engine32, self).__init__(module32='engine_server', append_sys_path=os.path.dirname(__file__))
+        super(Engine32, self).__init__(module32='engine_server', append_sys_path=os.path.dirname(__file__), dll_name=command)
 
     def enginecommand(self, command: str) -> Tuple[bytes, int]:
         """Send an enginecommand to the engine."""
