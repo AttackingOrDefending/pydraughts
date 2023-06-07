@@ -238,28 +238,28 @@ class ReceiveHandler(threading.Thread):
             elif dxpData["type"] == "A":
                 logger.debug(f"rcv GAMEACC: {message}")
                 if dxpData["accCode"] == "0":
-                    current.started = True
                     current.myColor = current.myColor  # as requested
                     current.engineName = dxpData["engineName"]
                     logger.debug(f"\nGame request accepted by {dxpData['engineName']}")
                     accepted = True
                     gameend_sent = False
+                    current.started = True
                 else:
-                    current.started = False
                     logger.debug(f"\nGame request NOT accepted by {dxpData['engineName']} Reason: {dxpData['accCode']}")
                     accepted = False
+                    current.started = False
 
             elif dxpData["type"] == "E":
                 logger.debug(f"rcv GAMEEND: {message}")
                 logger.debug(f"\nRequest end of game accepted. Reason: {dxpData['reason']} Stop: {dxpData['stop']}")
                 # Confirm game end by sending message back (if not sent by me)
                 if current.started and not gameend_sent:
-                    gameend_sent = True
-                    current.started = False
                     current.result = dxpData["reason"]
                     msg = dxp.msg_gameend(dxpData["reason"])
                     mySock.send(msg)
                     logger.debug(f"snd GAMEEND: {msg}")
+                    gameend_sent = True
+                    current.started = False
 
             elif dxpData["type"] == "M":
                 logger.debug(f"rcv MOVE: {message}")
@@ -274,9 +274,9 @@ class ReceiveHandler(threading.Thread):
 
                 if correct_move is not None:
                     last_move = correct_move
-                    last_move_changed = True
-                    logger.debug(f"\nMove received: {correct_move.steps_move}")
+                    logger.debug(f"Move received: {correct_move.steps_move}")
                     current.pos.push(correct_move)
+                    last_move_changed = True
                 else:
                     logger.debug(f"Error: received move is illegal [{message}]")
 

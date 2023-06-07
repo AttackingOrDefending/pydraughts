@@ -51,7 +51,7 @@ class MySocket:
             self.sock.connect((host, port))
         except socket.error as msg:
             self.sock = None
-            raise Exception("connection exception: failed to connect")
+            raise Exception(f"connection exception: failed to connect ({msg}).")
         if self.sock is not None:
             self.sock.settimeout(None)  # default
         return self
@@ -59,6 +59,7 @@ class MySocket:
     def send(self, msg: str) -> None:
         """Send a message to the engine."""
         try:
+            logger.debug(f"socket send: {msg}")
             self.sock.send(bytes(msg, 'utf-8') + b"\0")
         except Exception:
             raise Exception("send exception: no connection")
