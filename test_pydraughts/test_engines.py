@@ -150,7 +150,7 @@ def test_hub_engines():
 
 @pytest.mark.timeout(300, method="thread")
 def test_dxp_engines():
-    if platform not in ['win32', 'linux']:
+    if platform not in ['win32', 'linux', 'darwin']:
         assert True
         return
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False, 'ip': '127.0.0.1', 'port': 27531, 'wait-to-open-time': 10, 'max-moves': 100, 'initial-time': 30})
@@ -290,6 +290,12 @@ def test_engines():
 
     # options is None
     dxp = DXPEngine(None, None, initial_time=30)
+    dxp.sender.chat("chat")
+    try:
+        dxp.sender.backreq()
+        assert False
+    except NotImplementedError:
+        assert True
     dxp.quit()
 
     if platform != 'win32':
