@@ -1,4 +1,4 @@
-import draughts.engines.dxp_communication.dxp_run as dxp
+import draughts.engines.dxp_communication.dxp_communication as dxp_communication
 import draughts
 import draughts.engine
 import subprocess
@@ -7,7 +7,6 @@ import signal
 import threading
 import time
 import logging
-from importlib import reload
 from typing import Optional, Dict, Union, List, Any
 
 logger = logging.getLogger("pydraughts")
@@ -15,8 +14,6 @@ logger = logging.getLogger("pydraughts")
 
 class DXPEngine:
     def __init__(self, command: Union[List[str], str, None] = None, options: Optional[Dict[str, Union[str, int, bool]]] = None, initial_time: int = 0, cwd: Optional[str] = None, ENGINE: int = 5) -> None:
-        global dxp
-        dxp = reload(dxp)
         if options is None:
             options = {}
         self.initial_time = initial_time
@@ -29,8 +26,8 @@ class DXPEngine:
         self.ENGINE = ENGINE
         self.info: Dict[str, Any] = {}
         self.id: Dict[str, str] = {}
-        self.console = dxp.tConsoleHandler
-        self.receiver = dxp.tReceiveHandler
+        self.sender = dxp_communication.Sender()
+        self.receiver = self.sender.receiver
         self.game_started = False
         self.exit = False
 
@@ -126,19 +123,19 @@ class DXPEngine:
             logger.debug(f'wait time before connecting: {wait_time}')
             if wait_time > 0:
                 time.sleep(wait_time)
-        self.console.run_command(f'connect {self.ip} {self.port}')
+        self.sender.connect(self.ip, int(self.port))
 
-    def _start(self, board: draughts.Board, time: int) -> None:
+    def _start(self, board: draughts.Board, game_time: int) -> None:
         """Start the game."""
         self._connect()
         color = 'B' if board.turn == draughts.WHITE else 'W'
-        time = str(round(time // 60))
+        game_time = int(round(game_time // 60))
         moves = self.max_moves
-        self.console.run_command(f'setup {board.initial_fen} {board.variant}')
-        self.console.run_command(f'gamereq {color} {time} {moves}')
+        self.sender.setup(board.initial_fen, board.variant)
+        self.sender.gamereq(color, game_time, moves)
         accepted = self._recv_accept()
         logger.debug(f'Aceepted: {accepted}')
-        self.id["name"] = dxp.current.engineName
+        self.id["name"] = self.sender.current.engineName
 
     def _recv(self) -> None:
         """Receive a line from the engine, if the engine is opened by pydraughts."""
@@ -160,17 +157,17 @@ class DXPEngine:
     def _recv_accept(self) -> bool:
         """Get if the game was accepted."""
         while True:
-            if dxp.accepted is not None:
-                return dxp.accepted
+            if self.receiver.accepted is not None:
+                return self.receiver.accepted
 
     def _recv_move(self) -> Optional[List[List[int]]]:
         """Receive the engine move."""
         while True:
-            if not dxp.tReceiveHandler.isListening:
+            if not self.receiver.listening:
                 break
-            if dxp.last_move_changed:
-                logger.debug(f'new last move: {dxp.last_move.board_move}')
-                return dxp.last_move
+            if self.receiver.last_move_changed:
+                logger.debug(f'new last move: {self.receiver.last_move.board_move}')
+                return self.receiver.last_move
 
     def play(self, board: draughts.Board) -> Any:
         """Engine search."""
@@ -178,15 +175,12 @@ class DXPEngine:
             self._start(board, self.initial_time)
             self.game_started = True
         if board.move_stack:
-            move = board.move_stack[-1].li_one_move
-            move = [move[i:i+2] for i in range(0, len(move), 2)]
-            move = '-'.join(move)
-            self.console.run_command(f'sm {move}')
+            self.sender.send_move(board.move_stack[-1])
         best_move = self._recv_move()
         return draughts.engine.PlayResult(best_move, None, {})
 
     def quit(self) -> None:
         """Quit the engine."""
-        self.console.run_command('gameend 0')
-        self.console.run_command("disconn")
+        self.sender.gameend()
+        self.sender.disconnect()
         self.quit_time = time.perf_counter_ns()

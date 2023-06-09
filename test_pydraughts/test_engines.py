@@ -290,6 +290,12 @@ def test_engines():
 
     # options is None
     dxp = DXPEngine(None, None, initial_time=30)
+    dxp.sender.chat("chat")
+    try:
+        dxp.sender.backreq()
+        assert False
+    except NotImplementedError:
+        assert True
     dxp.quit()
 
     if platform != 'win32':

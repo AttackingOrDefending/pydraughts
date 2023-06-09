@@ -13,9 +13,9 @@ DXP_BLACK = 1
 
 
 class GameStatus:
-    def __init__(self, fen: str = 'startpos', myColor: int = DXP_WHITE, started: bool = False, variant: str = 'standard') -> None:
+    def __init__(self, fen: str = 'startpos', my_color: int = DXP_WHITE, started: bool = False, variant: str = 'standard') -> None:
         self.fen = fen
-        self.myColor = myColor
+        self.my_color = my_color
         self.started = started
         self.variant = variant
         self.pos = draughts.Board(fen=fen, variant=variant)
@@ -83,7 +83,7 @@ class MySocket:
             if len(msg) > 128:
                 break  # too long, no null char
 
-        logger.debug("final msg: " + msg)
+        logger.debug(f"socket receive: {msg}")
         msg = msg.replace("\0", "")  # remove all null chars
 
         # Use strip to remove all whitespace at the start and end.
@@ -156,7 +156,7 @@ class DamExchange:
         msg = "C" + msg
         return msg
 
-    def msg_gamereq(self, myColor: int, gameTime: int, numMoves: int, pos: Optional[draughts.Board] = None, colorToMove: Optional[int] = None) -> str:
+    def msg_gamereq(self, my_color: int, game_time: int, num_moves: int, pos: Optional[draughts.Board] = None, color_to_move: Optional[int] = None) -> str:
         """Generate a GAMEREQ message."""
         # Generate GAMEREQ message. Example: R01Tornado voor Windows 4.0        W060065A
         gamereq = []
@@ -164,14 +164,14 @@ class DamExchange:
         gamereq.append("01")  # version
 
         gamereq.append("DXP Client".ljust(32)[:32])  # iName: fixed length padding spaces
-        gamereq.append('Z' if myColor == DXP_WHITE else 'W')  # fColor: color of follower (server)
-        gamereq.append(str(gameTime).zfill(3))  # gameTime: time limit of game (ex: 090)
-        gamereq.append(str(numMoves).zfill(3))  # numMoves: number of moves of time limit (ex: 050)
-        if pos is None or colorToMove is None:
+        gamereq.append('Z' if my_color == DXP_WHITE else 'W')  # fColor: color of follower (server)
+        gamereq.append(str(game_time).zfill(3))  # game_time: time limit of game (ex: 090)
+        gamereq.append(str(num_moves).zfill(3))  # num_moves: number of moves of time limit (ex: 050)
+        if pos is None or color_to_move is None:
             gamereq.append("A")  # posInd == A: use starting position
         else:
-            gamereq.append("B")  # posInd == B: use parameters pos and colorToMove
-            gamereq.append("W" if colorToMove == DXP_WHITE else "Z")  # mColor
+            gamereq.append("B")  # posInd == B: use parameters pos and color_to_move
+            gamereq.append("W" if color_to_move == DXP_WHITE else "Z")  # mColor
             gamereq.append(pos._game.get_dxp_fen())  # board
 
         msg = ""
@@ -179,13 +179,13 @@ class DamExchange:
             msg = msg + item
         return msg
 
-    def msg_move(self, steps: List[int], captures: List[int], timeSpend: int) -> str:
+    def msg_move(self, steps: List[int], captures: List[int], time_spent: int) -> str:
         """Generate a MOVE message."""
         # Generate MOVE message. Example: M001205250422122320
         # Parm rmove is a "two-color" move
         move = []
         move.append("M")  # header
-        move.append(str(timeSpend % 10000).zfill(4))  # mTime: 0000 .. 9999
+        move.append(str(time_spent % 10000).zfill(4))  # mTime: 0000 .. 9999
         move.append(str(steps[0] % 100).zfill(2))  # mFrom
         move.append(str(steps[-1] % 100).zfill(2))  # mTo
         move.append(str(len(captures) % 100).zfill(2))  # mNumCaptured: number of takes (captures)
@@ -209,13 +209,13 @@ class DamExchange:
             msg = msg + item
         return msg
 
-    def msg_backreq(self, moveId: int, colorToMove: int) -> str:
+    def msg_backreq(self, moveId: int, color_to_move: int) -> str:
         """Generate a BACKREQ message."""
         # Generate BACKREQ message. Example: B005Z
         backreq = []
         backreq.append("B")
         backreq.append(str(moveId % 1000).zfill(3))  # moveId
-        backreq.append("W" if colorToMove == DXP_WHITE else "Z")  # mColor
+        backreq.append("W" if color_to_move == DXP_WHITE else "Z")  # mColor
         msg = ""
         for item in backreq:
             msg = msg + item
