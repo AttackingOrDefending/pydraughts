@@ -297,10 +297,9 @@ def test_engines():
     game = draughts.Board()
     best_move = dxp.play(game)
     game.push(best_move.move)
-    backreq = dxp.takeback(1, draughts.WHITE)
+    backreq, game, new_move = dxp.takeback(1, draughts.WHITE)
     if backreq:
-        while len(game.move_stack) > 0:
-            game.pop()
+        game.push(new_move.move)
     dxp.quit()
     dxp.kill_process()
 

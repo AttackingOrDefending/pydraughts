@@ -266,7 +266,6 @@ class Board:
         self._last_non_reversible_fens: List[str] = [self._last_non_reversible_fen]
         self._reversible_moves = []
 
-
     def copy(self) -> Board:
         """Copy the board (transfers all data)."""
         # At least 6 times faster than deepcopy.
