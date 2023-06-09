@@ -291,12 +291,18 @@ def test_engines():
     # options is None
     dxp = DXPEngine(None, None, initial_time=30)
     dxp.sender.chat("chat")
-    try:
-        dxp.sender.backreq()
-        assert False
-    except NotImplementedError:
-        assert True
     dxp.quit()
+
+    dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
+    game = draughts.Board()
+    best_move = dxp.play(game)
+    game.push(best_move.move)
+    backreq = dxp.takeback(1, draughts.WHITE)
+    if backreq:
+        while len(game.move_stack) > 0:
+            game.pop()
+    dxp.quit()
+    dxp.kill_process()
 
     if platform != 'win32':
         assert True

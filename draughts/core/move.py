@@ -362,9 +362,3 @@ class StandardMove:
         self.steps_move = steps_move
         self.li_api_move = li_api_move
         self.li_one_move = li_one_move
-
-
-class Move(StandardMove):
-    def __init__(self, board: Any = None, board_move: Optional[List[List[int]]] = None, hub_move: Optional[str] = None, hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None, pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None, li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None, has_captures: Optional[bool] = None, possible_moves: Optional[List[List[List[int]]]] = None, possible_captures: Optional[List[List[Optional[int]]]] = None, hub_to_pdn_pseudolegal: bool = False, variant: Optional[str] = None, is_null: Optional[bool] = None) -> None:
-        warnings.warn("`Move` was renamed to `StandardMove` and a new `Move` was created that doesn't force white to start. Replace `Move` with `StandardMove` in your code. This `Move` will be removed in version 0.7.0.", DeprecationWarning)
-        super().__init__(board, board_move, hub_move, hub_position_move, pdn_move, pdn_position_move, steps_move, li_api_move, li_one_move, has_captures, possible_moves, possible_captures, hub_to_pdn_pseudolegal, variant, is_null)

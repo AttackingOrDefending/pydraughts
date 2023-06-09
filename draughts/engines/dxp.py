@@ -7,7 +7,7 @@ import signal
 import threading
 import time
 import logging
-from typing import Optional, Dict, Union, List, Any
+from typing import Optional, Dict, Union, List, Any, Tuple
 
 logger = logging.getLogger("pydraughts")
 
@@ -128,11 +128,11 @@ class DXPEngine:
     def _start(self, board: draughts.Board, game_time: int) -> None:
         """Start the game."""
         self._connect()
-        color = 'B' if board.turn == draughts.WHITE else 'W'
+        engine_color = 'B' if board.turn == draughts.WHITE else 'W'
         game_time = int(round(game_time // 60))
         moves = self.max_moves
         self.sender.setup(board.initial_fen, board.variant)
-        self.sender.gamereq(color, game_time, moves)
+        self.sender.gamereq(engine_color, game_time, moves)
         accepted = self._recv_accept()
         logger.debug(f'Aceepted: {accepted}')
         self.id["name"] = self.sender.current.engineName
@@ -168,6 +168,37 @@ class DXPEngine:
             if self.receiver.last_move_changed:
                 logger.debug(f'new last move: {self.receiver.last_move.board_move}')
                 return self.receiver.last_move
+
+    def _recv_backreq(self) -> bool:
+        """Get if the backreq was accepted."""
+        while True:
+            if self.receiver.backreq_accepted is not None:
+                return self.receiver.backreq_accepted
+
+    def takeback(self, move: int, color: int) -> Tuple[bool, draughts.Board, Any]:
+        """
+        Attempt to take back moves.
+        Warning: If it is the engine's turn to play in the new position, it will attempt to move.
+        """
+        self.receiver.backreq_accepted = None
+        ply = (move - 1) * 2 + (0 if color == draughts.WHITE else 1)
+        remove_count = 0
+        best_move = None
+        logger.debug(f"Move stack before removing: {list(map(lambda old_move: old_move.steps_move, self.sender.current.pos.move_stack))}")
+        self.sender.backreq(move, color)
+        backreq = self._recv_backreq()
+        if backreq:
+            while len(self.sender.current.pos.move_stack) > ply:
+                remove_count += 1
+                self.sender.current.pos.pop()
+                logger.debug(f"Move stack after removing {remove_count} moves: {list(map(lambda old_move: old_move.steps_move, self.sender.current.pos.move_stack))}")
+            self.receiver.takeback_in_progress = False
+            new_board = self.sender.current.pos.copy()
+            if self.sender.current.engine_color == self.sender.current.get_color():  # It is the engine's turn to play.
+                best_move = self._recv_move()
+        else:
+            new_board = self.sender.current.pos.copy()
+        return backreq, new_board, draughts.engine.PlayResult(best_move, None, {})
 
     def play(self, board: draughts.Board) -> Any:
         """Engine search."""

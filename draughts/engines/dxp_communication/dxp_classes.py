@@ -13,9 +13,9 @@ DXP_BLACK = 1
 
 
 class GameStatus:
-    def __init__(self, fen: str = 'startpos', my_color: int = DXP_WHITE, started: bool = False, variant: str = 'standard') -> None:
+    def __init__(self, fen: str = 'startpos', engine_color: int = DXP_WHITE, started: bool = False, variant: str = 'standard') -> None:
         self.fen = fen
-        self.my_color = my_color
+        self.engine_color = engine_color
         self.started = started
         self.variant = variant
         self.pos = draughts.Board(fen=fen, variant=variant)
