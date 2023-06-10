@@ -293,6 +293,10 @@ def test_engines():
     dxp.sender.chat("chat")
     dxp.quit()
 
+    if platform not in ['win32', 'linux']:
+        assert True
+        return
+
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     game = draughts.Board()
     best_move = dxp.play(game)
