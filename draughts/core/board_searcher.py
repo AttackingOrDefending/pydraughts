@@ -27,7 +27,8 @@ class BoardSearcher:
 
     def build_filled_positions(self) -> None:
         """Find the filled positions (squares which have a piece)."""
-        self.filled_positions = reduce((lambda open_positions, piece: open_positions + [piece.position]), self.uncaptured_pieces, [])
+        self.filled_positions = reduce((lambda open_positions, piece: open_positions + [piece.position]),
+                                       self.uncaptured_pieces, [])
 
     def build_open_positions(self) -> None:
         """Find the open positions (empty squares)."""
@@ -36,15 +37,19 @@ class BoardSearcher:
     def build_player_positions(self) -> None:
         """Find the positions where each player has a piece."""
         self.player_positions = {
-            1: reduce((lambda positions, piece: positions + ([piece.position] if piece.player == BLACK else [])), self.uncaptured_pieces, []),
-            2: reduce((lambda positions, piece: positions + ([piece.position] if piece.player == WHITE else [])), self.uncaptured_pieces, [])
+            1: reduce((lambda positions, piece: positions + ([piece.position] if piece.player == BLACK else [])),
+                      self.uncaptured_pieces, []),
+            2: reduce((lambda positions, piece: positions + ([piece.position] if piece.player == WHITE else [])),
+                      self.uncaptured_pieces, [])
         }
 
     def build_player_pieces(self) -> None:
         """Find all the pieces of both players."""
         self.player_pieces = {
-            BLACK: reduce((lambda pieces, piece: pieces + ([piece] if piece.player == BLACK else [])), self.uncaptured_pieces, []),
-            WHITE: reduce((lambda pieces, piece: pieces + ([piece] if piece.player == WHITE else [])), self.uncaptured_pieces, [])
+            BLACK: reduce((lambda pieces, piece: pieces + ([piece] if piece.player == BLACK else [])),
+                          self.uncaptured_pieces, []),
+            WHITE: reduce((lambda pieces, piece: pieces + ([piece] if piece.player == WHITE else [])),
+                          self.uncaptured_pieces, [])
         }
 
     def build_position_pieces(self) -> None:
@@ -65,7 +70,8 @@ class BoardSearcher:
         in the middle of a multi-capture, so it has already captured one or more pieces, but it can capture more,
         where we only return the piece that is in the middle of the multi-capture.
         """
-        return self.player_pieces[self.board.player_turn] if not self.board.piece_requiring_further_capture_moves else [self.board.piece_requiring_further_capture_moves]
+        return (self.player_pieces[self.board.player_turn] if not self.board.piece_requiring_further_capture_moves else
+                [self.board.piece_requiring_further_capture_moves])
 
     def get_piece_by_position(self, position: int) -> Piece:
         """Get the piece given its position."""

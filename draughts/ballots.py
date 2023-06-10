@@ -1,4 +1,6 @@
-# 11 english, 11 italian, 4 move english and 5 move english ballots are from Ed Gilbert (http://edgilbert.org/Checkers/KingsRow.htm).
+# 11 english, 11 italian, 4 move english and 5 move english ballots are from
+# Ed Gilbert (http://edgilbert.org/Checkers/KingsRow.htm).
+
 import random
 import json
 import os
@@ -6,7 +8,8 @@ from typing import Tuple, List, Dict
 
 
 class Ballots:
-    def __init__(self, variant: str, moves: int = 3, eleven_pieces: bool = False, basic_positions: bool = False, include_lost_games: bool = False) -> None:
+    def __init__(self, variant: str, moves: int = 3, eleven_pieces: bool = False, basic_positions: bool = False,
+                 include_lost_games: bool = False) -> None:
         self.variant = variant
         self.moves = moves
         self.eleven_pieces = eleven_pieces

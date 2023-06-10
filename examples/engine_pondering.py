@@ -1,4 +1,4 @@
-from draughts.engine import HubEngine, Limit
+from draughts.engine import HubEngine, Limit, PlayResult
 from draughts import Board
 import threading
 import time
@@ -12,7 +12,7 @@ move = None
 
 def ponder_result(game, limit):
     global move
-    move = engine.play(game, limit, True)
+    move: PlayResult = engine.play(game, limit, True)
 
 
 thr = threading.Thread(target=ponder_result, args=(game, limit))

@@ -13,7 +13,8 @@ DXP_BLACK = 1
 
 
 class GameStatus:
-    def __init__(self, fen: str = 'startpos', engine_color: int = DXP_WHITE, started: bool = False, variant: str = 'standard') -> None:
+    def __init__(self, fen: str = 'startpos', engine_color: int = DXP_WHITE, started: bool = False,
+                 variant: str = 'standard') -> None:
         self.fen = fen
         self.engine_color = engine_color
         self.started = started
@@ -30,7 +31,7 @@ class GameStatus:
 
 class MySocket:
     def __init__(self) -> None:
-        self.sock = None
+        self.sock: Optional[socket.socket] = None
         self.closed = False
 
     def open(self) -> MySocket:
@@ -91,14 +92,14 @@ class MySocket:
         msg = msg.strip()
         return msg
 
-    def close(self):
+    def close(self) -> None:
         if self.sock and not self.closed:
             self.closed = True
             self.sock.shutdown(socket.SHUT_RDWR)
             self.sock.close()
             self.sock = None
 
-    def __del__(self):
+    def __del__(self) -> None:
         self.close()
 
 
@@ -156,7 +157,8 @@ class DamExchange:
         msg = "C" + msg
         return msg
 
-    def msg_gamereq(self, my_color: int, game_time: int, num_moves: int, pos: Optional[draughts.Board] = None, color_to_move: Optional[int] = None) -> str:
+    def msg_gamereq(self, my_color: int, game_time: int, num_moves: int, pos: Optional[draughts.Board] = None,
+                    color_to_move: Optional[int] = None) -> str:
         """Generate a GAMEREQ message."""
         # Generate GAMEREQ message. Example: R01Tornado voor Windows 4.0        W060065A
         gamereq = []

@@ -13,7 +13,9 @@ logger = logging.getLogger("pydraughts")
 
 
 class DXPEngine:
-    def __init__(self, command: Union[List[str], str, None] = None, options: Optional[Dict[str, Union[str, int, bool]]] = None, initial_time: int = 0, cwd: Optional[str] = None, ENGINE: int = 5) -> None:
+    def __init__(self, command: Union[List[str], str, None] = None,
+                 options: Optional[Dict[str, Union[str, int, bool]]] = None, initial_time: int = 0,
+                 cwd: Optional[str] = None, ENGINE: int = 5) -> None:
         if options is None:
             options = {}
         self.initial_time = initial_time
@@ -38,7 +40,7 @@ class DXPEngine:
             cwd = os.path.realpath(os.path.expanduser(cwd))
             if type(command) == str:
                 command = [command]
-            command = list(filter(bool, command))
+            command = list(filter(None, command))
             command[0] = os.path.realpath(os.path.expanduser(command[0]))
             command[0] = '"' + command[0] + '"'
             command = ' '.join(command)
@@ -53,7 +55,7 @@ class DXPEngine:
     def setoption(self, name: str, value: Union[str, int, bool]) -> None:
         """Set a DXP option."""
         if name == 'engine-opened':
-            self.engine_opened = value
+            self.engine_opened = bool(value)
         elif name == 'ip':
             self.ip = str(value)
         elif name == 'port':
@@ -61,16 +63,17 @@ class DXPEngine:
         elif name == 'wait-to-open-time':
             self.wait_to_open_time = int(value)
         elif name == 'max-moves':
-            self.max_moves = 0
+            self.max_moves = int(value)
         elif name == 'initial-time':
-            self.initial_time = 0
+            self.initial_time = int(value)
 
     def configure(self, options: Dict[str, Union[str, int, bool]]) -> None:
         """Configure many options at once."""
         for name, value in options.items():
             self.setoption(name, value)
 
-    def _open_process(self, command: str, cwd: Optional[str] = None, shell: bool = True, _popen_lock: Any = threading.Lock()) -> subprocess.Popen:
+    def _open_process(self, command: str, cwd: Optional[str] = None, shell: bool = True,
+                      _popen_lock: Any = threading.Lock()) -> subprocess.Popen[str]:
         """Open the engine process."""
         kwargs = {
             "shell": shell,
@@ -160,7 +163,7 @@ class DXPEngine:
             if self.receiver.accepted is not None:
                 return self.receiver.accepted
 
-    def _recv_move(self) -> Optional[List[List[int]]]:
+    def _recv_move(self) -> Optional[draughts.Move]:
         """Receive the engine move."""
         while True:
             if not self.receiver.listening:
@@ -168,6 +171,7 @@ class DXPEngine:
             if self.receiver.last_move_changed:
                 logger.debug(f'new last move: {self.receiver.last_move.board_move}')
                 return self.receiver.last_move
+        return None
 
     def _recv_backreq(self) -> bool:
         """Get if the backreq was accepted."""
@@ -184,14 +188,16 @@ class DXPEngine:
         ply = (move - 1) * 2 + (0 if color == draughts.WHITE else 1)
         remove_count = 0
         best_move = None
-        logger.debug(f"Move stack before removing: {list(map(lambda old_move: old_move.steps_move, self.sender.current.pos.move_stack))}")
+        moves = list(map(lambda old_move: old_move.steps_move, self.sender.current.pos.move_stack))
+        logger.debug(f"Move stack before removing: {moves}")
         self.sender.backreq(move, color)
         backreq = self._recv_backreq()
         if backreq:
             while len(self.sender.current.pos.move_stack) > ply:
                 remove_count += 1
                 self.sender.current.pos.pop()
-                logger.debug(f"Move stack after removing {remove_count} moves: {list(map(lambda old_move: old_move.steps_move, self.sender.current.pos.move_stack))}")
+                moves = list(map(lambda old_move: old_move.steps_move, self.sender.current.pos.move_stack))
+                logger.debug(f"Move stack after removing {remove_count} moves: {moves}")
             self.receiver.takeback_in_progress = False
             new_board = self.sender.current.pos.copy()
             if self.sender.current.engine_color == self.sender.current.get_color():  # It is the engine's turn to play.

@@ -33,7 +33,8 @@ class HubEngine:
         self._last_sent = ""
         self.hub()
 
-    def _open_process(self, command: str, cwd: Optional[str] = None, shell: Optional[bool] = True, _popen_lock: Any = threading.Lock()) -> subprocess.Popen:
+    def _open_process(self, command: str, cwd: Optional[str] = None, shell: Optional[bool] = True,
+                      _popen_lock: Any = threading.Lock()) -> subprocess.Popen[str]:
         """Open the engine process."""
         kwargs: Dict[str, Any] = {
             "shell": shell,
@@ -101,6 +102,7 @@ class HubEngine:
             return [command_and_args[0], ""]
         elif len(command_and_args) == 2:
             return command_and_args
+        return []
 
     def hub(self) -> Tuple[Dict[str, str], Set[str], Set[str]]:
         """Send the hub command to an engine."""
@@ -179,7 +181,10 @@ class HubEngine:
         for name, value in options.items():
             self.setoption(name, value)
 
-    def go(self, fen: str, moves: Optional[str] = None, my_time: Union[int, float, None] = None, inc: Union[int, float, None] = None, moves_left: Optional[int] = None, movetime: Union[int, float, None] = None, depth: Optional[int] = None, nodes: Optional[int] = None, ponder: Optional[bool] = False) -> Tuple[str, Optional[str]]:
+    def go(self, fen: str, moves: Optional[str] = None, my_time: Union[int, float, None] = None,
+           inc: Union[int, float, None] = None, moves_left: Optional[int] = None,
+           movetime: Union[int, float, None] = None, depth: Optional[int] = None, nodes: Optional[int] = None,
+           ponder: Optional[bool] = False) -> Tuple[str, Optional[str]]:
         """Send the engine a go command."""
         if moves:
             self.send(f'pos pos={fen} moves="{moves}"')
@@ -262,9 +267,9 @@ class HubEngine:
         depth = time_limit.depth
         nodes = time_limit.nodes
         movetime = time_limit.movetime
-        hub_moves = board.move_stack
-        hub_moves = list(map(lambda move: move.hub_move, hub_moves))
-        bestmove, pondermove = self.go(board._game.initial_hub_fen, moves=' '.join(hub_moves), my_time=time, inc=inc, depth=depth, nodes=nodes, movetime=movetime, ponder=ponder)
+        hub_moves = list(map(lambda move: move.hub_move, board.move_stack))
+        bestmove, pondermove = self.go(board._game.initial_hub_fen, moves=' '.join(hub_moves), my_time=time, inc=inc,
+                                       depth=depth, nodes=nodes, movetime=movetime, ponder=ponder)
 
         ponder_move = None
         ponder_board = board.copy()

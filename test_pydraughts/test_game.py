@@ -77,7 +77,7 @@ def test_game():
     assert game._game.reversible_moves == []
 
     game = Board(fen='W:WK39:B23,33')
-    _, captures = game._game.push([[39, 28], [28, 19]], return_captured=True)
+    _, captures = game._game.push([[39, 28], [28, 19]])
     assert captures == [33, 23]
 
     game = Board()
@@ -86,7 +86,11 @@ def test_game():
     assert game.move_stack[0].pdn_move == '0-0'
 
     game = Board('frisian', 'W:WK4,36,41,42,43,44,46,47,48,49,50:B1,2,6,12,14,17,18,23')
-    assert list(map(lambda move: move.board_move, game.legal_moves())) == [[[4, 24], [24, 22], [22, 11], [11, 13], [13, 22]], [[4, 24], [24, 22], [22, 11], [11, 13], [13, 27]], [[4, 24], [24, 22], [22, 11], [11, 13], [13, 31]], [[4, 24], [24, 22], [22, 13], [13, 11], [11, 22]], [[4, 24], [24, 22], [22, 13], [13, 11], [11, 28]], [[4, 24], [24, 22], [22, 13], [13, 11], [11, 33]], [[4, 24], [24, 22], [22, 13], [13, 11], [11, 39]]]
+    assert (list(map(lambda move: move.board_move, game.legal_moves())) ==
+            [[[4, 24], [24, 22], [22, 11], [11, 13], [13, 22]], [[4, 24], [24, 22], [22, 11], [11, 13], [13, 27]],
+             [[4, 24], [24, 22], [22, 11], [11, 13], [13, 31]], [[4, 24], [24, 22], [22, 13], [13, 11], [11, 22]],
+             [[4, 24], [24, 22], [22, 13], [13, 11], [11, 28]], [[4, 24], [24, 22], [22, 13], [13, 11], [11, 33]],
+             [[4, 24], [24, 22], [22, 13], [13, 11], [11, 39]]])
 
     assert Board(fen='W:WKa1,K8,9:BK7,Kb2,23').fen == 'W:W9,K1,K8:B23,K6,K7'
 
@@ -104,25 +108,25 @@ def test_game():
 
 def fifty_square_draw_board(game, repeat_time=12, half_time=True):
     for _ in range(repeat_time):
-        game._game.push([28, 33])
-        game._game.push([1, 7])
-        game._game.push([33, 28])
-        game._game.push([7, 1])
+        game.push(Move(steps_move=[28, 33]))
+        game.push(Move(steps_move=[1, 7]))
+        game.push(Move(steps_move=[33, 28]))
+        game.push(Move(steps_move=[7, 1]))
     if half_time:
-        game._game.push([28, 33])
-        game._game.push([1, 7])
+        game.push(Move(steps_move=[28, 33]))
+        game.push(Move(steps_move=[1, 7]))
     return game
 
 
 def thirtytwo_square_draw_board(game, repeat_time=7, half_time=True):
     for _ in range(repeat_time):
-        game._game.push([32, 27])
-        game._game.push([1, 6])
-        game._game.push([27, 32])
-        game._game.push([6, 1])
+        game._game.push([[32, 27]])
+        game._game.push([[1, 6]])
+        game._game.push([[27, 32]])
+        game._game.push([[6, 1]])
     if half_time:
-        game._game.push([32, 27])
-        game._game.push([1, 6])
+        game._game.push([[32, 27]])
+        game._game.push([[1, 6]])
     return game
 
 
@@ -185,21 +189,21 @@ def test_drawing_conditions():
     # 3 pieces (with at least 1 king) vs 1 king on the long diagonal.
     game = Board('russian', 'W:WKa7,b4,f4:BKa1')
     for _ in range(2):
-        game._game.push([5, 9])
-        game._game.push([29, 4])
-        game._game.push([9, 5])
-        game._game.push([4, 29])
-    game._game.push([5, 9])
-    game._game.push([29, 4])
+        game._game.push([[5, 9]])
+        game._game.push([[29, 4]])
+        game._game.push([[9, 5]])
+        game._game.push([[4, 29]])
+    game._game.push([[5, 9]])
+    game._game.push([[29, 4]])
     assert game.winner() == 0
     game = Board('russian', 'B:WKa1:BKa7,b4,f4')
     for _ in range(2):
-        game._game.push([5, 9])
-        game._game.push([29, 4])
-        game._game.push([9, 5])
-        game._game.push([4, 29])
-    game._game.push([5, 9])
-    game._game.push([29, 4])
+        game._game.push([[5, 9]])
+        game._game.push([[29, 4]])
+        game._game.push([[9, 5]])
+        game._game.push([[4, 29]])
+    game._game.push([[5, 9]])
+    game._game.push([[29, 4]])
     assert game.winner() == 0
 
     # 2 pieces (with at least 1 king) vs 1 king and 5 moves made.
@@ -215,8 +219,8 @@ def test_drawing_conditions():
     assert game.winner() == 0
 
     game = Board('turkish', 'W:WKh5:Bb7')
-    game._game.push([32, 31])
-    game._game.push([10, 9])
-    game._game.push([31, 32])
-    game._game.push([9, 10])
+    game._game.push([[32, 31]])
+    game._game.push([[10, 9]])
+    game._game.push([[31, 32]])
+    game._game.push([[9, 10]])
     assert game.winner() == 0
