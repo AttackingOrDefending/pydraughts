@@ -198,7 +198,7 @@ class PDNWriter:
             self.moves = self.board.move_stack
             self.variant = self.board.variant
             self.starting_fen = self.board.initial_fen
-            self.tags = {}
+            self.tags = tags or {}
         else:
             self.moves = moves
             self.variant = variant or 'standard'
