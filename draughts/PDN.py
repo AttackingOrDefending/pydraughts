@@ -3,7 +3,6 @@ import string
 from draughts.convert import fen_to_variant
 from draughts import Board, Move
 from typing import List, Optional, Dict, Union
-from functools import reduce
 
 
 class _PDNGame:
