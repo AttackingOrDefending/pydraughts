@@ -4,11 +4,8 @@ from draughts.PDN import PDNReader, PDNWriter
 import requests
 import zipfile
 import os
-import sys
 import shutil
 import logging
-platform = sys.platform
-file_extension = '.exe' if platform == 'win32' else ''
 
 logger = logging.getLogger(__name__)
 

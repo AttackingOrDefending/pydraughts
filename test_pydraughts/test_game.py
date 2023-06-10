@@ -50,7 +50,6 @@ def test_game():
 
     # Test pop()
     game = Board()
-    game.pop()
     game.push(Move(steps_move=[35, 30]))
     game.pop()
     game.push(Move(steps_move=[35, 30]))

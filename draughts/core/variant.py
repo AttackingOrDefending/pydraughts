@@ -263,6 +263,7 @@ class Board:
         self.fens = [self.initial_fen]
 
         self._last_non_reversible_fen = self.initial_fen
+        self._last_non_reversible_fens: List[str] = [self._last_non_reversible_fen]
         self._reversible_moves = []
 
     def copy(self) -> Board:
@@ -274,6 +275,11 @@ class Board:
         """Undo the last move."""
         self._game.pop()
         self.fens.pop()
+        self.move_stack.pop()
+        self._last_non_reversible_fens.pop()
+        self._last_non_reversible_fen = self._last_non_reversible_fens[-1]
+        if self._reversible_moves:
+            self._reversible_moves.pop()
         return self
 
     def push(self, move: Move) -> Board:
@@ -289,6 +295,7 @@ class Board:
         else:
             self._reversible_moves = []
             self._last_non_reversible_fen = self.fen
+        self._last_non_reversible_fens.append(self._last_non_reversible_fen)
         return self
 
     def null(self) -> Board:

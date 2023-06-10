@@ -4,7 +4,7 @@ from __future__ import annotations
 import threading
 import logging
 from draughts.engines.dxp_communication.dxp_classes import DamExchange, MySocket, GameStatus, DXP_WHITE, DXP_BLACK
-from draughts import Move
+from draughts import Move, WHITE
 
 logger = logging.getLogger("pydraughts")
 
@@ -18,6 +18,8 @@ class Receiver:
         self.last_move_changed = False
         self.listening = False
         self.receive_thread_started = False
+        self.backreq_accepted = None
+        self.takeback_in_progress = False
         self.receive_thread = threading.Thread(target=self.receive)
     
     def start(self) -> None:
@@ -48,7 +50,7 @@ class Receiver:
             elif dxp_data["type"] == "A":
                 logger.debug(f"rcv GAMEACC: {message}")
                 if dxp_data["accCode"] == "0":
-                    self.sender.current.my_color = self.sender.current.my_color  # as requested
+                    self.sender.current.engine_color = self.sender.current.engine_color  # as requested
                     self.sender.current.engineName = dxp_data["engineName"]
                     logger.debug(f"\nGame request accepted by {dxp_data['engineName']}")
                     self.accepted = True
@@ -79,6 +81,9 @@ class Receiver:
                 ntakes = list(map(lambda pos: str(pos).zfill(2), sorted(ntakes)))
                 logger.debug(f"FEN: {self.sender.current.pos.fen}, Steps: {nsteps}, Takes: {ntakes}")
                 correct_move = None
+                while True:
+                    if not self.takeback_in_progress:
+                        break
                 for move in self.sender.current.pos.legal_moves():
                     if move.hub_position_move == f"{str(nsteps[0]).zfill(2)}{str(nsteps[-1]).zfill(2)}{''.join(ntakes)}":
                         correct_move = move
@@ -106,7 +111,13 @@ class Receiver:
                 acc_code = dxp_data['accCode']
                 if acc_code == "0":
                     # Actions to go back in history as specified in my request
-                    raise NotImplementedError("Moving back is not implemented")
+                    self.backreq_accepted = True
+                elif acc_code == "1":
+                    logger.debug("Engine doesn't support going back.")
+                    self.backreq_accepted = False
+                else:
+                    logger.debug("Engine wants to continue the game.")
+                    self.backreq_accepted = False
 
             else:
                 logger.debug(f"rcv UNKNOWN: {message}")
@@ -125,8 +136,8 @@ class Sender:
 
     def setup(self, fen: str, variant: str) -> None:
         logger.debug(f"FEN: {fen.strip()}, Variant: {variant}")
-        color = DXP_BLACK if fen[0] == 'B' else DXP_WHITE
-        self.current = GameStatus(fen=fen, my_color=color, variant=variant)
+        engine_color = DXP_BLACK if fen[0] == 'B' else DXP_WHITE
+        self.current = GameStatus(fen=fen, engine_color=engine_color, variant=variant)
 
     def send_move(self, move: Move) -> None:
         logger.debug(f"FEN: {self.current.pos.fen}, Steps: {move.steps_move}, Captures: {move.captures}")
@@ -174,9 +185,9 @@ class Sender:
             logger.debug(f"Error sending chat message: {err}")
             return
 
-    def gamereq(self, color: str, time: int, max_moves: int) -> None:
-        logger.debug(f"Color: {color}, Time: {time}, Max moves: {max_moves}")
-        dxp_color = DXP_WHITE if color.upper().startswith('W') else DXP_BLACK
+    def gamereq(self, engine_color: str, time: int, max_moves: int) -> None:
+        logger.debug(f"Engine color: {engine_color}, Time: {time}, Max moves: {max_moves}")
+        dxp_color = DXP_WHITE if engine_color.upper().startswith('W') else DXP_BLACK
         msg = self.dxp.msg_gamereq(dxp_color, time, max_moves, self.current.pos, self.current.get_color())
         try:
             self.socket.send(msg)
@@ -195,5 +206,13 @@ class Sender:
         except Exception as err:
             logger.debug(f"Error sending gameend message: {err}")
     
-    def backreq(self) -> None:
-        raise NotImplementedError("Backreq isn't implemented yet.")
+    def backreq(self, move: int, color: int) -> None:
+        logger.debug(f"Request to return to {move}th move with {'WHITE' if color == WHITE else 'BLACK'} to move.")
+        msg = self.dxp.msg_backreq(move, DXP_WHITE if color == WHITE else DXP_BLACK)
+        self.receiver.last_move_changed = False
+        self.receiver.takeback_in_progress = True
+        try:
+            self.socket.send(msg)
+            logger.debug(f"snd BACKREQ: {msg}")
+        except Exception as err:
+            logger.debug(f"Error sending backreq request: {err}")

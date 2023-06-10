@@ -1,5 +1,3 @@
-from draughts.core.game import Game
-from draughts.core.move import StandardMove
 from draughts.core.variant import Board, Move, WHITE, BLACK
 
 __author__ = "Ioannis Pantidis"
