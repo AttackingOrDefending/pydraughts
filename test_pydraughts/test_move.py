@@ -1,4 +1,6 @@
-from draughts import Board, Game, Move, StandardMove
+from draughts import Board, Move
+from draughts.core.game import Game
+from draughts.core.move import StandardMove
 
 
 def test_move():
@@ -49,7 +51,3 @@ def test_standard_move():
     assert StandardMove(Game(), pdn_move='31-27').pdn_position_move == '3127'
     assert StandardMove(Game(fen='W:WK47:B14,19,29,31,42'), pdn_move='47x38x24x13x36').pdn_position_move == '4738241336'
     assert StandardMove(Game(fen='W:WK47:B14,19,29,31,42'), pdn_position_move='4738200936').pdn_move == '47x38x20x9x36'
-
-
-def test_deprecation():
-    from draughts.core.move import Move as InternalMove
