@@ -15,6 +15,6 @@ def test_tournament():
         assert True
         return
     players = [(["scan.exe", "dxp"], "dxp", {'engine-opened': False}), ("kr_hub.exe", "hub", {})]
-    tournament = RoundRobin(players, 20, .2)
+    tournament = RoundRobin("tournament.pdn", players, 20, .2)
     scores = tournament.play()
     tournament.print_standings()
