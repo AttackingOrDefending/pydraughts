@@ -3,6 +3,7 @@ import string
 from draughts.convert import fen_to_variant
 from draughts import Board, Move
 from typing import List, Optional, Dict, Union
+from functools import reduce
 
 
 class _PDNGame:
@@ -98,18 +99,18 @@ class _PDNGame:
             return
         starts = self.tags.get('FEN', 'W')
         if starts.startswith('W'):
-            moves = []
+            clean_moves = []
             list_moves = [move.split()[:2] for move in moves]
             for move in list_moves:
-                moves.extend(move)
+                clean_moves.extend(move)
         else:
-            moves = [moves[0].split()[0]]
-            list_moves = [move.split()[:2] for move in moves[1:]]
+            clean_moves = [moves[0].split()[0]]
+            list_moves = [[moves[0].split()[0]]] + [move.split()[:2] for move in moves[1:]]
             for move in list_moves:
-                moves.extend(move)
+                clean_moves.extend(move)
         results = ["1-0", "1/2-1/2", "0-1", "2-0", "1-1", "0-2", "0-0", "*"]
-        moves = moves[:-1] if moves[-1] in results else moves
-        self.moves = moves
+        clean_moves = clean_moves[:-1] if clean_moves[-1] in results else clean_moves
+        self.moves = clean_moves
 
         if "GameType" in self.tags:
             game_type = self.tags["GameType"]
