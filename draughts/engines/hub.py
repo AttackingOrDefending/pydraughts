@@ -34,7 +34,7 @@ class HubEngine:
         self.hub()
 
     def _open_process(self, command: str, cwd: Optional[str] = None, shell: Optional[bool] = True,
-                      _popen_lock: Any = threading.Lock()) -> subprocess.Popen[str]:
+                      _popen_lock: Any = threading.Lock()) -> subprocess.Popen:
         """Open the engine process."""
         kwargs: Dict[str, Any] = {
             "shell": shell,
