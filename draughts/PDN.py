@@ -1,6 +1,5 @@
 import re
 import string
-from functools import reduce
 from draughts.convert import fen_to_variant
 from draughts import Board, Move
 from typing import List, Optional, Dict, Union
@@ -9,7 +8,9 @@ from typing import List, Optional, Dict, Union
 class _PDNGame:
     """Read one PDN game."""
     def __init__(self, pdn_text: str) -> None:
-        self.values_to_variant = {20: "standard", 21: "english", 22: "italian", 23: "american pool", 24: "spanish", 25: "russian", 26: "brazilian", 27: "canadian", 28: "portuguese", 29: "czech", 30: "turkish", 31: "thai", 40: "frisian", 41: "spantsiretti"}
+        self.values_to_variant = {20: "standard", 21: "english", 22: "italian", 23: "american pool", 24: "spanish",
+                                  25: "russian", 26: "brazilian", 27: "canadian", 28: "portuguese", 29: "czech",
+                                  30: "turkish", 31: "thai", 40: "frisian", 41: "spantsiretti"}
         self.tags: Dict[str, str] = {}
         self.moves: List[str] = []
         self.variant: Optional[str] = None
@@ -61,13 +62,13 @@ class _PDNGame:
         # Changes to the PDN.
 
         # From https://stackoverflow.com/a/37538815/10014873
-        def remove_text_between_parens(text):
+        def remove_text_between_parens(text: str) -> str:
             n = 1  # Run at least once.
             while n:
                 text, n = re.subn(r'\([^()]*\)', '', text)  # Remove non-nested/flat balanced parts.
             return text
 
-        def remove_text_between_brackets(text):
+        def remove_text_between_brackets(text: str) -> str:
             n = 1  # Run at least once.
             while n:
                 text, n = re.subn(r'{[^{}]*}', '', text)  # Remove non-nested/flat balanced parts.
@@ -89,19 +90,26 @@ class _PDNGame:
         move_numbers = re.findall(r"\d+\.", str_moves)
         double_numbers = list(set(filter(lambda move: move_numbers.count(move) >= 2, move_numbers)))
         for move_number in double_numbers:
-            str_moves = str_moves[:str_moves.index(move_number) + len(move_number)] + str_moves[str_moves.index(move_number) + len(move_number):].replace(move_number, "")
+            str_moves = (str_moves[:str_moves.index(move_number) + len(move_number)] +
+                         str_moves[str_moves.index(move_number) + len(move_number):].replace(move_number, ""))
 
         moves = str_moves.split(".")[1:]
         if not moves:
             return
         starts = self.tags.get('FEN', 'W')
         if starts.startswith('W'):
-            moves = list(reduce(lambda x, y: x + y.split()[:2], moves, []))
+            clean_moves = []
+            list_moves = [move.split()[:2] for move in moves]
+            for move in list_moves:
+                clean_moves.extend(move)
         else:
-            moves = [moves[0].split()[0]] + list(reduce(lambda x, y: x + y.split()[:2], moves[1:], []))
+            clean_moves = [moves[0].split()[0]]
+            list_moves = [[moves[0].split()[0]]] + [move.split()[:2] for move in moves[1:]]
+            for move in list_moves:
+                clean_moves.extend(move)
         results = ["1-0", "1/2-1/2", "0-1", "2-0", "1-1", "0-2", "0-0", "*"]
-        moves = moves[:-1] if moves[-1] in results else moves
-        self.moves = moves
+        clean_moves = clean_moves[:-1] if clean_moves[-1] in results else clean_moves
+        self.moves = clean_moves
 
         if "GameType" in self.tags:
             game_type = self.tags["GameType"]
@@ -149,13 +157,13 @@ class _PDNGame:
 
 class PDNReader:
     """Read PDN games."""
-    def __init__(self, pdn_text: Optional[str] = None, filename: Optional[str] = None, encodings: Union[List[str], str, None] = None) -> None:
-        assert pdn_text or filename
+    def __init__(self, pdn_text: Optional[str] = None, filename: Optional[str] = None,
+                 encodings: Union[List[str], str, None] = None) -> None:
         if encodings is None:
             encodings = ['utf8', 'ISO 8859/1']
         if type(encodings) == str:
             encodings = [encodings]
-        if not pdn_text:
+        if filename:
             pdn_text = ''
             for encoding in encodings:
                 try:
@@ -164,6 +172,7 @@ class PDNReader:
                     break
                 except Exception:
                     pass
+        assert pdn_text is not None
         self.pdn_text = pdn_text
         self.pdn_text = re.sub('\n +', '\n', self.pdn_text)
         self.pdn_text = re.sub('\n\n+', '\n\n', self.pdn_text)
@@ -179,10 +188,15 @@ class PDNReader:
 
 class PDNWriter:
     """Write a game to a file."""
-    VARIANT_TO_GAMETYPE = {'standard': 20, 'english': 21, 'italian': 22, 'russian': 25, 'brazilian': 26, 'turkish': 30, 'frisian': 40, 'frysk!': 40}
-    SHORT_TO_LONG_GAMETYPE = {'20': '20,W,10,10,N2,0', '21': '21,B,8,8,N1,0', '22': '22,W,8,8,N2,1', '25': '25,W,8,8,A0,0', '26': '26,W,8,8,A0,0', '30': '30,W,8,8,A0,0', '40': '40,W,10,10,N2,0'}
+    VARIANT_TO_GAMETYPE = {'standard': 20, 'english': 21, 'italian': 22, 'russian': 25, 'brazilian': 26, 'turkish': 30,
+                           'frisian': 40, 'frysk!': 40}
+    SHORT_TO_LONG_GAMETYPE = {'20': '20,W,10,10,N2,0', '21': '21,B,8,8,N1,0', '22': '22,W,8,8,N2,1',
+                              '25': '25,W,8,8,A0,0', '26': '26,W,8,8,A0,0', '30': '30,W,8,8,A0,0', '40': '40,W,10,10,N2,0'}
 
-    def __init__(self, filename: str, board: Optional[Board] = None, moves: Optional[List[Union[str, Move]]] = None, variant: Optional[str] = None, starting_fen: Optional[str] = None, tags: Optional[Dict[str, Union[str, int]]] = None, game_ending: str = '*', replay_moves_from_board: bool = True, file_encoding: str = 'utf8', file_mode: str = 'a') -> None:
+    def __init__(self, filename: str, board: Optional[Board] = None, moves: Union[List[str], List[Move], None] = None,
+                 variant: Optional[str] = None, starting_fen: Optional[str] = None,
+                 tags: Optional[Dict[str, Union[str, int]]] = None, game_ending: str = '*',
+                 replay_moves_from_board: bool = True, file_encoding: str = 'utf8', file_mode: str = 'a') -> None:
         """
         :param replay_moves_from_board: The already saved pdn_move in move_stack may be wrong because it is pseudolegal
         and doesn't account for ambiguous moves. If replay_moves_from_board is enabled, it will replay all the moves to
@@ -194,6 +208,7 @@ class PDNWriter:
         self.notation: Optional[int] = None
 
         self.board = board
+        self.moves: Union[List[str], List[Move]]
         if self.board:
             self.moves = self.board.move_stack
             self.variant = self.board.variant

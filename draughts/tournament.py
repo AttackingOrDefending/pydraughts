@@ -26,7 +26,7 @@ class RoundRobin:
         self.int_players = list(range(self.player_count))
         self.results = [[0, 0, 0] for _ in range(self.player_count)]
         self.scores = [0] * self.player_count
-        self.complete_results = []
+        self.complete_results: List[List[Tuple[Tuple[int, int, int], Tuple[int, int, int]]]] = []
         self.pairs: List[Tuple[int, int]] = list(itertools.combinations(self.int_players, 2))
         logger.debug(f"There are {len(self.pairs)} possible pairs.")
         self.complete_pairs: List[List[Tuple[int, int]]] = []
@@ -43,16 +43,18 @@ class RoundRobin:
             self.tags["FEN"] = self.starting_fen
         self.round = 0
 
-        self.latest_round_results = []
-        self.latest_complete_results = []
+        self.latest_round_results: List[Tuple[Tuple[int, int, int], Tuple[int, int, int]]] = []
+        self.latest_complete_results: List[List[Tuple[Tuple[int, int, int], Tuple[int, int, int]]]] = []
 
     def get_complete_pairs(self) -> None:
         pairs = self.pairs.copy()
         for match in range(self.games_per_pair):
             self.complete_pairs.append(pairs.copy())
-            pairs: List[Tuple[int, int]] = list(map(lambda _pair: tuple(reversed(_pair)), pairs))
+            pairs = list(map(lambda _pair: (_pair[1], _pair[0]), pairs))
 
-    def get_engine(self, command: Union[str, List[str]], protocol: str, options: Dict[str, Any]) -> Union[HubEngine, DXPEngine, CheckerBoardEngine]:
+    def get_engine(self, command: Union[str, List[str]], protocol: str, options: Dict[str, Any]
+                   ) -> Union[HubEngine, DXPEngine, CheckerBoardEngine]:
+        engine: Union[HubEngine, DXPEngine, CheckerBoardEngine]
         if protocol.lower() == "hub":
             engine = HubEngine(command)
             engine.configure(options)
@@ -97,14 +99,16 @@ class RoundRobin:
         self.latest_complete_results = self.complete_results.copy()
         logger.debug(f"Complete results until now: {self.latest_complete_results}")
 
-    def play_game(self, player_1_info, player_2_info, game_number: int) -> Tuple[Tuple[int, int, int], Tuple[int, int, int]]:
+    def play_game(self, player_1_info: Tuple[Union[str, List[str]], str, Dict[str, Any]],
+                  player_2_info: Tuple[Union[str, List[str]], str, Dict[str, Any]], game_number: int
+                  ) -> Tuple[Tuple[int, int, int], Tuple[int, int, int]]:
         logger.debug(f"Player 1: '{player_1_info[0]}', Player 2: '{player_2_info[0]}'")
         board = Board(self.variant, self.starting_fen)
         player_1 = self.get_engine(*player_1_info)
         player_2 = self.get_engine(*player_2_info)
-        if player_1_info[1].lower() == "hub":
+        if isinstance(player_1, HubEngine):
             player_1.init()
-        if player_2_info[1].lower() == "hub":
+        if isinstance(player_2, HubEngine):
             player_2.init()
         player_1_limit = Limit(self.start_time, self.increment)
         player_2_limit = Limit(self.start_time, self.increment)
@@ -115,9 +119,9 @@ class RoundRobin:
             logger.info(f'move: {len(board.move_stack)}')
             if board.turn == WHITE:
                 start = time.perf_counter_ns()
-                if player_1_info[1].lower() == "hub":
+                if isinstance(player_1, HubEngine):
                     best_move = player_1.play(board, player_1_limit, False)
-                elif player_1_info[1].lower() == "dxp":
+                elif isinstance(player_1, DXPEngine):
                     best_move = player_1.play(board)
                 else:  # Checkerboard
                     best_move = player_1.play(board, player_1_limit)
@@ -125,9 +129,9 @@ class RoundRobin:
                 player_1_limit.time = player_1_limit.time - (end - start) / 1e9 + player_1_limit.inc
             else:
                 start = time.perf_counter_ns()
-                if player_2_info[1].lower() == "hub":
+                if isinstance(player_2, HubEngine):
                     best_move = player_2.play(board, player_2_limit, False)
-                elif player_2_info[1].lower() == "dxp":
+                elif isinstance(player_2, DXPEngine):
                     best_move = player_2.play(board)
                 else:  # Checkerboard
                     best_move = player_2.play(board, player_2_limit)
@@ -137,8 +141,10 @@ class RoundRobin:
                 board.push(best_move.move)
             else:
                 break
-        player_1.quit()
-        player_2.quit()
+        if not isinstance(player_1, CheckerBoardEngine):
+            player_1.quit()
+        if not isinstance(player_2, CheckerBoardEngine):
+            player_2.quit()
         player_1.kill_process()
         player_2.kill_process()
         winner = board.winner()
@@ -173,7 +179,7 @@ class RoundRobin:
             logger.debug("Game ended in a draw.")
             return (0, 1, 0), (0, 1, 0)
 
-    def _get_date_tags(self):
+    def _get_date_tags(self) -> Tuple[str, str, str, str]:
         date = datetime.datetime.now()
         year = str(date.year).zfill(4)
         month = str(date.month).zfill(2)
@@ -182,7 +188,7 @@ class RoundRobin:
         minute = str(date.minute).zfill(2)
         second = str(date.second).zfill(2)
         date_tag = f"{year}.{month}.{day}"
-        time_tag = f"{hour}.{minute}.{second}"
+        time_tag = f"{hour}:{minute}:{second}"
         date = datetime.datetime.utcnow()
         year = str(date.year).zfill(4)
         month = str(date.month).zfill(2)
@@ -191,7 +197,7 @@ class RoundRobin:
         minute = str(date.minute).zfill(2)
         second = str(date.second).zfill(2)
         utc_date_tag = f"{year}.{month}.{day}"
-        utc_time_tag = f"{hour}.{minute}.{second}"
+        utc_time_tag = f"{hour}:{minute}:{second}"
         return date_tag, time_tag, utc_date_tag, utc_time_tag
 
     def get_standings(self) -> List[Tuple[int, int]]:

@@ -56,7 +56,8 @@ class BoardInitializer:
 
             for key, row in self.board.position_layout.items():
                 for key, position in row.items():
-                    player_number = 1 if position in player_starting_positions[1] else 2 if position in player_starting_positions[2] else None
+                    player_number = 1 if position in player_starting_positions[1] else (
+                        2 if position in player_starting_positions[2] else None)
 
                     if player_number:
                         pieces.append(self.create_piece(player_number, position))

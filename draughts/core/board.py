@@ -53,7 +53,8 @@ class Board:
         """Count the pieces of one player that can be moved."""
         if captures is None:
             captures = []
-        return reduce((lambda count, piece: count + (1 if piece.is_movable(captures) else 0)), self.searcher.get_pieces_by_player(player_number), 0)
+        return reduce((lambda count, piece: count + (1 if piece.is_movable(captures) else 0)),
+                      self.searcher.get_pieces_by_player(player_number), 0)
 
     def get_possible_moves(self, captures: List[int]) -> List[List[int]]:
         """Get all possible moves."""
@@ -63,17 +64,20 @@ class Board:
 
     def get_possible_capture_moves(self, captures: List[int]) -> List[List[int]]:
         """Get all possible capture moves (not positional moves)."""
-        return reduce((lambda moves, piece: moves + piece.get_possible_capture_moves(captures)), self.searcher.get_pieces_in_play(), [])
+        return reduce((lambda moves, piece: moves + piece.get_possible_capture_moves(captures)),
+                      self.searcher.get_pieces_in_play(), [])
 
     def get_possible_positional_moves(self) -> List[List[int]]:
         """Get all possible positional moves (not capture moves)."""
-        return reduce((lambda moves, piece: moves + piece.get_possible_positional_moves()), self.searcher.get_pieces_in_play(), [])
+        return reduce((lambda moves, piece: moves + piece.get_possible_positional_moves()),
+                      self.searcher.get_pieces_in_play(), [])
 
     def position_is_open(self, position: int) -> bool:
         """Get if the position is open (a piece is not in the given square)."""
         return position in self.searcher.open_positions
 
-    def create_new_board_from_move(self, move: List[int], move_number: int, captures: List[int]) -> Tuple[Board, Optional[int]]:
+    def create_new_board_from_move(self, move: List[int], move_number: int, captures: List[int]
+                                   ) -> Tuple[Board, Optional[int]]:
         """Create a new board and play the move given."""
         new_board = pickle.loads(pickle.dumps(self, -1))  # A lot faster that deepcopy.
         enemy_position = None
@@ -111,11 +115,13 @@ class Board:
         elif not originally_was_king and not self.pieces_promote_and_continue_capturing:
             was_king = piece.king
             piece.king = False
-            further_capture_moves_for_piece = [capture_move for capture_move in self.get_possible_capture_moves(captures + [enemy_position]) if move[1] == capture_move[0]]
+            further_capture_moves_for_piece = [capture_move for capture_move in self.get_possible_capture_moves(
+                captures + [enemy_position]) if move[1] == capture_move[0]]
             if not further_capture_moves_for_piece and was_king:
                 piece.king = True
         else:
-            further_capture_moves_for_piece = [capture_move for capture_move in self.get_possible_capture_moves(captures + [enemy_position]) if move[1] == capture_move[0]]
+            further_capture_moves_for_piece = [capture_move for capture_move in self.get_possible_capture_moves(
+                captures + [enemy_position]) if move[1] == capture_move[0]]
 
         if further_capture_moves_for_piece:
             self.piece_requiring_further_capture_moves = self.searcher.get_piece_by_position(move[1])

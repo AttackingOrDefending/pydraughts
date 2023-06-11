@@ -72,7 +72,9 @@ class Piece:
 
     def build_possible_capture_moves(self, captures: List[int]) -> List[List[int]]:
         """Build all possible capture moves (not positional moves) for this piece."""
-        adjacent_enemy_positions = list(filter((lambda position: position in self.board.searcher.get_positions_by_player(self.other_player)), self.get_adjacent_positions(capture=True)))
+        adjacent_enemy_positions = list(
+            filter((lambda position: position in self.board.searcher.get_positions_by_player(
+                self.other_player)), self.get_adjacent_positions(capture=True)))
         capture_move_positions = []
 
         for enemy_position in adjacent_enemy_positions:
@@ -129,7 +131,8 @@ class Piece:
 
         # If half_of_the_squares_are_playable the square in the front is not playable
         # (e.g. a1 is playable but a2 isn't, so the square directly in front of it is a3)
-        if (column_difference == 0 or row_difference == 0) and (row_difference % 2 == 0 if self.half_of_the_squares_are_playable else True):
+        if ((column_difference == 0 or row_difference == 0) and
+                (row_difference % 2 == 0 if self.half_of_the_squares_are_playable else True)):
             next_row = enemy_row - row_difference
             next_column = enemy_column - column_difference
             return [self.get_square(next_row, next_column)]
@@ -161,9 +164,14 @@ class Piece:
             down_direction_possible = row > enemy_row
             left_direction_possible = column < enemy_column if enemy_row % 2 == 1 else column <= enemy_column
             # Checks if the captured piece square is between the starting square and the landing square
-            # For example, if the captured piece square is to the left and down of the starting square, we check if the landing square is to the left and down of the captured piece square
-            # It also checks if the position is in a pseudolegal list of legal moves (because we can have landing squares that aren't in the same diagonal as the staring square (e.g. if the piece is in 28, 31 isn't a possible landing square))
-            if down_direction_possible == down_direction and left_direction_possible == left_direction and position in adjacent_positions:
+            # For example, if the captured piece square is to the left and down of the starting square,
+            # we check if the landing square is to the left and down of the captured piece square.
+            #
+            # It also checks if the position is in a pseudolegal list of legal moves
+            # (because we can have landing squares that aren't in the same diagonal as the staring square
+            # (e.g. if the piece is in 28, 31 isn't a possible landing square))
+            if (down_direction_possible == down_direction and left_direction_possible == left_direction and
+                    position in adjacent_positions):
                 legal_adjacent_positions.append(self.get_square(row, column))
 
         enemy_piece.king = was_king
@@ -250,7 +258,8 @@ class Piece:
             add_column = 1
 
         # Check if the pieces are on the same row or column
-        if (column_difference == 0 or row_difference == 0) and (row_difference % 2 == 0 if self.half_of_the_squares_are_playable else True):
+        if ((column_difference == 0 or row_difference == 0) and (
+                row_difference % 2 == 0 if self.half_of_the_squares_are_playable else True)):
             for multiplier in range(1, max(self.board.width, self.board.height)):
                 # In frisian, the square directly in front, behind, on the left and on the right of the piece
                 # isn't playable. We only skip if 'column_difference == 0' because the squares on the right and left,
@@ -349,7 +358,8 @@ class Piece:
         """Get all adjacent positions of the piece."""
         # In some variants men can't capture backwards
         criteria = bool(capture or self.king) if self.men_can_capture_backwards else bool(self.king)
-        return self.get_directional_adjacent_positions(forward=True, capture=capture) + (self.get_directional_adjacent_positions(forward=False, capture=capture) if criteria else [])
+        return self.get_directional_adjacent_positions(forward=True, capture=capture) + (
+            self.get_directional_adjacent_positions(forward=False, capture=capture) if criteria else [])
 
     def get_column(self) -> int:
         """Get the piece's column."""
@@ -477,7 +487,8 @@ class Piece:
         row_in_front = 2 if self.half_of_the_squares_are_playable else 1
 
         for multiplier in range(1, self.board.height):
-            next_row = current_row + multiplier * (row_in_front if self.player == BLACK else -row_in_front) * (1 if forward else -1)
+            next_row = current_row + multiplier * (row_in_front if self.player == BLACK else -row_in_front) * (
+                1 if forward else -1)
             if next_row in self.board.position_layout:
                 positions.append(self.board.position_layout[next_row][current_column])
 
@@ -509,7 +520,8 @@ class Piece:
                     positions += self.get_directional_orthogonal_one_square_adjacent_positions(forward, capture)
         return positions
 
-    def get_next_column_indexes(self, current_row: int, current_column: int, i: int = 1, unfiltered: bool = False) -> List[int]:
+    def get_next_column_indexes(self, current_row: int, current_column: int, i: int = 1, unfiltered: bool = False
+                                ) -> List[int]:
         """
         Get the index of the next column.
         It isn't as simple as finding the next row (where we only add or subtract 1) but the column index only changes

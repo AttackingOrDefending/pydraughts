@@ -34,7 +34,8 @@ def _rotate_move(internal_move: str, notation: Optional[int] = None, variant: Op
             correct_seperator = separator
             break
     int_move_parts = list(map(int, split_move))
-    variant_to_notation = {'standard': 2, 'english': 1, 'italian': 2, 'russian': 0, 'brazilian': 0, 'turkish': 0, 'frisian': 2, 'frysk!': 2, 'antidraughts': 2, 'breakthrough': 2}
+    variant_to_notation = {'standard': 2, 'english': 1, 'italian': 2, 'russian': 0, 'brazilian': 0, 'turkish': 0,
+                           'frisian': 2, 'frysk!': 2, 'antidraughts': 2, 'breakthrough': 2}
     if notation is None:
         notation = variant_to_notation.get(variant, 2)
 
@@ -68,7 +69,8 @@ def _rotate_move(internal_move: str, notation: Optional[int] = None, variant: Op
     return correct_seperator.join(rotated_str_move)
 
 
-def _algebraic_to_number(algebraic_move: str, squares_per_letter: Optional[int] = None, variant: Optional[str] = None, every_other_square: Optional[bool] = None) -> str:
+def _algebraic_to_number(algebraic_move: str, squares_per_letter: Optional[int] = None, variant: Optional[str] = None,
+                         every_other_square: Optional[bool] = None) -> str:
     """Convert an algebraic move to a numeric move."""
     if every_other_square is None:
         if variant == 'turkish':
@@ -116,7 +118,8 @@ def _algebraic_to_numeric_square(square: str, squares_per_letter: int, every_oth
     return (int(square[1]) - 1) * squares_per_letter + ceil(string.ascii_lowercase.index(square[0]) // 2) + 1
 
 
-def _number_to_algebraic(number_move: str, width: Optional[int] = None, variant: Optional[str] = None, every_other_square: Optional[bool] = None) -> str:
+def _number_to_algebraic(number_move: str, width: Optional[int] = None, variant: Optional[str] = None,
+                         every_other_square: Optional[bool] = None) -> str:
     """Convert a numeric move to an algebraic move."""
     if every_other_square is None:
         every_other_square = _get_squares(variant)[3]
@@ -155,7 +158,8 @@ def _numeric_to_algebraic_square(square: str, width: int, every_other_square: Op
     return string.ascii_lowercase[column] + str(row + 1)
 
 
-def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, squares_per_letter: int = 5, every_other_square: bool = True, variant: Optional[str] = None) -> str:
+def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, squares_per_letter: int = 5,
+                             every_other_square: bool = True, variant: Optional[str] = None) -> str:
     """Convert an internal fen to the correct fen for the variant."""
     if variant:
         _, _, squares_per_letter, every_other_square = _get_squares(variant)
@@ -177,7 +181,8 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
             if start_end[0][0] == 'K':
                 add_for_king = 'K'
                 start_end[0] = start_end[0][1:]
-            start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
+            start = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square)
+            end = _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
             for number in range(start, end + 1):
                 white_pieces_remove_hyphen.append(add_for_king + _rotate_move(str(number), notation=notation, variant=variant))
         else:
@@ -185,7 +190,10 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
             if white_piece[0] == 'K':
                 add_for_king = 'K'
                 white_piece = white_piece[1:]
-            white_pieces_remove_hyphen.append(add_for_king + _rotate_move(str(_algebraic_to_numeric_square(white_piece, squares_per_letter, every_other_square)), notation=notation, variant=variant))
+            white_pieces_remove_hyphen.append(
+                add_for_king + _rotate_move(
+                    str(_algebraic_to_numeric_square(white_piece, squares_per_letter, every_other_square)),
+                    notation=notation, variant=variant))
 
     black_pieces_remove_hyphen = []
     for black_piece in black_pieces:
@@ -195,7 +203,8 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
             if start_end[0][0] == 'K':
                 add_for_king = 'K'
                 start_end[0] = start_end[0][1:]
-            start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
+            start = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square)
+            end = _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
             for number in range(start, end + 1):
                 black_pieces_remove_hyphen.append(add_for_king + _rotate_move(str(number), notation=notation, variant=variant))
         else:
@@ -203,7 +212,10 @@ def _change_fen_from_variant(li_fen: str, notation: Optional[int] = None, square
             if black_piece[0] == 'K':
                 add_for_king = 'K'
                 black_piece = black_piece[1:]
-            black_pieces_remove_hyphen.append(add_for_king + _rotate_move(str(_algebraic_to_numeric_square(black_piece, squares_per_letter, every_other_square)), notation=notation, variant=variant))
+            black_pieces_remove_hyphen.append(
+                add_for_king + _rotate_move(
+                    str(_algebraic_to_numeric_square(black_piece, squares_per_letter, every_other_square)),
+                    notation=notation, variant=variant))
 
     # Because in english black starts.
     white_starts = variant not in ['english']

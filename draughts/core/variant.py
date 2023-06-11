@@ -1,6 +1,7 @@
 from __future__ import annotations
 from draughts.core.game import Game, _convert_variant_names
-from draughts.convert import fen_from_variant, fen_to_variant, move_from_variant, move_to_variant, _number_to_algebraic, _algebraic_to_number
+from draughts.convert import (fen_from_variant, fen_to_variant, move_from_variant, move_to_variant,
+                              _number_to_algebraic, _algebraic_to_number)
 from draughts.core.move import StandardMove
 import pickle
 from typing import Optional, Any, List, Tuple
@@ -11,7 +12,13 @@ BLACK = 1
 
 class Move(StandardMove):
     """Convert between different move types. Accounts for the differences between variants."""
-    def __init__(self, board: Any = None, board_move: Optional[List[List[int]]] = None, hub_move: Optional[str] = None, hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None, pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None, li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None, has_captures: Optional[bool] = None, possible_moves: Optional[List[List[List[int]]]] = None, possible_captures: Optional[List[List[Optional[int]]]] = None, hub_to_pdn_pseudolegal: bool = False, variant: Optional[str] = None, is_null: Optional[bool] = None) -> None:
+    def __init__(self, board: Any = None, board_move: Optional[List[List[int]]] = None, hub_move: Optional[str] = None,
+                 hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None,
+                 pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None,
+                 li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None,
+                 has_captures: Optional[bool] = None, possible_moves: Optional[List[List[List[int]]]] = None,
+                 possible_captures: Optional[List[List[Optional[int]]]] = None, hub_to_pdn_pseudolegal: bool = False,
+                 variant: Optional[str] = None, is_null: Optional[bool] = None) -> None:
         self.ambiguous: Optional[bool] = None
         self.captures = None
         self.to_algebraic_variant = None
@@ -31,17 +38,23 @@ class Move(StandardMove):
         self.is_null = is_null
 
         if self.is_null is None:
-            self.is_null = board_move == [[0, 0]] or hub_move == '0-0' or hub_position_move == '0000' or pdn_move == '0-0' or pdn_position_move == '0000' or steps_move == [0, 0] or li_api_move == ['0000'] or li_one_move == '0000'
+            self.is_null = (board_move == [[0, 0]] or hub_move == '0-0' or hub_position_move == '0000' or
+                            pdn_move == '0-0' or pdn_position_move == '0000' or steps_move == [0, 0] or
+                            li_api_move == ['0000'] or li_one_move == '0000')
 
-        if (board_move or hub_move or hub_position_move or pdn_move or pdn_position_move or steps_move or li_api_move or li_one_move) and not self.is_null:
+        if ((board_move or hub_move or hub_position_move or pdn_move or pdn_position_move or steps_move or
+             li_api_move or li_one_move) and not self.is_null):
             if self.possible_moves:
-                self.board_move = self._to_board(board_move, hub_move, hub_position_move, pdn_move, pdn_position_move, steps_move, li_api_move, li_one_move)
+                self.board_move = self._to_board(board_move, hub_move, hub_position_move, pdn_move, pdn_position_move,
+                                                 steps_move, li_api_move, li_one_move)
                 self.captures = self.possible_captures[self.possible_moves.index(self.board_move)]
                 self.captures = [] if self.captures[0] is None else self.captures
                 self.has_captures = bool(self.captures)
-                self._from_board(hub_move, hub_position_move, pdn_move, pdn_position_move, steps_move, li_api_move, li_one_move)
+                self._from_board(hub_move, hub_position_move, pdn_move, pdn_position_move, steps_move, li_api_move,
+                                 li_one_move)
             else:
-                self._no_board(board_move, hub_move, hub_position_move, pdn_move, pdn_position_move, steps_move, li_api_move, li_one_move)
+                self._no_board(board_move, hub_move, hub_position_move, pdn_move, pdn_position_move, steps_move,
+                               li_api_move, li_one_move)
         elif self.is_null:
             self.board_move = [[0, 0]]
             self.hub_move = '0-0'
@@ -52,7 +65,10 @@ class Move(StandardMove):
             self.li_api_move = ['0000']
             self.li_one_move = '0000'
 
-    def _to_board(self, board_move_given: Optional[List[List[int]]] = None, hub_move: Optional[str] = None, hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None, pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None, li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None) -> List[List[int]]:
+    def _to_board(self, board_move_given: Optional[List[List[int]]] = None, hub_move: Optional[str] = None,
+                  hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None,
+                  pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None,
+                  li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None) -> List[List[int]]:
         """Convert the move to a board_move. Requires a Board() object to make the conversions."""
 
         board_move = [] if board_move_given is None else board_move_given
@@ -82,11 +98,13 @@ class Move(StandardMove):
             # Hub position move
 
             # Order the captures
-            hub_position_move_to_use = hub_position_move[:4] + self._sort_captures([int(hub_position_move[i:i + 2]) for i in range(4, len(hub_position_move), 2)])
+            hub_position_move_to_use = hub_position_move[:4] + self._sort_captures(
+                [int(hub_position_move[i:i + 2]) for i in range(4, len(hub_position_move), 2)])
 
             moves_li_board = {}
             for possible_move, possible_capture in zip(self.possible_moves, self.possible_captures):
-                li_move = self._make_len_2(possible_move[0][0]) + self._make_len_2(possible_move[-1][1]) + self._sort_captures(possible_capture)
+                li_move = self._make_len_2(possible_move[0][0]) + self._make_len_2(
+                    possible_move[-1][1]) + self._sort_captures(possible_capture)
                 moves_li_board[li_move] = possible_move
             board_move = moves_li_board[hub_position_move_to_use]
 
@@ -133,7 +151,10 @@ class Move(StandardMove):
 
         return board_move
 
-    def _from_board(self, hub_move: Optional[str] = None, hub_position_move: Optional[str] = None, pdn_move: Optional[str] = None, pdn_position_move: Optional[str] = None, steps_move: Optional[List[int]] = None, li_api_move: Optional[List[str]] = None, li_one_move: Optional[str] = None) -> None:
+    def _from_board(self, hub_move: Optional[str] = None, hub_position_move: Optional[str] = None,
+                    pdn_move: Optional[str] = None, pdn_position_move: Optional[str] = None,
+                    steps_move: Optional[List[int]] = None, li_api_move: Optional[List[str]] = None,
+                    li_one_move: Optional[str] = None) -> None:
         """Convert the move to all other move types. Requires a Board() object to make the conversions."""
 
         hub_move = "" if hub_move is None else hub_move
@@ -259,17 +280,18 @@ class Board:
         self.variant = _convert_variant_names(variant)
         self._game = Game(variant, fen_from_variant(fen, variant) if fen != "startpos" else fen)
         self.initial_fen = fen_to_variant(self._game.initial_fen, self.variant)
-        self.move_stack = []
+        self.move_stack: List[Move] = []
         self.fens = [self.initial_fen]
 
         self._last_non_reversible_fen = self.initial_fen
         self._last_non_reversible_fens: List[str] = [self._last_non_reversible_fen]
-        self._reversible_moves = []
+        self._reversible_moves: List[Move] = []
 
     def copy(self) -> Board:
         """Copy the board (transfers all data)."""
         # At least 6 times faster than deepcopy.
-        return pickle.loads(pickle.dumps(self, -1))
+        new_board: Board = pickle.loads(pickle.dumps(self, -1))
+        return new_board
 
     def pop(self) -> Board:
         """Undo the last move."""
@@ -326,14 +348,17 @@ class Board:
         legal_moves, legal_captures = self._game.legal_moves()
         for move_index, move_capture in enumerate(zip(legal_moves, legal_captures)):
             for index, steps in enumerate(move_capture[0]):
-                legal_moves[move_index][index] = list(map(lambda square: int(move_to_variant(str(square), variant=self.variant, to_algebraic=False)), steps))
-            legal_captures[move_index] = list(map(lambda square: None if square is None else int(move_to_variant(str(square), variant=self.variant, to_algebraic=False)), move_capture[1]))
+                legal_moves[move_index][index] = list(map(lambda square: int(move_to_variant(
+                    str(square), variant=self.variant, to_algebraic=False)), steps))
+            legal_captures[move_index] = list(map(lambda square: None if square is None else int(move_to_variant(
+                str(square), variant=self.variant, to_algebraic=False)), move_capture[1]))
         return legal_moves, legal_captures
 
     def legal_moves(self) -> List[Move]:
         """Get the legal moves for the current position."""
-        legal_moves, legal_captures = self._legal_moves_board()
-        legal_moves = list(map(lambda move: Move(board_move=move, possible_moves=legal_moves, possible_captures=legal_captures), legal_moves))
+        legal_board_moves, legal_captures = self._legal_moves_board()
+        legal_moves: List[Move] = list(map(lambda board_move: Move(
+            board_move=board_move, possible_moves=legal_board_moves, possible_captures=legal_captures), legal_board_moves))
         return legal_moves
 
     @property

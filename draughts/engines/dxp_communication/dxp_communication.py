@@ -5,6 +5,7 @@ import threading
 import logging
 from draughts.engines.dxp_communication.dxp_classes import DamExchange, MySocket, GameStatus, DXP_WHITE, DXP_BLACK
 from draughts import Move, WHITE
+from typing import Optional
 
 logger = logging.getLogger("pydraughts")
 
@@ -12,16 +13,16 @@ logger = logging.getLogger("pydraughts")
 class Receiver:
     def __init__(self, sender: Sender) -> None:
         self.sender = sender
-        self.accepted = None
+        self.accepted: Optional[bool] = None
         self.gameend_sent = False
-        self.last_move = None
+        self.last_move: Optional[Move] = None
         self.last_move_changed = False
         self.listening = False
         self.receive_thread_started = False
-        self.backreq_accepted = None
+        self.backreq_accepted: Optional[bool] = None
         self.takeback_in_progress = False
         self.receive_thread = threading.Thread(target=self.receive)
-    
+
     def start(self) -> None:
         self.receive_thread_started = True
         self.receive_thread.start()
@@ -29,8 +30,8 @@ class Receiver:
     def close(self) -> None:
         if self.receive_thread_started:
             self.receive_thread.join()
-    
-    def receive(self):
+
+    def receive(self) -> None:
         logger.debug("DXP Client starts listening")
         self.listening = True
         while True:
@@ -67,7 +68,7 @@ class Receiver:
                 # Confirm game end by sending message back (if not sent by me)
                 if self.sender.current.started and not self.gameend_sent:
                     self.sender.current.result = dxp_data["reason"]
-                    msg = self.sender.dxp.msg_gameend(dxp_data["reason"])
+                    msg = self.sender.dxp.msg_gameend(str(dxp_data["reason"]))  # `str` is there only for mypy.
                     self.sender.socket.send(msg)
                     logger.debug(f"snd GAMEEND: {msg}")
                     self.gameend_sent = True
@@ -77,8 +78,8 @@ class Receiver:
                 logger.debug(f"rcv MOVE: {message}")
                 steps = [dxp_data['from'], dxp_data['to']]
                 nsteps = list(map(int, steps))
-                ntakes = list(map(int, dxp_data['captures']))
-                ntakes = list(map(lambda pos: str(pos).zfill(2), sorted(ntakes)))
+                ntakes_int = list(map(int, dxp_data['captures']))
+                ntakes = list(map(lambda pos: str(pos).zfill(2), sorted(ntakes_int)))
                 logger.debug(f"FEN: {self.sender.current.pos.fen}, Steps: {nsteps}, Takes: {ntakes}")
                 correct_move = None
                 while True:
@@ -94,7 +95,8 @@ class Receiver:
                     logger.debug(f"Move received: {correct_move.steps_move}")
                     self.last_move_changed = True
                 else:
-                    logger.debug(f"Error: received move is illegal [{message}]\nMove history: {list(map(lambda old_move: old_move.steps_move, self.sender.current.pos.move_stack))}")
+                    move_history = list(map(lambda old_move: old_move.steps_move, self.sender.current.pos.move_stack))
+                    logger.debug(f"Error: received move is illegal [{message}]\nMove history: {move_history}")
 
             elif dxp_data["type"] == "B":
                 # For the time being do not confirm request from server: send message back.
@@ -130,8 +132,7 @@ class Sender:
     def __init__(self) -> None:
         self.dxp = DamExchange()
         self.socket = MySocket()
-        self.game_status = GameStatus()
-        self.current = None
+        self.current = GameStatus("W")
         self.receiver = Receiver(self)
 
     def setup(self, fen: str, variant: str) -> None:
@@ -168,13 +169,13 @@ class Sender:
         logger.debug("Attempting to disconnect.")
         try:
             self.socket.close()
-            logger.debug(f"Successfully closed socket.")
+            logger.debug("Successfully closed socket.")
         except Exception as err:
             self.socket.sock = None
             logger.debug(f"Error trying to close socket: {err}")
         self.receiver.close()
 
-    def chat(self, text: str):
+    def chat(self, text: str) -> None:
         text = text.strip()  # trim whitespace
         logger.debug(f"Text: {text}")
         msg = self.dxp.msg_chat(text)
@@ -183,7 +184,6 @@ class Sender:
             logger.debug(f"snd CHAT: {msg}")
         except Exception as err:
             logger.debug(f"Error sending chat message: {err}")
-            return
 
     def gamereq(self, engine_color: str, time: int, max_moves: int) -> None:
         logger.debug(f"Engine color: {engine_color}, Time: {time}, Max moves: {max_moves}")
@@ -194,7 +194,7 @@ class Sender:
             logger.debug(f"snd GAMEREQ: {msg}")
         except Exception as err:
             logger.debug(f"Error sending game request: {err}")
-    
+
     def gameend(self) -> None:
         logger.debug("Attempting to send a gameend.")
         reason = "0"
@@ -205,7 +205,7 @@ class Sender:
             logger.debug(f"snd GAMEEND: {msg}")
         except Exception as err:
             logger.debug(f"Error sending gameend message: {err}")
-    
+
     def backreq(self, move: int, color: int) -> None:
         logger.debug(f"Request to return to {move}th move with {'WHITE' if color == WHITE else 'BLACK'} to move.")
         msg = self.dxp.msg_backreq(move, DXP_WHITE if color == WHITE else DXP_BLACK)

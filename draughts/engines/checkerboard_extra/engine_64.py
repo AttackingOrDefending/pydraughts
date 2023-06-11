@@ -28,7 +28,9 @@ class Engine64:
         result = self.engine.enginecommand(ctypes.create_string_buffer(bytes(command.encode('ascii')), 256), output)
         return output.value, result
 
-    def getmove(self, game: draughts.Board, maxtime: Union[int, float, None] = None, time: Union[int, float, None] = None, increment: Union[int, float, None] = None, movetime: Union[int, float, None] = None) -> Tuple[Optional[str], bytes, Dict[str, Any], int]:
+    def getmove(self, game: draughts.Board, maxtime: Union[int, float, None] = None, time: Union[int, float, None] = None,
+                increment: Union[int, float, None] = None, movetime: Union[int, float, None] = None
+                ) -> Tuple[Optional[str], bytes, Dict[str, Any], int]:
         """Send a getmove to the engine."""
         assert maxtime is not None or time is not None or movetime is not None
 
@@ -45,7 +47,7 @@ class Engine64:
         moreinfo = 0
         if movetime:
             info = info | (1 << 1)  # 2nd bit means the engine has to think for exactly maxtime seconds
-        elif time:
+        elif time is not None and increment is not None:
             if time / .01 > 2 ** 15 - 1 or increment / .01 > 2 ** 15 - 1:
                 info = info | (1 << 3)  # 0.1 seconds
                 info = info | (1 << 4)  # 0.1 seconds
@@ -67,10 +69,11 @@ class Engine64:
                 bin_inc = '1' * 16
             moreinfo = eval('0b' + bin_time + bin_inc)
 
-        if movetime:
-            maxtime = ctypes.c_double(float(movetime))
+        if movetime is not None:
+            maxtime_double = ctypes.c_double(float(movetime))
         else:
-            maxtime = ctypes.c_double(float(maxtime))
+            assert maxtime is not None
+            maxtime_double = ctypes.c_double(float(maxtime))
         output = ctypes.create_string_buffer(b'', 1024)
         playnow = ctypes.c_int(0)
 
@@ -78,13 +81,16 @@ class Engine64:
             _fields_ = [("x", ctypes.c_int), ("y", ctypes.c_int)]
 
         class CBmove(ctypes.Structure):
-            _fields_ = [("jumps", ctypes.c_int), ("newpiece", ctypes.c_int), ("oldpiece", ctypes.c_int), ("from", coor), ("to", coor), ("path", coor * 12), ("del", coor * 12), ("delpiece", ctypes.c_int * 12)]
+            _fields_ = [("jumps", ctypes.c_int), ("newpiece", ctypes.c_int), ("oldpiece", ctypes.c_int), ("from", coor),
+                        ("to", coor), ("path", coor * 12), ("del", coor * 12), ("delpiece", ctypes.c_int * 12)]
 
-        self.engine.argtypes = [((ctypes.c_int * 8) * 8), ctypes.c_int, ctypes.c_double, (ctypes.c_char * 1024), ctypes.POINTER(ctypes.c_int), ctypes.c_int, ctypes.c_int, ctypes.POINTER(CBmove)]
+        # self.engine.argtypes = [((ctypes.c_int * 8) * 8), ctypes.c_int, ctypes.c_double, (ctypes.c_char * 1024),
+        #                         ctypes.POINTER(ctypes.c_int), ctypes.c_int, ctypes.c_int, ctypes.POINTER(CBmove)]
 
         cbmove = CBmove()
 
-        result = self.engine.getmove(board, color, maxtime, output, ctypes.byref(playnow), info, moreinfo,  ctypes.byref(cbmove))
+        result = self.engine.getmove(board, color, maxtime_double, output, ctypes.byref(playnow), info, moreinfo,
+                                     ctypes.byref(cbmove))
 
         old_fen = game._game.get_fen()
         new_fen = from_board(board, game)
@@ -100,7 +106,8 @@ class Engine64:
                 captures.append(index)
         hub_pos_move = None
         if start_pos and end_pos:
-            hub_pos_move = game._game.make_len_2(start_pos) + game._game.make_len_2(end_pos) + game._game.sort_captures(captures)
+            hub_pos_move = game._game.make_len_2(start_pos) + game._game.make_len_2(end_pos) + game._game.sort_captures(
+                captures)
 
         cbmove_output_2 = {}
         cbmove_output_2['jumps'] = cbmove.jumps

@@ -65,7 +65,8 @@ class Game:
     def copy(self) -> Game:
         """Copy the board (transfers all data)."""
         # At least 6 times faster than deepcopy.
-        return pickle.loads(pickle.dumps(self, -1))
+        copy_game: Game = pickle.loads(pickle.dumps(self, -1))
+        return copy_game
 
     def copy_fast(self) -> Game:
         """Copy the board (doesn't transfer all the data but is faster)."""
@@ -98,7 +99,7 @@ class Game:
 
             self.board = Board(self.variant, self.fens[-1])
 
-    def move(self, move: List[int], return_captured: bool = False, include_pdn=False) -> Union[Game, Tuple[Game, Optional[int]]]:
+    def move(self, move: List[int], include_pdn: bool = False) -> Tuple[Game, Optional[int]]:
         """Make a move. Plays only one jump in case of a multi-capture and not the whole sequence."""
         # [0, 0] is a null move.
         is_null_move = move == [0, 0]
@@ -116,19 +117,21 @@ class Game:
             self.board, enemy_position = self.board.push_move(move, len(self.move_stack) + 1, self._not_added_capture)
         self.moves.append(move)
 
-        if self.whose_turn() == turn:
+        if self.whose_turn() == turn and enemy_position is not None:  # `enemy_position is not None` is there only for mypy.
             self._not_added_move.append(move)
             self._not_added_capture.append(enemy_position)
         else:
-            captures = self._not_added_capture + [enemy_position]
-            if captures[0] is None:
-                captures = []
+            captures = []
+            if enemy_position:
+                captures = self._not_added_capture + [enemy_position]
             move_to_add_board = self._not_added_move + [move]
-            move_to_add_hub = self.make_len_2(move_to_add_board[0][0]) + self.make_len_2(move_to_add_board[-1][1]) + self.sort_captures(captures)
+            move_to_add_hub = self.make_len_2(move_to_add_board[0][0]) + self.make_len_2(
+                move_to_add_board[-1][1]) + self.sort_captures(captures)
             if include_pdn:
                 move_to_add = StandardMove(board=old_board, board_move=move_to_add_board)
             else:
-                move_to_add = StandardMove(board_move=move_to_add_board, hub_position_move=move_to_add_hub, has_captures=bool(captures), hub_to_pdn_pseudolegal=True)
+                move_to_add = StandardMove(board_move=move_to_add_board, hub_position_move=move_to_add_hub,
+                                           has_captures=bool(captures), hub_to_pdn_pseudolegal=True)
             self.move_stack.append(move_to_add)
             self.capture_stack.append(captures)
             self._not_added_move = []
@@ -147,23 +150,14 @@ class Game:
             self.consecutive_noncapture_king_moves_history.append(self.consecutive_noncapture_king_moves)
             self.fens.append(self.get_fen())
 
-        if return_captured:
-            return self, enemy_position
-        else:
-            return self
+        return self, enemy_position
 
-    def push(self, move: Union[List[List[int]], List[int]], return_captured: bool = False, include_pdn=False) -> Union[Game, Tuple[Game, List[int]]]:
+    def push(self, move: List[List[int]], include_pdn: bool = False) -> Tuple[Game, List[Optional[int]]]:
         """Make a move. Plays the whole move sequence in case of a capture."""
-        if type(move[0]) == int:
-            move = [move]
         enemy_positions = []
         for move_part in move:
-            enemy_positions.append(self.move(move_part, return_captured, include_pdn))
-        if return_captured:
-            enemy_positions = list(map(lambda game_enemy_position: game_enemy_position[1], enemy_positions))
-            return self, enemy_positions
-        else:
-            return self
+            enemy_positions.append(self.move(move_part, include_pdn)[1])
+        return self, enemy_positions
 
     def null(self) -> Game:
         """Play a null move."""
@@ -225,21 +219,27 @@ class Game:
             if self.consecutive_noncapture_king_moves >= 50:
                 return True
             # 1 king vs 3 pieces (with at least 1 king) and 16 moves made.
-            if white_pieces == white_kings == 1 and black_pieces == 3 and black_kings >= 1 and self.consecutive_noncapture_king_moves >= 32:
+            if (white_pieces == white_kings == 1 and black_pieces == 3 and black_kings >= 1 and
+                    self.consecutive_noncapture_king_moves >= 32):
                 return True
-            if black_pieces == black_kings == 1 and white_pieces == 3 and white_kings >= 1 and self.consecutive_noncapture_king_moves >= 32:
+            if (black_pieces == black_kings == 1 and white_pieces == 3 and white_kings >= 1 and
+                    self.consecutive_noncapture_king_moves >= 32):
                 return True
             # 1 king vs 2 or fewer pieces (with at least 1 king) and 5 moves made.
-            if white_pieces == white_kings == 1 and black_pieces <= 2 and black_kings >= 1 and self.consecutive_noncapture_king_moves >= 10:
+            if (white_pieces == white_kings == 1 and black_pieces <= 2 and black_kings >= 1 and
+                    self.consecutive_noncapture_king_moves >= 10):
                 return True
-            if black_pieces == black_kings == 1 and white_pieces <= 2 and white_kings >= 1 and self.consecutive_noncapture_king_moves >= 10:
+            if (black_pieces == black_kings == 1 and white_pieces <= 2 and white_kings >= 1 and
+                    self.consecutive_noncapture_king_moves >= 10):
                 return True
             return self.is_threefold()
         elif self.variant in ['frisian', 'frysk!']:
             # 2 kings vs 1 king and 7 moves made.
-            if white_pieces == white_kings == 1 and black_pieces == black_kings == 2 and self.consecutive_noncapture_king_moves >= 14:
+            if (white_pieces == white_kings == 1 and black_pieces == black_kings == 2 and
+                    self.consecutive_noncapture_king_moves >= 14):
                 return True
-            if white_pieces == white_kings == 2 and black_pieces == black_kings == 1 and self.consecutive_noncapture_king_moves >= 14:
+            if (white_pieces == white_kings == 2 and black_pieces == black_kings == 1 and
+                    self.consecutive_noncapture_king_moves >= 14):
                 return True
             # 1 king vs 1 king and 2 moves made (officially immediately if there can't be a forced capture).
             # but we don't detect if there is a forced capture.
@@ -253,28 +253,36 @@ class Game:
             return False
         elif self.variant in ['russian', 'brazilian']:
             # 3 or more kings vs 1 king and 15 moves made.
-            if white_pieces == white_kings == 1 and black_pieces == black_kings >= 3 and self.consecutive_noncapture_king_moves >= 30:
+            if (white_pieces == white_kings == 1 and black_pieces == black_kings >= 3 and
+                    self.consecutive_noncapture_king_moves >= 30):
                 return True
-            if white_pieces == white_kings >= 3 and black_pieces == black_kings == 1 and self.consecutive_noncapture_king_moves >= 30:
+            if (white_pieces == white_kings >= 3 and black_pieces == black_kings == 1 and
+                    self.consecutive_noncapture_king_moves >= 30):
                 return True
             # 15 consecutive non-capture king moves.
             if self.consecutive_noncapture_king_moves >= 30:
                 return True
             # Same number of kings, same number of pieces, 4 or 5 pieces per side and 30 moves made.
-            if white_kings == black_kings >= 1 and white_pieces == black_pieces and white_pieces in [4, 5] and self.moves_since_last_capture >= 60:
+            if (white_kings == black_kings >= 1 and white_pieces == black_pieces and white_pieces in [4, 5] and
+                    self.moves_since_last_capture >= 60):
                 return True
             # Same number of kings, same number of pieces, 6 or 7 pieces per side and 60 moves made.
-            if white_kings == black_kings >= 1 and white_pieces == black_pieces and white_pieces in [6, 7] and self.moves_since_last_capture >= 120:
+            if (white_kings == black_kings >= 1 and white_pieces == black_pieces and white_pieces in [6, 7] and
+                    self.moves_since_last_capture >= 120):
                 return True
             # 3 pieces (with at least 1 king) vs 1 king on the long diagonal and 5 moves made.
-            if white_pieces == 3 and white_kings >= 1 and black_pieces == black_kings == 1 and not white_piece_in_long_diagonal and black_piece_in_long_diagonal and self.moves_since_last_capture >= 10:
+            if (white_pieces == 3 and white_kings >= 1 and black_pieces == black_kings == 1 and
+                    not white_piece_in_long_diagonal and black_piece_in_long_diagonal and self.moves_since_last_capture >= 10):
                 return True
-            if white_pieces == white_kings == 1 and black_pieces == 3 and black_kings >= 1 and white_piece_in_long_diagonal and not black_piece_in_long_diagonal and self.moves_since_last_capture >= 10:
+            if (white_pieces == white_kings == 1 and black_pieces == 3 and black_kings >= 1 and
+                    white_piece_in_long_diagonal and not black_piece_in_long_diagonal and self.moves_since_last_capture >= 10):
                 return True
             # 2 pieces (with at least 1 king) vs 1 king and 5 moves made.
-            if white_pieces == 2 and white_kings >= 1 and black_pieces == black_kings == 1 and self.moves_since_last_capture >= 10:
+            if (white_pieces == 2 and white_kings >= 1 and black_pieces == black_kings == 1 and
+                    self.moves_since_last_capture >= 10):
                 return True
-            if white_pieces == white_kings == 1 and black_pieces == 2 and black_kings >= 1 and self.moves_since_last_capture >= 10:
+            if (white_pieces == white_kings == 1 and black_pieces == 2 and black_kings >= 1 and
+                    self.moves_since_last_capture >= 10):
                 return True
             return self.is_threefold()
         elif self.variant in ['english', 'italian']:
@@ -387,7 +395,7 @@ class Game:
         # so we use it again after the first jump to check if there are any further moves.
         for move in self.get_possible_moves():
             game_2 = self.copy_fast()
-            _, captures = game_2.move(move, return_captured=True)
+            _, captures = game_2.move(move)
             if game_2.whose_turn() == turn:
                 more_moves, more_captures = game_2.get_moves()
                 for semi_move, semi_capture in zip(more_moves, more_captures):
@@ -406,7 +414,8 @@ class Game:
             return moves, captures
 
         if self.variant in ['frisian', 'frysk!']:
-            # Kings are worth 1.5 and men 1. The kings here are worth 1.501 because if we have a choice between 3 men or 2 kings (both are worth 3) we must capture the kings.
+            # Kings are worth 1.5 and men 1. The kings here are worth 1.501
+            # because if we have a choice between 3 men or 2 kings (both are worth 3) we must capture the kings.
 
             # We have to choose the path that is worth the most.
             king_value = 1.501
@@ -429,13 +438,16 @@ class Game:
                     moves_pseudo_legal.append(move)
                     captures_pseudo_legal.append(capture)
 
-            # If a man and a king can play a capture sequence of equal value, it is forced play the capture sequence with the king.
-            move_with_king = bool(list(filter(lambda move: self.board.searcher.get_piece_by_position(move[0][0]).king, moves_pseudo_legal)))
+            # If a man and a king can play a capture sequence of equal value,
+            # it is forced play the capture sequence with the king.
+            move_with_king = bool(list(filter(lambda move: self.board.searcher.get_piece_by_position(move[0][0]).king,
+                                              moves_pseudo_legal)))
             if move_with_king:
                 moves_pseudo_legal_2 = []
                 captures_pseudo_legal_2 = []
                 for move, capture in zip(moves_pseudo_legal, captures_pseudo_legal):
-                    if self.board.searcher.get_piece_by_position(move[0][0]).king and capture[0] is not None or capture[0] is None:
+                    if (self.board.searcher.get_piece_by_position(move[0][0]).king and capture[0] is not None or
+                            capture[0] is None):
                         moves_pseudo_legal_2.append(move)
                         captures_pseudo_legal_2.append(capture)
             else:
@@ -451,8 +463,10 @@ class Game:
             if has_man and len(self.move_stack) >= 6:
                 last_3_move_stack_moves = [self.move_stack[-6], self.move_stack[-4], self.move_stack[-2]]
                 last_3_moves = list(map(lambda move: move.li_one_move, last_3_move_stack_moves))
-                last_3_moves_same_piece = last_3_moves[0][-2:] == last_3_moves[1][:2] and last_3_moves[1][-2:] == last_3_moves[2][:2]
-                was_a_capture = bool(list(filter(bool, [self.capture_stack[-6], self.capture_stack[-4], self.capture_stack[-2]])))
+                last_3_moves_same_piece = (last_3_moves[0][-2:] == last_3_moves[1][:2] and
+                                           last_3_moves[1][-2:] == last_3_moves[2][:2])
+                was_a_capture = bool(list(
+                    filter(bool, [self.capture_stack[-6], self.capture_stack[-4], self.capture_stack[-2]])))
                 loc = int(last_3_moves[-1][-2:])
                 if loc in self.board.searcher.open_positions:
                     is_king = False
@@ -486,13 +500,16 @@ class Game:
                     moves_pseudo_legal.append(move)
                     captures_pseudo_legal.append(capture)
 
-            # If a man and a king can play a capture the same number of pieces, it is forced play the capture sequence with the king.
-            move_with_king = bool(list(filter(lambda move: self.board.searcher.get_piece_by_position(move[0][0]).king, moves_pseudo_legal)))
+            # If a man and a king can play a capture the same number of pieces,
+            # it is forced play the capture sequence with the king.
+            move_with_king = bool(list(filter(lambda move: self.board.searcher.get_piece_by_position(
+                move[0][0]).king, moves_pseudo_legal)))
             if move_with_king:
                 moves_pseudo_legal_2 = []
                 captures_pseudo_legal_2 = []
                 for move, capture in zip(moves_pseudo_legal, captures_pseudo_legal):
-                    if self.board.searcher.get_piece_by_position(move[0][0]).king and capture[0] is not None or capture[0] is None:
+                    if self.board.searcher.get_piece_by_position(
+                            move[0][0]).king and capture[0] is not None or capture[0] is None:
                         moves_pseudo_legal_2.append(move)
                         captures_pseudo_legal_2.append(capture)
             else:
@@ -557,7 +574,8 @@ class Game:
             captures_legal = []
             for move, capture in zip(moves, captures):
                 for possible_move, possible_capture in zip(moves, captures):
-                    if move[0][0] == possible_move[0][0] and capture == possible_capture[:len(capture)] and len(possible_capture) > len(capture):
+                    if (move[0][0] == possible_move[0][0] and capture == possible_capture[:len(capture)] and
+                            len(possible_capture) > len(capture)):
                         break
                 else:
                     moves_legal.append(move)
@@ -568,7 +586,8 @@ class Game:
             # They only have to complete the multi-capture.
             return moves, captures
         else:
-            # Turkish also goes in this category (together with international etc.) because the rule that prohibits a piece from turning 180 degrees is accounted for in get_position_behind_enemy.
+            # Turkish also goes in this category (together with international etc.) because the rule
+            # that prohibits a piece from turning 180 degrees is accounted for in get_position_behind_enemy.
 
             # The move that captures the most pieces has to be played.
             max_len_key = max(list(map(len, moves)))
@@ -624,7 +643,8 @@ class Game:
                 if start_end[0][0] == 'K':
                     add_for_king = 'K'
                     start_end[0] = start_end[0][1:]
-                start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
+                start = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square)
+                end = _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
                 for number in range(start, end + 1):
                     white_pieces_remove_hyphen.append(add_for_king + str(number))
             else:
@@ -632,7 +652,8 @@ class Game:
                 if white_piece[0] == 'K':
                     add_for_king = 'K'
                     white_piece = white_piece[1:]
-                white_pieces_remove_hyphen.append(add_for_king + str(_algebraic_to_numeric_square(white_piece, squares_per_letter, every_other_square)))
+                white_pieces_remove_hyphen.append(add_for_king + str(_algebraic_to_numeric_square(
+                    white_piece, squares_per_letter, every_other_square)))
 
         black_pieces_remove_hyphen = []
         for black_piece in black_pieces:
@@ -642,7 +663,8 @@ class Game:
                 if start_end[0][0] == 'K':
                     add_for_king = 'K'
                     start_end[0] = start_end[0][1:]
-                start, end = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square), _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
+                start = _algebraic_to_numeric_square(start_end[0], squares_per_letter, every_other_square)
+                end = _algebraic_to_numeric_square(start_end[1], squares_per_letter, every_other_square)
                 for number in range(start, end + 1):
                     black_pieces_remove_hyphen.append(add_for_king + str(number))
             else:
@@ -650,7 +672,8 @@ class Game:
                 if black_piece[0] == 'K':
                     add_for_king = 'K'
                     black_piece = black_piece[1:]
-                black_pieces_remove_hyphen.append(add_for_king + str(_algebraic_to_numeric_square(black_piece, squares_per_letter, every_other_square)))
+                black_pieces_remove_hyphen.append(add_for_king + str(_algebraic_to_numeric_square(
+                    black_piece, squares_per_letter, every_other_square)))
 
         position_count = _get_squares(self.variant)[0]
 
@@ -704,9 +727,11 @@ class Game:
             if not half_of_the_squares_are_playable:
                 pass
             elif row_number % 2 == 0:
-                column = (column + 1) * 2 - (2 if bottom_left_square_isnt_playable else 1)  # To account for the always empty white squares
+                # To account for the always empty white squares
+                column = (column + 1) * 2 - (2 if bottom_left_square_isnt_playable else 1)
             else:
-                column = (column + 1) * 2 - (1 if bottom_left_square_isnt_playable else 2)  # To account for the always empty white squares
+                # To account for the always empty white squares
+                column = (column + 1) * 2 - (1 if bottom_left_square_isnt_playable else 2)
 
             piece_symbol = " "
             if loc in self.board.searcher.filled_positions:

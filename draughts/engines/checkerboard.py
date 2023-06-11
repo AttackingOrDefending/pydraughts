@@ -11,7 +11,8 @@ logger = logging.getLogger("pydraughts")
 
 
 class CheckerBoardEngine:
-    def __init__(self, command: Union[List[str], str], divide_time_by: int = 40, checkerboard_timing: bool = False, ENGINE: int = 5) -> None:
+    def __init__(self, command: Union[List[str], str], divide_time_by: int = 40, checkerboard_timing: bool = False,
+                 ENGINE: int = 5) -> None:
         if type(command) == str:
             command = [command]
         command = list(filter(bool, command))
@@ -22,12 +23,13 @@ class CheckerBoardEngine:
         else:
             self.command = command
         self.ENGINE = ENGINE
-        self.info = None
+        self.info = ""
         self.id = {}
         self.result = None
         self.divide_time_by = divide_time_by
         self.checkerboard_timing = checkerboard_timing
         self._sent_variant = False
+        self.engine: Union[Engine64, Engine32]
         self.engine, self.bits = self._open_engine()
         self.id["name"] = self.engine.enginecommand('name')[0].decode()
 
@@ -41,7 +43,7 @@ class CheckerBoardEngine:
     def setoption(self, name: str, value: Union[str, int]) -> None:
         """Set an engine option."""
         if name == 'divide-time-by':
-            self.divide_time_by = value
+            self.divide_time_by = int(value)
         else:
             self.engine.enginecommand(f"set {name} {value}")
 
@@ -80,7 +82,8 @@ class CheckerBoardEngine:
             self._sent_variant = True
 
         if board.move_stack:
-            gamehist = f'set gamehist {board._last_non_reversible_fen} {" ".join(list(map(lambda move: move.pdn_move, board._reversible_moves)))}'
+            reversible_moves = " ".join(list(map(lambda move: move.pdn_move, board._reversible_moves)))
+            gamehist = f'set gamehist {board._last_non_reversible_fen} {reversible_moves}'
             if len(gamehist) > 256:
                 gamehist = " ".join(gamehist[-256:].split()[1:])
             self.engine.enginecommand(gamehist)
@@ -112,7 +115,7 @@ class CheckerBoardEngine:
 
         hub_pos_move, info, cbmove, result = self.engine.getmove(board, time_to_use, time, inc, movetime)
 
-        logger.debug(f"Hub Pos Move: {hub_pos_move}, CBMove: {cbmove}, Info: {info}, Result: {result}")
+        logger.debug(f"Hub Pos Move: {hub_pos_move}, CBMove: {cbmove}, Info: {info.decode()}, Result: {result}")
 
         if hub_pos_move:
             hub_move = '-'.join([hub_pos_move[i:i+2] for i in range(0, len(hub_pos_move), 2)])
@@ -125,7 +128,8 @@ class CheckerBoardEngine:
                 positions.append(pos)
             positions.append(cbmove['to'])
             for pos in positions:
-                steps.append(self._row_col_to_num(board, pos[1], pos[0]))  # Checkerboard returns first the column, then the row
+                # Checkerboard returns first the column, then the row
+                steps.append(self._row_col_to_num(board, pos[1], pos[0]))
 
             steps = list(map(lambda step: int(move_to_variant(str(step), board.variant, to_algebraic=False)), steps))
             bestmove = draughts.Move(board, steps_move=steps)
@@ -137,9 +141,9 @@ class CheckerBoardEngine:
     def _row_col_to_num(self, board: draughts.Board, row: int, col: int) -> int:
         """Get the square from the row and column."""
         if row % 2 == 0:
-            col = ((col + 2) / 2) - 1
+            col = int(((col + 2) / 2) - 1)
         else:
-            col = ((col + 1) / 2) - 1
+            col = int(((col + 1) / 2) - 1)
         # Because:
         # 1. In italian the bottom-left square isn't playable, so in CheckerBoard the board is flipped vertically.
         # 2. In most variants the bottom-left square for the starting side (usually white) is in column a,
@@ -152,4 +156,5 @@ class CheckerBoardEngine:
         if not white_starts:
             row = (board._game.board.height - 1) - row
         loc = board._game.board.position_layout.get(row, {}).get(col)
+        assert isinstance(loc, int)
         return loc
