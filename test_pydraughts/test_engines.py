@@ -294,6 +294,7 @@ def test_engines():
     dxp = DXPEngine(None, None, initial_time=30)
     dxp.sender.chat("chat")
     dxp.quit()
+    dxp.kill_process()
 
     if platform not in ['win32', 'linux']:
         assert True
