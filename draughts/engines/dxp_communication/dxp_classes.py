@@ -96,6 +96,11 @@ class MySocket:
         if self.sock and not self.closed:
             self.closed = True
             self.sock.shutdown(socket.SHUT_RDWR)
+            while True:
+                try:
+                    self.receive()
+                except Exception:
+                    break
             self.sock.close()
             self.sock = None
 
