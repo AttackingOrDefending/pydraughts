@@ -95,10 +95,11 @@ class MySocket:
     def close(self) -> None:
         if self.sock and not self.closed:
             self.closed = True
+            self.sock.settimeout(10)
             self.sock.shutdown(socket.SHUT_RDWR)
             while True:
                 try:
-                    self.receive()
+                    _ = self.sock.recv(1024)
                 except Exception:
                     break
             self.sock.close()
