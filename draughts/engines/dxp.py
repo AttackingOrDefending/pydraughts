@@ -75,7 +75,6 @@ class DXPEngine:
     def _open_process(self, command: str, cwd: Optional[str] = None, shell: bool = True,
                       _popen_lock: Any = threading.Lock()) -> subprocess.Popen:
         """Open the engine process."""
-        subprocess.Popen(["sudo", "lsof", "-i:27531"], shell=True)
         kwargs = {
             "shell": shell,
             "stdout": subprocess.PIPE,
