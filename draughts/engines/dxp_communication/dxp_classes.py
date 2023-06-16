@@ -4,6 +4,7 @@ from __future__ import annotations
 import socket
 import logging
 import draughts
+import select
 from typing import Dict, Optional, List, Union
 
 logger = logging.getLogger("pydraughts")
@@ -95,12 +96,11 @@ class MySocket:
     def close(self) -> None:
         if self.sock and not self.closed:
             self.closed = True
-            self.sock.settimeout(10)
             self.sock.shutdown(socket.SHUT_RDWR)
             while True:
-                try:
-                    _ = self.sock.recv(1024)
-                except Exception:
+                select.select([self.sock], [], [], 10)
+                data = self.sock.recv(1024)
+                if not data:
                     break
             self.sock.close()
             self.sock = None
