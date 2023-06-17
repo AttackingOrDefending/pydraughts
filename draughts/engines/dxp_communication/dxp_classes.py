@@ -97,7 +97,7 @@ class MySocket:
         if self.sock and not self.closed:
             self.closed = True
             self.sock.shutdown(socket.SHUT_RDWR)
-            time.sleep(10)
+            time.sleep(7)
             self.sock.close()
             self.sock = None
 

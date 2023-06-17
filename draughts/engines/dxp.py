@@ -115,7 +115,7 @@ class DXPEngine:
                 # Unix
                 logger.debug("Killing UNIX.")
                 os.killpg(self.p.pid, signal.SIGTERM)
-                time.sleep(10)
+                time.sleep(7)
                 os.killpg(self.p.pid, signal.SIGKILL)
 
             self.p.communicate()
