@@ -10,7 +10,6 @@ import stat
 import sys
 import threading
 import random
-import time
 import logging
 platform = sys.platform
 file_extension = '.exe' if platform == 'win32' else ''
@@ -174,8 +173,6 @@ def test_dxp_engines():
     dxp.kill_process()
     logger.info('Killed dxp 1')
 
-    time.sleep(20)
-
     dxp = DXPEngine([f'scan{file_extension}', 'dxp'], {'engine-opened': False}, initial_time=30)
     game = draughts.Board()
     logger.info('Starting game 2')
@@ -266,6 +263,10 @@ def test_russian_checkerboard_engines():
 
 @pytest.mark.timeout(450, method="thread")
 def test_engines():
+    if platform not in ['win32', 'linux', 'darwin']:
+        assert True
+        return
+
     # Test ping and setoption
     hub = HubEngine([f'scan{file_extension}', 'hub'])
     hub.init()
@@ -296,6 +297,7 @@ def test_engines():
     dxp = DXPEngine(None, None, initial_time=30)
     dxp.sender.chat("chat")
     dxp.quit()
+    dxp.kill_process()
 
     if platform not in ['win32', 'linux']:
         assert True

@@ -4,6 +4,7 @@ from __future__ import annotations
 import socket
 import logging
 import draughts
+import time
 from typing import Dict, Optional, List, Union
 
 logger = logging.getLogger("pydraughts")
@@ -38,7 +39,7 @@ class MySocket:
         """Open the socket."""
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            # self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.closed = False
         except Exception:
             self.sock = None
@@ -96,6 +97,7 @@ class MySocket:
         if self.sock and not self.closed:
             self.closed = True
             self.sock.shutdown(socket.SHUT_RDWR)
+            time.sleep(7)
             self.sock.close()
             self.sock = None
 
