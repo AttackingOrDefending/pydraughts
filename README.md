@@ -120,6 +120,17 @@ ballots = Ballots('english')
 ballot1 = ballots.get_ballot()
 ballot2 = ballots.get_ballot()
 ```
+* Run tournaments
+```python
+from draughts.tournament import RoundRobin
+player1 = (["scan.exe", "hub"], "hub", {})
+player2 = ("kr_hub.exe", "hub", {})
+players = [player1, player2]
+tournament = RoundRobin("tournament.pdn", players, start_time=20, increment=0.2, games_per_pair=4)
+scores = tournament.play()
+print(scores)
+tournament.print_standings()
+```
 
 ## Acknowledgements
 Thanks to [fishnet](https://github.com/lichess-org/fishnet/tree/ebd2a5e16d37135509cbfbff9998e0b798866ef5) which was modified to add support for Hub engines. Thanks to [akalverboer](https://github.com/akalverboer) for their [DXC100_draughts_client](https://github.com/akalverboer/DXC100_draughts_client) which was modified to add support for DXP engines.
