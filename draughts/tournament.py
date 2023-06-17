@@ -81,7 +81,7 @@ class RoundRobin:
     def play_round(self) -> None:
         round_results = []
         for game_number, match in enumerate(self.complete_pairs[self.round]):
-            logger.debug(f"Playing game {game_number+1}/{len(self.complete_pairs[self.round])} in {self.round}th round.")
+            logger.debug(f"Playing game {game_number+1}/{len(self.complete_pairs[self.round])} in {self.round+1}th round.")
             result1, result2 = self.play_game(self.players[match[0]], self.players[match[1]], game_number+1)
             round_results.append((result1, result2))
             # Player 1
