@@ -15,7 +15,7 @@ def test_tournament():
     if platform != 'win32':
         assert True
         return
-    players = [(["scan.exe", "dxp"], "dxp", {'engine-opened': False}), ("kr_hub.exe", "hub", {})]
+    players = [(["scan.exe", "dxp"], "dxp", {'engine-opened': False}, None), ("kr_hub.exe", "hub", {}, None)]
     tournament = RoundRobin("tournament.pdn", players, 20, .2)
     scores = tournament.play()
     logger.debug(f"Scores: {scores}")
