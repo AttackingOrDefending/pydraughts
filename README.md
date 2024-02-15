@@ -123,8 +123,8 @@ ballot2 = ballots.get_ballot()
 * Run tournaments
 ```python
 from draughts.tournament import RoundRobin
-player1 = (["scan.exe", "hub"], "hub", {})
-player2 = ("kr_hub.exe", "hub", {})
+player1 = (["scan.exe", "hub"], "hub", {}, "")
+player2 = ("kr_hub.exe", "hub", {}, "")
 players = [player1, player2]
 tournament = RoundRobin("tournament.pdn", players, start_time=20, increment=0.2, games_per_pair=4)
 scores = tournament.play()
