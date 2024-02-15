@@ -1,7 +1,7 @@
 from draughts.engine import HubEngine, DXPEngine, CheckerBoardEngine, Limit
 from draughts import Board, WHITE, BLACK
 from draughts.PDN import PDNWriter
-from typing import List, Tuple, Dict, Any, Union
+from typing import List, Tuple, Dict, Any, Union, Optional
 import datetime
 import itertools
 import time
@@ -11,7 +11,7 @@ logger = logging.getLogger("pydraughts")
 
 
 class RoundRobin:
-    def __init__(self, filename: str, players: List[Tuple[Union[str, List[str]], str, Dict[str, Any]]],
+    def __init__(self, filename: str, players: List[Tuple[Union[str, List[str]], str, Dict[str, Any], Optional[str]]],
                  start_time: Union[int, float], increment: Union[int, float] = 0, variant: str = "standard",
                  games_per_pair: int = 2, starting_fen: str = "startpos", max_moves: int = 300) -> None:
         self.filename = filename
@@ -52,16 +52,16 @@ class RoundRobin:
             self.complete_pairs.append(pairs.copy())
             pairs = list(map(lambda _pair: (_pair[1], _pair[0]), pairs))
 
-    def get_engine(self, command: Union[str, List[str]], protocol: str, options: Dict[str, Any]
+    def get_engine(self, command: Union[str, List[str]], protocol: str, options: Dict[str, Any], cwd: Optional[str],
                    ) -> Union[HubEngine, DXPEngine, CheckerBoardEngine]:
         engine: Union[HubEngine, DXPEngine, CheckerBoardEngine]
         if protocol.lower() == "hub":
-            engine = HubEngine(command)
+            engine = HubEngine(command, cwd=cwd)
             engine.configure(options)
         elif protocol.lower() == "dxp":
             options["initial-time"] = self.start_time
             options["max-moves"] = self.max_moves
-            engine = DXPEngine(command, options)
+            engine = DXPEngine(command, options, cwd=cwd)
         elif protocol.lower() == "cb" or protocol.lower() == "checkerboard":
             engine = CheckerBoardEngine(command)
             engine.configure(options)
