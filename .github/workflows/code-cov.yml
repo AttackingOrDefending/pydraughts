@@ -7,7 +7,7 @@ jobs:
     runs-on: windows-latest
     env:
       OS: windows-latest
-      PYTHON: '3.12'
+      PYTHON: '3.13'
     steps:
     - uses: actions/checkout@v3
       with:
