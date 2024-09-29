@@ -5,9 +5,6 @@ on: [push, pull_request]
 jobs:
   run:
     runs-on: windows-latest
-    env:
-      OS: windows-latest
-      PYTHON: '3.13'
     steps:
     - uses: actions/checkout@v3
       with:
@@ -16,7 +13,7 @@ jobs:
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
-        python-version: "3.11"
+        python-version: "3.13"
     - name: Generate Report
       run: |
         pip install msl-loadlib pytest pytest-timeout pytest-cov requests
