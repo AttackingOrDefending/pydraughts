@@ -209,7 +209,8 @@ class Move(StandardMove):
                     possible_steps_move = [possible_move[0][0]]
                     for semi_move in possible_move:
                         possible_steps_move.append(semi_move[1])
-                    moves_with_same_start_end_and_captures.append(possible_steps_move)
+                    if possible_captures == self.captures:
+                        moves_with_same_start_end_and_captures.append(possible_steps_move)
             self.ambiguous = same_start_ends >= 2
             if self.ambiguous:
                 # From FMJD (https://pdn.fmjd.org/grammar.html#pdn-3-0-grammar):
@@ -223,23 +224,28 @@ class Move(StandardMove):
                 # pydraughts supports providing a square not immediately behind the captured piece, but when we
                 # convert it to a PDN move, we have to change it to the square immediately behind the captured piece.
                 correct_start_ends = []
-                for index in range(1, len(steps_move) - 1):
-                    closest_distance = 1000
+                # If it is equal to 1 then there are other moves with the same start and end, but not the same captures.
+                # This can happen in russian draughts.
+                if len(moves_with_same_start_end_and_captures) > 1:
+                    for index in range(1, len(steps_move) - 1):
+                        closest_distance = 1000
 
-                    for steps_move in moves_with_same_start_end_and_captures:
-                        distance = abs(steps_move[index - 1] - steps_move[index])
+                        for possible_steps_move in moves_with_same_start_end_and_captures:
+                            distance = abs(possible_steps_move[index - 1] - possible_steps_move[index])
 
-                        # New closest square
-                        if distance < closest_distance:
-                            closest_distance = distance
-                            correct_start_ends = [steps_move]
-                        # The same intermediate square.
-                        # This means that the difference is in a later intermediate square.
-                        elif distance == closest_distance:
-                            correct_start_ends.append(steps_move)
-                        moves_with_same_start_end_and_captures = correct_start_ends
+                            # New closest square
+                            if distance < closest_distance:
+                                closest_distance = distance
+                                correct_start_ends = [possible_steps_move]
+                            # The same intermediate square.
+                            # This means that the difference is in a later intermediate square.
+                            elif distance == closest_distance:
+                                correct_start_ends.append(possible_steps_move)
+                            moves_with_same_start_end_and_captures = correct_start_ends
 
-                correct_move = correct_start_ends[0]
+                    correct_move = correct_start_ends[0]
+                else:
+                    correct_move = steps_move
 
                 pdn_position_move = "".join(list(map(self._make_len_2, correct_move)))
             else:
