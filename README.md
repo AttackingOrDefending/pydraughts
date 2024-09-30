@@ -132,6 +132,26 @@ print(scores)
 tournament.print_standings()
 ```
 
+## Example Engines
+Some engines that can be used with `pydraughts`.
+
+| Engine                                                                                     | Protocol     |
+|:-------------------------------------------------------------------------------------------|:-------------|
+| [Kingsrow (international)](https://edgilbert.org/InternationalDraughts/download_links.htm) | Hub & DXP    |
+| [Scan](https://hjetten.home.xs4all.nl/scan/scan.html)                                      | Hub & DXP    |
+| [Moby Dam](https://hjetten.home.xs4all.nl/mobydam/mobydam.html)                            | DXP          |
+| [Kingsrow (english)](https://edgilbert.org/EnglishCheckers/KingsRowEnglish.htm)            | CheckerBoard |
+| [Kingsrow (italian)](https://edgilbert.org/ItalianCheckers/KingsRowItalian.htm)            | CheckerBoard |
+| [Cake](https://www.fierz.ch/download.php)                                                  | CheckerBoard |
+| [Kallisto](https://www.igorkorshunov.narod.ru/Draughts/Kallisto4.rar)                      | CheckerBoard |
+
+## Selected Projects
+If you like, share your interesting project that uses pydraughts.
+
+| Projects                                                              |
+|-----------------------------------------------------------------------|
+| Checkers Reinforcement Learning — https://github.com/d3da/checkers-rl |
+
 ## Acknowledgements
 Thanks to [fishnet](https://github.com/lichess-org/fishnet/tree/ebd2a5e16d37135509cbfbff9998e0b798866ef5) which was modified to add support for Hub engines. Thanks to [akalverboer](https://github.com/akalverboer) for their [DXC100_draughts_client](https://github.com/akalverboer/DXC100_draughts_client) which was modified to add support for DXP engines.
 
