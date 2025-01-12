@@ -17,8 +17,7 @@ def create_svg(board: Board) -> str:
 
     # Background color for coordinates
     svg = [f'''<svg viewBox="0 0 {svg_width} {svg_height}" xmlns="http://www.w3.org/2000/svg">
-        <rect x="0" y="0" width="{svg_width}" height="{svg_height}" fill="#1A1A1A"/>
-    ''']
+<rect x="0" y="0" width="{svg_width}" height="{svg_height}" fill="#1A1A1A"/>''']
 
     # Add coordinates in white
     for i in range(width):
@@ -66,15 +65,13 @@ def create_svg(board: Board) -> str:
             # Enhanced crown for kings
             if piece.isupper():
                 gradient_id = f"crown_gradient_{cx}_{cy}"
-                svg.append(f'''
-                    <defs>
-                        <linearGradient id="{gradient_id}" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
-                            <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
-                        </linearGradient>
-                    </defs>
-                ''')
+                svg.append(f'''<defs>
+    <linearGradient id="{gradient_id}" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+        <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    </linearGradient>
+</defs>''')
 
                 # Draw 5-pointed star
                 num_points = 5
