@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def download_games():
     headers = {'User-Agent': 'User Agent', 'From': 'mail@mail.com'}
-    response = requests.get('https://github.com/wiegerw/pdn/blob/master/games/games.zip', headers=headers, allow_redirects=True)
+    response = requests.get('https://github.com/wiegerw/pdn/raw/refs/heads/master/games/games.zip', headers=headers, allow_redirects=True)
     with open('./TEMP/games.zip', 'wb') as file:
         file.write(response.content)
     with zipfile.ZipFile('./TEMP/games.zip', 'r') as zip_ref:
