@@ -211,6 +211,7 @@ def test_checkerboard_engines():
             break
     logger.info('Finished playing 1')
     checkerboard.kill_process()
+    logger.info('Closed engines 1')
 
     checkerboard = CheckerBoardEngine('cake_189f.dll')
     limit = Limit(10)
@@ -225,6 +226,7 @@ def test_checkerboard_engines():
             break
     logger.info('Finished playing 2')
     checkerboard.kill_process()
+    logger.info('Closed engines 2')
 
 
 @pytest.mark.timeout(300, method="thread")
@@ -245,6 +247,7 @@ def test_russian_checkerboard_engines():
             break
     logger.info('Finished playing 1')
     checkerboard.kill_process()
+    logger.info('Closed engines 1')
 
     checkerboard = CheckerBoardEngine('kestog.dll')
     limit = Limit(10)
@@ -259,6 +262,7 @@ def test_russian_checkerboard_engines():
             break
     logger.info('Finished playing 2')
     checkerboard.kill_process()
+    logger.info('Closed engines 2')
 
 
 @pytest.mark.timeout(450, method="thread")
