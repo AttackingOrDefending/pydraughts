@@ -1,7 +1,7 @@
 # pydraughts
 [![PyPI version](https://badge.fury.io/py/pydraughts.svg)](https://badge.fury.io/py/pydraughts) [![Tests](https://github.com/AttackingOrDefending/pydraughts/actions/workflows/tests.yml/badge.svg)](https://github.com/AttackingOrDefending/pydraughts/actions/workflows/tests.yml) [![Build](https://github.com/AttackingOrDefending/pydraughts/actions/workflows/build.yml/badge.svg)](https://github.com/AttackingOrDefending/pydraughts/actions/workflows/build.yml) [![CodeQL](https://github.com/AttackingOrDefending/pydraughts/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/AttackingOrDefending/pydraughts/actions/workflows/codeql-analysis.yml) [![codecov](https://codecov.io/gh/AttackingOrDefending/pydraughts/branch/main/graph/badge.svg?token=ZSPXIVSAWN)](https://codecov.io/gh/AttackingOrDefending/pydraughts)
 
-pydraughts is a draughts (checkers) library for Python with move generation, PDN reading and writing, engine communication and balloted openings. It is based on [ImparaAI/checkers](https://github.com/ImparaAI/checkers).
+pydraughts is a draughts (checkers) library for Python with move generation, SVG visualizations, PDN reading and writing, engine communication and balloted openings. It is based on [ImparaAI/checkers](https://github.com/ImparaAI/checkers).
 
 Installing
 ----------
@@ -48,7 +48,13 @@ board.push(move)
 board2 = Board(fen="W:WK40:B19,29")
 board2.push(Move(board2, pdn_move='40x14'))
 ```
-* Get a visual representation of the board
+* Get a visual representation of the board as SVG
+```python
+from draughts import svg
+svg.create_svg(Board(fen="B:W16,19,33,34,47,K4:B17,25,26"))
+```
+![SVG Board](examples/board.svg)
+* Get a visual representation of the board in the terminal
 ```python
 print(board)
 
